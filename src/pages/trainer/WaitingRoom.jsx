@@ -106,9 +106,15 @@ const WaitingRoom = () => {
         // Elapsed timer
         timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
 
+        // Fallback polling for serverless (Vercel) hosting
+        const pollingInterval = setInterval(() => {
+            fetchRoomData();
+        }, 5000);
+
         return () => {
             if (socket.current) socket.current.disconnect();
             clearInterval(timerRef.current);
+            clearInterval(pollingInterval);
         };
     }, [key]);
 

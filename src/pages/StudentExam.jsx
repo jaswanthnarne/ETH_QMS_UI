@@ -278,8 +278,31 @@ const StudentExam = () => {
     };
 
     // Compliance Management
-    const handleViolation = (type, count) => {
+    const handleViolation = async (type, count) => {
         setShowWarning({ type, count });
+        
+        if (exam) {
+            const violationData = {
+                tabSwitches: type === 'tabSwitch' ? count : warnings.tabSwitch,
+                fullScreenExits: type === 'fullScreen' ? count : warnings.fullScreen,
+                copyAttempts: type === 'copyPaste' ? count : warnings.copyPaste,
+                devToolsAttempts: type === 'devTools' ? count : warnings.devTools,
+                windowBlurs: type === 'windowBlur' ? count : warnings.windowBlur,
+                overlaysDetected: type === 'overlaysDetected' ? count : warnings.overlaysDetected,
+                idleTimeouts: type === 'idleTimeouts' ? count : warnings.idleTimeouts
+            };
+
+            try {
+                await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/update-violations`, {
+                    examId: exam.id,
+                    rollNumber,
+                    violations: violationData
+                });
+            } catch (error) {
+                console.error('Failed to sync violations:', error);
+            }
+        }
+
         if (socket.current) {
             socket.current.emit('student_violation', {
                 examKey: key,
@@ -431,6 +454,35 @@ const StudentExam = () => {
             submitExam('completed', true);
         }
     }, [timeLeft, loading, exam, result]);
+
+    // Fallback polling for exam session state (started / paused / closed)
+    useEffect(() => {
+        if (loading || result || !exam) return;
+
+        const checkStatusInterval = setInterval(async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/settings/${key}`);
+                if (res.data.success) {
+                    const { isStarted: serverStarted, isPaused: serverPaused, isActive: serverActive } = res.data.data;
+                    
+                    if (serverStarted !== undefined && serverStarted !== isStarted) {
+                        setIsStarted(serverStarted);
+                    }
+                    if (serverPaused !== undefined && serverPaused !== isPaused) {
+                        setIsPaused(serverPaused);
+                    }
+                    if (serverActive === false && !submitting && !result) {
+                        // Session has been forced closed by instructor
+                        window.location.reload();
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to poll exam status:', err);
+            }
+        }, 5000);
+
+        return () => clearInterval(checkStatusInterval);
+    }, [loading, result, isStarted, isPaused, exam, key, submitting]);
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
