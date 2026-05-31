@@ -68,7 +68,11 @@ const WaitingRoom = () => {
     useEffect(() => {
         fetchRoomData();
 
-        socket.current = io((import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000'));
+        const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+        const isVercelServer = socketUrl.includes('vercel.app');
+        socket.current = isVercelServer 
+            ? { on: () => {}, off: () => {}, emit: () => {}, disconnect: () => {} }
+            : io(socketUrl);
         socket.current.emit('trainer_monitor', key);
 
         socket.current.on('student_status_update', (data) => {

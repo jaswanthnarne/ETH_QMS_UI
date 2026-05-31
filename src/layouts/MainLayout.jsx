@@ -47,7 +47,11 @@ const MainLayout = ({ children }) => {
         }
 
         // Connect socket for all authenticated users so pages can react to live updates.
-        socketRef.current = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000');
+        const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+        const isVercelServer = socketUrl.includes('vercel.app');
+        socketRef.current = isVercelServer 
+            ? { on: () => {}, off: () => {}, emit: () => {}, disconnect: () => {} }
+            : io(socketUrl);
 
         if (user?.role === 'super_admin' || user?.role === 'college_admin') {
             socketRef.current.on('new_notification', (data) => {
