@@ -74,6 +74,16 @@ const StudentExam = () => {
     const questionTimeRef = useRef({}); // { [questionId]: totalSecondsSpent }
     const questionStartRef = useRef(null); // timestamp when current Q was shown
 
+    const violationsRef = useRef({
+        tabSwitches: 0,
+        fullScreenExits: 0,
+        copyAttempts: 0,
+        devToolsAttempts: 0,
+        windowBlurs: 0,
+        overlaysDetected: 0,
+        idleTimeouts: 0
+    });
+
     // Identity Validation and Storage
     useEffect(() => {
         if (!studentName || !rollNumber) {
@@ -285,16 +295,22 @@ const StudentExam = () => {
     const handleViolation = async (type, count) => {
         setShowWarning({ type, count });
         
+        const fieldMap = {
+            tabSwitch: 'tabSwitches',
+            fullScreen: 'fullScreenExits',
+            copyPaste: 'copyAttempts',
+            devTools: 'devToolsAttempts',
+            windowBlur: 'windowBlurs',
+            overlaysDetected: 'overlaysDetected',
+            idleTimeouts: 'idleTimeouts'
+        };
+        const refField = fieldMap[type];
+        if (refField) {
+            violationsRef.current[refField] = count;
+        }
+
         if (exam) {
-            const violationData = {
-                tabSwitches: type === 'tabSwitch' ? count : warnings.tabSwitch,
-                fullScreenExits: type === 'fullScreen' ? count : warnings.fullScreen,
-                copyAttempts: type === 'copyPaste' ? count : warnings.copyPaste,
-                devToolsAttempts: type === 'devTools' ? count : warnings.devTools,
-                windowBlurs: type === 'windowBlur' ? count : warnings.windowBlur,
-                overlaysDetected: type === 'overlaysDetected' ? count : warnings.overlaysDetected,
-                idleTimeouts: type === 'idleTimeouts' ? count : warnings.idleTimeouts
-            };
+            const violationData = { ...violationsRef.current };
 
             try {
                 await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/update-violations`, {
@@ -339,15 +355,7 @@ const StudentExam = () => {
 
         try {
             setSubmitting(true);
-            const violationData = {
-                tabSwitches: warnings.tabSwitch,
-                fullScreenExits: warnings.fullScreen,
-                copyAttempts: warnings.copyPaste,
-                devToolsAttempts: warnings.devTools,
-                windowBlurs: warnings.windowBlur,
-                overlaysDetected: warnings.overlaysDetected,
-                idleTimeouts: warnings.idleTimeouts
-            };
+            const violationData = { ...violationsRef.current };
 
             const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/submit`, {
                 examId: exam.id,
