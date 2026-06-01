@@ -433,7 +433,9 @@ const Courses = () => {
                                             <div className="flex justify-end gap-1.5 transition-opacity">
                                                 <button onClick={() => handleExport(c._id, c.name)} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-lg hover:bg-blue-50 transition-colors" title="Export Results Report"><Download size={16} /></button>
                                                 <button onClick={() => { setSelectedCourse(c); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-lg hover:bg-blue-50 transition-colors" title="Edit Course"><Edit2 size={16} /></button>
-                                                <button onClick={() => handleDelete(c._id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors" title="Delete Course"><Trash2 size={16} /></button>
+                                                {user?.role !== 'trainer' && (
+                                                    <button onClick={() => handleDelete(c._id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors" title="Delete Course"><Trash2 size={16} /></button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
