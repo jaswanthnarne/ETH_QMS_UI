@@ -91,7 +91,7 @@ const Colleges = () => {
                                 <td className="px-6 py-4"><code className="px-2 py-1 bg-slate-100 text-xs font-mono text-slate-600 rounded">{college.code}</code></td>
                                 <td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${college.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}><span className={`w-1.5 h-1.5 rounded-full ${college.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />{college.status}</span></td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex justify-end gap-2 transition-opacity">
                                         <button onClick={() => handleManage(college)} className="px-3 py-1.5 bg-[#004AAD] text-white rounded-md text-xs font-medium hover:bg-[#003580] flex items-center gap-1"><ExternalLink size={12} /> Manage</button>
                                         <button onClick={() => handleExport(college._id, college.name)} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50"><Download size={16} /></button>
                                         <button onClick={() => { setSelectedCollege(college); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50"><Edit2 size={16} /></button>

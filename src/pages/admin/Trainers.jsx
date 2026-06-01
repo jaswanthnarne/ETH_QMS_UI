@@ -568,7 +568,7 @@ const Trainers = () => {
                                 </td>
                                 {/* Actions */}
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex justify-end gap-2 transition-opacity">
                                         <button onClick={() => { setSelectedTrainer(t); setIsProfileOpen(true); }}
                                             className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50" title="View Profile">
                                             <Eye size={16} />
