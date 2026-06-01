@@ -40,7 +40,7 @@ const Exams = () => {
             setLoading(true);
             const url = effectiveCollegeId
                 ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams?collegeId=${effectiveCollegeId}`
-                : 'http://localhost:5000/api/admin/exams';
+                : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams`;
             const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
             setExams(res.data.data);
         } catch (e) {

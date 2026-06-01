@@ -206,7 +206,7 @@ const CreateExam = () => {
     useEffect(() => {
         if (!token || !user) return;
         if ((user.role === 'super_admin' || user.role === 'trainer') && !isEditing) {
-            axios.get('http://localhost:5000/api/admin/colleges', { headers: { Authorization: `Bearer ${token}` } })
+            axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } })
                 .then(res => setColleges(res.data.data))
                 .catch(() => { });
         }
@@ -234,7 +234,7 @@ const CreateExam = () => {
 
                 // If super_admin or trainer, fetch colleges so the select isn't empty
                 if (user?.role === 'super_admin' || user?.role === 'trainer') {
-                    const cRes = await axios.get('http://localhost:5000/api/admin/colleges', { headers: { Authorization: `Bearer ${token}` } });
+                    const cRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } });
                     setColleges(cRes.data.data);
                 }
 
@@ -333,7 +333,7 @@ const CreateExam = () => {
                 await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
                 setAlertState({ open: true, title: 'Success', message: 'Exam configuration updated successfully!', type: 'success' });
             } else {
-                await axios.post('http://localhost:5000/api/admin/exams', payload, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams`, payload, { headers: { Authorization: `Bearer ${token}` } });
                 setAlertState({ open: true, title: 'Exam Created', message: 'Your assessment has been published and is ready for use.', type: 'success' });
             }
             setTimeout(() => navigate(redirectPath), 1500);

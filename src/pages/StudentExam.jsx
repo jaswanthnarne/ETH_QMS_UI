@@ -816,6 +816,28 @@ const StudentExam = () => {
         );
     }
 
+    if (!loading && (!questions || questions.length === 0) && !result && !submitting) {
+        return (
+            <div className="min-h-screen bg-[#f8f9fb] flex flex-col items-center justify-center p-6 text-center font-sans">
+                <div className="bg-white p-10 md:p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border-t-[6px] border-t-amber-500 max-w-lg w-full flex flex-col items-center">
+                    <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center mb-8 border border-amber-100">
+                        <AlertTriangle size={40} className="text-amber-500" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">No Questions Configured</h2>
+                    <p className="text-slate-500 text-[15px] leading-relaxed mb-8">
+                        This assessment is currently active but does not contain any questions. Please notify your instructor or institution administrator.
+                    </p>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                        Return to Portal <ArrowRight size={18} />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     if (!isStarted && !result && !submitting) {
         return (
             <div className="min-h-screen bg-[#f8f9fb] flex flex-col items-center justify-center p-6 text-center font-sans">

@@ -21,7 +21,7 @@ const Allotments = () => {
     const [copied, setCopied] = useState(null);
 
     const fetchAllotments = async () => {
-        try { setLoading(true); const url = effectiveCollegeId ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/allotments?collegeId=${effectiveCollegeId}` : 'http://localhost:5000/api/admin/allotments'; const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } }); setAllotments(res.data.data); } catch (e) { console.error(e); } finally { setLoading(false); }
+        try { setLoading(true); const url = effectiveCollegeId ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/allotments?collegeId=${effectiveCollegeId}` : `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/allotments`; const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } }); setAllotments(res.data.data); } catch (e) { console.error(e); } finally { setLoading(false); }
     };
     useEffect(() => { fetchAllotments(); }, [effectiveCollegeId]);
     useSocketUpdate(() => fetchAllotments(), ['colleges', 'courses', 'exams']);
