@@ -30,6 +30,7 @@ import Leaderboard from './pages/admin/Leaderboard';
 import QuestionBank from './pages/admin/QuestionBank';
 import AdminTrainingLogs from './pages/admin/AdminTrainingLogs';
 import CollegeContextWrapper from './components/CollegeContextWrapper';
+import NotFound from './pages/NotFound';
 
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -256,6 +257,9 @@ function App() {
                         <MainLayout><WaitingRoom /></MainLayout>
                     </ProtectedRoute>
                 } />
+                
+                {/* Sarcastic 404 Fallback Route */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
     );
