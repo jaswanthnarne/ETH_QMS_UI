@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, Loader2, Clock, Target, Send, AlertCircle, ChevronDown, Bot, FileSpreadsheet, Upload, Download, X, Database, Users } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
 import useCollegeStore from '../../store/collegeStore';
@@ -162,11 +162,16 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total }) => {
 
 const CreateExam = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { id } = useParams();
     const isEditing = !!id;
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
     const redirectPath = user?.role === 'trainer' ? '/trainer/exams' : '/admin/exams';
+
+    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
+    const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
+    const effectiveCollegeId = selectedCollegeId || urlCollegeId;
 
     const [step, setStep] = useState(1);
     const [colleges, setColleges] = useState([]);
@@ -194,7 +199,7 @@ const CreateExam = () => {
     const [selectedBatches, setSelectedBatches] = useState([]);
 
     const [examData, setExamData] = useState({
-        title: '', collegeId: selectedCollegeId || (user?.role === 'college_admin' ? user.collegeId : ''),
+        title: '', collegeId: effectiveCollegeId || (user?.role === 'college_admin' ? user.collegeId : ''),
         courseId: '', department: '', duration: 60, passingPercentage: 40, instructions: '',
         scheduledDate: new Date().toISOString().slice(0, 16),
         expiryDate: '',
@@ -479,7 +484,7 @@ const CreateExam = () => {
                     <h3 className="text-lg font-bold text-slate-900">Exam Details</h3>
                     <div><label className="block text-sm font-medium text-slate-700 mb-1">Exam Title *</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#004AAD] outline-none" placeholder="e.g. Python Programming — Final Assessment 2026" value={examData.title} onChange={(e) => setExamData({ ...examData, title: e.target.value })} /></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">College *</label><select disabled={!!selectedCollegeId || user?.role === 'college_admin'} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60" value={examData.collegeId} onChange={(e) => setExamData({ ...examData, collegeId: e.target.value, courseId: '' })}><option value="">Select college</option>{colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">College *</label><select disabled={!!effectiveCollegeId || user?.role === 'college_admin'} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60" value={examData.collegeId} onChange={(e) => setExamData({ ...examData, collegeId: e.target.value, courseId: '' })}><option value="">Select college</option>{colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
                         <div><label className="block text-sm font-medium text-slate-700 mb-1">Course *</label><select disabled={!examData.collegeId || loadingCourses} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60" value={examData.courseId} onChange={(e) => setExamData({ ...examData, courseId: e.target.value })}><option value="">{loadingCourses ? 'Loading courses...' : 'Select course'}</option>{courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Phone, Edit2, Trash2, X, Loader2, School, Download, BookOpen, Check, Eye, KeyRound } from 'lucide-react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
@@ -373,6 +374,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const Trainers = () => {
+    const location = useLocation();
     const [trainers, setTrainers] = useState([]);
     const [colleges, setColleges] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -384,12 +386,15 @@ const Trainers = () => {
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
 
+    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
+    const effectiveCollegeId = selectedCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null);
+
     const fetchData = async () => {
         try {
             setLoading(true);
             const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const url = selectedCollegeId
-                ? `${baseURL}/admin/trainers?collegeId=${selectedCollegeId}`
+            const url = effectiveCollegeId
+                ? `${baseURL}/admin/trainers?collegeId=${effectiveCollegeId}`
                 : `${baseURL}/admin/trainers`;
             const [tRes, cRes] = await Promise.all([
                 axios.get(url, { headers: { Authorization: `Bearer ${token}` } }),
@@ -399,8 +404,8 @@ const Trainers = () => {
             setColleges(cRes.data.data);
 
             // Load courses for the selected college
-            if (selectedCollegeId) {
-                const courseRes = await axios.get(`${baseURL}/admin/colleges/${selectedCollegeId}/courses`, {
+            if (effectiveCollegeId) {
+                const courseRes = await axios.get(`${baseURL}/admin/colleges/${effectiveCollegeId}/courses`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setCourses(courseRes.data.data);
@@ -409,7 +414,7 @@ const Trainers = () => {
         finally { setLoading(false); }
     };
 
-    useEffect(() => { fetchData(); }, [selectedCollegeId]);
+    useEffect(() => { fetchData(); }, [effectiveCollegeId]);
 
     useSocketUpdate(() => fetchData(), ['trainers', 'courses', 'colleges']);
 
@@ -598,7 +603,7 @@ const Trainers = () => {
                 trainer={selectedTrainer}
                 colleges={colleges}
                 courses={courses}
-                selectedCollegeId={selectedCollegeId}
+                selectedCollegeId={effectiveCollegeId}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />

@@ -177,7 +177,7 @@ const Courses = () => {
     const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
 
     const [colleges, setColleges] = useState([]);
-    const [inlineCollegeId, setInlineCollegeId] = useState('all');
+    const [inlineCollegeId, setInlineCollegeId] = useState(selectedCollegeId || urlCollegeId || 'all');
     const [loadingColleges, setLoadingColleges] = useState(false);
     const [courses, setCourses] = useState([]); 
     const [loading, setLoading] = useState(true);
@@ -189,7 +189,7 @@ const Courses = () => {
     // For college_admin, use their assigned college. For others, allow selection.
     const activeCollegeId = user?.role === 'college_admin' 
         ? (selectedCollegeId || urlCollegeId || user.collegeId) 
-        : (inlineCollegeId || selectedCollegeId || urlCollegeId || 'all');
+        : (inlineCollegeId && inlineCollegeId !== 'all' ? inlineCollegeId : (selectedCollegeId || urlCollegeId || 'all'));
 
     // Fetch colleges for super_admin and trainer
     useEffect(() => {
@@ -203,6 +203,16 @@ const Courses = () => {
               .finally(() => setLoadingColleges(false));
         }
     }, [user, token]);
+
+    // Synchronize inlineCollegeId selector state when the active context updates
+    useEffect(() => {
+        const currentCollegeId = selectedCollegeId || urlCollegeId;
+        if (currentCollegeId) {
+            setInlineCollegeId(currentCollegeId);
+        } else {
+            setInlineCollegeId('all');
+        }
+    }, [selectedCollegeId, urlCollegeId]);
 
     const fetchCourses = async () => { 
         setLoading(true); 
