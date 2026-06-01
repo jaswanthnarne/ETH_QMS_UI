@@ -109,6 +109,7 @@ const MainLayout = ({ children }) => {
     ] : (user?.role === 'super_admin' && !selectedCollegeId) ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { label: 'Colleges', icon: School, path: '/admin/colleges' },
+        { label: 'Courses', icon: BookOpen, path: '/admin/courses' },
         { label: 'Trainers', icon: Users, path: '/admin/trainers' },
         { label: 'Training Logs', icon: FileSpreadsheet, path: '/admin/logs' },
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
