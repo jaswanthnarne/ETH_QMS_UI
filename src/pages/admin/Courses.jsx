@@ -237,7 +237,7 @@ const Courses = () => {
     };
 
     const handleDelete = async (id) => { 
-        if (window.confirm('Delete this course? All associated exams will be removed.')) { 
+        if (window.confirm('Are you sure you want to delete this course? Associated exams will be preserved.')) { 
             try { 
                 await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/courses/${id}`, { headers: { Authorization: `Bearer ${token}` } }); 
                 fetchCourses(); 
