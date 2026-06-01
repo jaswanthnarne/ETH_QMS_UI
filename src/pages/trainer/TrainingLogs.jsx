@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-    FileText, Plus, Trash2, Edit, Clock, BookOpen, Users, Calendar, X, Save, ArrowLeft, Loader2, Info, Eye, Search
+    FileText, Plus, Trash2, Edit, Clock, BookOpen, Users, Calendar, X, Save, ArrowLeft, Loader2, Info, Eye, Search, Download
 } from 'lucide-react';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
@@ -272,12 +272,90 @@ const TrainingLogs = () => {
         }
     };
 
+    const [selectedCollege, setSelectedCollege] = useState('all');
+    const [selectedCourse, setSelectedCourse] = useState('all');
+    const [filterCourses, setFilterCourses] = useState([]);
+    const [loadingFilterCourses, setLoadingFilterCourses] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
+
+    const fetchFilterCourses = async (collegeId) => {
+        if (!collegeId || collegeId === 'all') {
+            setFilterCourses([]);
+            return;
+        }
+        try {
+            setLoadingFilterCourses(true);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges/${collegeId}/courses`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFilterCourses(res.data.data || []);
+        } catch (e) {
+            console.error('Failed to load courses for filter', e);
+        } finally {
+            setLoadingFilterCourses(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFilterCourses(selectedCollege);
+        setSelectedCourse('all');
+    }, [selectedCollege]);
+
+    const handleExport = async () => {
+        setExportLoading(true);
+        try {
+            const collegeQuery = selectedCollege !== 'all' ? `&collegeId=${selectedCollege}` : '';
+            const courseQuery = selectedCourse !== 'all' ? `&courseId=${selectedCourse}` : '';
+            
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/export?type=training_logs${collegeQuery}${courseQuery}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+
+            const url = window.URL.createObjectURL(res.data);
+            const link = document.createElement('a');
+            link.href = url;
+
+            let collegeName = 'Overall_Platform';
+            if (selectedCollege !== 'all') {
+                const matched = colleges.find(c => c._id === selectedCollege);
+                if (matched) collegeName = matched.name;
+            }
+
+            let filename = `${collegeName.replace(/\s+/g, '_')}_Training_Logs_Report.xlsx`;
+            if (selectedCourse !== 'all') {
+                const matchedCourse = filterCourses.find(c => c._id === selectedCourse);
+                if (matchedCourse) {
+                    filename = `${collegeName.replace(/\s+/g, '_')}_Course_${matchedCourse.code}_Training_Logs.xlsx`;
+                }
+            }
+
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error('Failed to export training logs', error);
+            alert('Failed to generate Excel export.');
+        } finally {
+            setExportLoading(false);
+        }
+    };
+
     const filteredLogs = logs.filter(log => {
+        const matchesCollege = selectedCollege === 'all' || normalizeId(log.collegeId) === normalizeId(selectedCollege);
+        const matchesCourse = selectedCourse === 'all' || normalizeId(log.courseId) === normalizeId(selectedCourse);
+        
         const courseName = log.courseId?.name?.toLowerCase() || '';
         const courseCode = log.courseId?.code?.toLowerCase() || '';
         const collegeName = log.collegeId?.name?.toLowerCase() || '';
         const search = searchTerm.toLowerCase();
-        return courseName.includes(search) || courseCode.includes(search) || collegeName.includes(search);
+        const matchesSearch = courseName.includes(search) || courseCode.includes(search) || collegeName.includes(search);
+        
+        return matchesCollege && matchesCourse && matchesSearch;
     });
 
     return (
@@ -298,16 +376,60 @@ const TrainingLogs = () => {
 
             {/* List panel */}
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div className="px-6 py-4 border-b border-slate-100 flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 bg-white">
                     <h3 className="text-sm font-semibold text-slate-700">{filteredLogs.length} logged day{filteredLogs.length !== 1 ? 's' : ''}</h3>
-                    <div className="relative w-72">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input 
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD]" 
-                            placeholder="Search by course or college..." 
-                            value={searchTerm} 
-                            onChange={(e) => setSearchTerm(e.target.value)} 
-                        />
+                    
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-wrap">
+                        {/* College Filter Selection */}
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 border border-slate-200 rounded-lg shadow-sm">
+                            <span className="text-xs font-semibold text-slate-400">College:</span>
+                            <select 
+                                value={selectedCollege} 
+                                onChange={(e) => setSelectedCollege(e.target.value)}
+                                className="text-xs font-semibold text-slate-650 bg-transparent outline-none cursor-pointer pr-4"
+                            >
+                                <option value="all">All Colleges</option>
+                                {colleges.map(c => (
+                                    <option key={c._id} value={c._id}>{c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Course Filter Selection */}
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 border border-slate-200 rounded-lg shadow-sm">
+                            <span className="text-xs font-semibold text-slate-400">Course:</span>
+                            <select 
+                                value={selectedCourse} 
+                                onChange={(e) => setSelectedCourse(e.target.value)}
+                                disabled={selectedCollege === 'all' || loadingFilterCourses}
+                                className="text-xs font-semibold text-slate-650 bg-transparent outline-none cursor-pointer pr-4 disabled:opacity-50"
+                            >
+                                <option value="all">All Courses</option>
+                                {filterCourses.map(c => (
+                                    <option key={c._id} value={c._id}>{c.name} ({c.code})</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Export Button */}
+                        <button 
+                            onClick={handleExport}
+                            disabled={exportLoading || filteredLogs.length === 0}
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-lg text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+                        >
+                            {exportLoading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                            Export Logs
+                        </button>
+
+                        <div className="relative w-full sm:w-48">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input 
+                                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]" 
+                                placeholder="Search..." 
+                                value={searchTerm} 
+                                onChange={(e) => setSearchTerm(e.target.value)} 
+                            />
+                        </div>
                     </div>
                 </div>
 
