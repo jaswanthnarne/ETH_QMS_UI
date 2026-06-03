@@ -262,7 +262,7 @@ const CreateExam = () => {
                 });
                 // Pre-select targeted batches when editing
                 if (exam.batches && exam.batches.length > 0) {
-                    setSelectedBatches(exam.batches.map(b => typeof b === 'object' ? b._id || b : b));
+                    setSelectedBatches(exam.batches.map(b => (b && typeof b === 'object') ? b._id || b : b));
                 }
 
                 if (fetchedQs && fetchedQs.length > 0) {
@@ -505,7 +505,7 @@ const CreateExam = () => {
                             <div className="flex items-center gap-2 py-4"><Loader2 size={16} className="animate-spin text-[#004AAD]" /><span className="text-xs text-slate-400">Loading batches...</span></div>
                         ) : (() => {
                             const filteredBatches = examData.courseId ? availableBatches.filter(b => {
-                                const bCourseId = typeof b.courseId === 'object' ? b.courseId._id : b.courseId;
+                                const bCourseId = (b.courseId && typeof b.courseId === 'object') ? b.courseId._id : b.courseId;
                                 return bCourseId?.toString() === examData.courseId;
                             }) : availableBatches;
                             return filteredBatches.length === 0 ? (

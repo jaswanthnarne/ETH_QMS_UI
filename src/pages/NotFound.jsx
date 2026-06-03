@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    ShieldAlert, 
-    Compass, 
-    BookOpen, 
-    ArrowRight, 
-    Award, 
-    Trophy, 
+import {
+    ShieldAlert,
+    Compass,
+    BookOpen,
+    ArrowRight,
+    Award,
+    Trophy,
     ArrowLeft,
     Calculator,
     HelpCircle,
@@ -30,10 +30,10 @@ const NotFound = () => {
     const [unpaidInternships, setUnpaidInternships] = useState("1");
     const [calcResult, setCalcResult] = useState(null);
     const [isCalculating, setIsCalculating] = useState(false);
-    
+
     const [excuse, setExcuse] = useState("");
     const [excuseReply, setExcuseReply] = useState("");
-    
+
     const [activeTab, setActiveTab] = useState("roast"); // "roast" | "calculator" | "excuses"
     const [tickerIndex, setTickerIndex] = useState(0);
     const [claimedInternship, setClaimedInternship] = useState(false);
@@ -73,10 +73,10 @@ const NotFound = () => {
     const handleCalculatePlacement = () => {
         setIsCalculating(true);
         setCalcResult(null);
-        
+
         setTimeout(() => {
             setIsCalculating(false);
-            
+
             const hours = Number(hoursCode);
             const grade = Number(cgpa);
             const internships = unpaidInternships;
@@ -153,7 +153,7 @@ const NotFound = () => {
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f29370a_1px,transparent_1px),linear-gradient(to_bottom,#1f29370a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
             <div className="max-w-3xl w-full text-center space-y-8 relative z-10 animate-in fade-in-50 zoom-in-95 duration-500">
-                
+
                 {/* Custom Ethnotech Live Scrolling Sarcastic Ticker */}
                 <div className="bg-indigo-950/40 backdrop-blur-sm border border-indigo-500/20 rounded-full px-4 py-2 text-xs font-semibold text-indigo-300 flex items-center gap-2 overflow-hidden max-w-lg mx-auto shadow-md">
                     <span className="bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold shrink-0 animate-pulse border border-red-500/30">
@@ -191,19 +191,19 @@ const NotFound = () => {
                 <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-3xl shadow-2xl text-left overflow-hidden">
                     {/* Navigation Tabs */}
                     <div className="flex border-b border-slate-800 bg-slate-950/40 text-xs sm:text-sm">
-                        <button 
+                        <button
                             onClick={() => setActiveTab("roast")}
                             className={`flex-1 py-4 text-center font-bold transition-all ${activeTab === 'roast' ? 'text-indigo-400 bg-slate-900/50 border-b-2 border-indigo-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/20'}`}
                         >
                             📋 Academy Roast
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab("calculator")}
                             className={`flex-1 py-4 text-center font-bold transition-all ${activeTab === 'calculator' ? 'text-indigo-400 bg-slate-900/50 border-b-2 border-indigo-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/20'}`}
                         >
                             🧮 Placement Luck Calc
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab("excuses")}
                             className={`flex-1 py-4 text-center font-bold transition-all ${activeTab === 'excuses' ? 'text-indigo-400 bg-slate-900/50 border-b-2 border-indigo-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/20'}`}
                         >
@@ -218,7 +218,7 @@ const NotFound = () => {
                                 <Compass className="text-indigo-400 shrink-0" size={20} />
                                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Ethnotech Placement Cell Alert</span>
                             </div>
-                            
+
                             <p className="text-base sm:text-lg text-slate-300 leading-relaxed italic font-medium bg-slate-950/40 p-5 rounded-2xl border border-slate-800/60 shadow-inner">
                                 "{randomRemark}"
                             </p>
@@ -254,16 +254,16 @@ const NotFound = () => {
                                         <span className="text-slate-400">Daily Coding Practice:</span>
                                         <span className="text-indigo-400">{hoursCode} Hours</span>
                                     </div>
-                                    <input 
-                                        type="range" 
-                                        min="0" 
-                                        max="12" 
-                                        value={hoursCode} 
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="12"
+                                        value={hoursCode}
                                         onChange={(e) => {
                                             setHoursCode(e.target.value);
                                             setCalcResult(null);
                                         }}
-                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                                     />
                                 </div>
 
@@ -273,25 +273,25 @@ const NotFound = () => {
                                         <span className="text-slate-400">Inflated Resume CGPA:</span>
                                         <span className="text-indigo-400">{cgpa} CGPA</span>
                                     </div>
-                                    <input 
-                                        type="range" 
-                                        min="5.0" 
-                                        max="10.0" 
+                                    <input
+                                        type="range"
+                                        min="5.0"
+                                        max="10.0"
                                         step="0.1"
-                                        value={cgpa} 
+                                        value={cgpa}
                                         onChange={(e) => {
                                             setCgpa(e.target.value);
                                             setCalcResult(null);
                                         }}
-                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                                     />
                                 </div>
 
                                 {/* Unpaid Internships Select */}
                                 <div className="space-y-2">
                                     <label className="block text-xs font-bold text-slate-400">Unpaid Internships Accepted:</label>
-                                    <select 
-                                        value={unpaidInternships} 
+                                    <select
+                                        value={unpaidInternships}
                                         onChange={(e) => {
                                             setUnpaidInternships(e.target.value);
                                             setCalcResult(null);
@@ -334,7 +334,7 @@ const NotFound = () => {
                                         </div>
                                         {/* Fake progress bar */}
                                         <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-850">
-                                            <div 
+                                            <div
                                                 className={`h-full rounded-full transition-all duration-500 ${calcResult.percentage > 70 ? 'bg-emerald-500' : calcResult.percentage > 40 ? 'bg-amber-500' : 'bg-red-500'}`}
                                                 style={{ width: `${calcResult.percentage}%` }}
                                             />
@@ -367,7 +367,7 @@ const NotFound = () => {
                                 </p>
 
                                 <div className="space-y-2">
-                                    <select 
+                                    <select
                                         onChange={handleExcuseSubmit}
                                         value={excuse}
                                         className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 text-sm font-semibold text-slate-350 focus:border-indigo-500 focus:outline-none"
@@ -394,7 +394,7 @@ const NotFound = () => {
                             </div>
                         </div>
                     )}
-                    
+
                     {/* Bottom promotion strip */}
                     <div className="bg-slate-950/60 p-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
                         <div className="flex items-center gap-2 text-slate-400 font-semibold">
@@ -420,7 +420,7 @@ const NotFound = () => {
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         {isAuthenticated ? 'Back to Portal Dashboard' : 'Back to Admin Portal'}
                     </button>
-                    
+
                     <button
                         onClick={() => navigate(isAuthenticated ? '/admin/courses' : '/portal')}
                         className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-white text-sm font-bold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 group cursor-pointer"
