@@ -483,7 +483,7 @@ const Batches = () => {
 
     // Fetch trainers when college filter changes
     useEffect(() => {
-        if (user?.role === 'super_admin' || user?.role === 'college_admin') {
+        if (isAdmin) {
             const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const url = filterCollegeId 
                 ? `${baseURL}/admin/trainers?collegeId=${filterCollegeId}`
@@ -523,7 +523,7 @@ const Batches = () => {
         try {
             const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const targetCollege = filterCollegeId || 'all';
-            const url = (user?.role === 'super_admin' || user?.role === 'college_admin')
+            const url = isAdmin
                 ? `${baseURL}/admin/colleges/${targetCollege}/batches`
                 : `${baseURL}/trainer/batches${selectedCollegeId ? `?collegeId=${selectedCollegeId}` : ''}`;
             const res = await axios.get(url, {
@@ -681,7 +681,7 @@ const Batches = () => {
                             className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:border-[#004AAD] outline-none max-w-sm flex-1 sm:flex-initial" 
                         />
                         
-                        {(user?.role === 'super_admin' || user?.role === 'college_admin') && (
+                        {isAdmin && (
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                                 {activeCollegeId ? (
                                     <div className="flex items-center gap-2 bg-blue-50 text-[#004AAD] border border-blue-100 rounded-lg px-3.5 py-2 text-xs font-bold shadow-sm max-w-[240px] truncate">

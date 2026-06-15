@@ -46,7 +46,7 @@ const MainLayout = ({ children }) => {
     useEffect(() => {
         if (!token) return;
 
-        if (user?.role === 'super_admin' || user?.role === 'college_admin') {
+        if (user && user.role !== 'student') {
             fetchNotifications();
         }
 
@@ -57,10 +57,16 @@ const MainLayout = ({ children }) => {
             ? { on: () => {}, off: () => {}, emit: () => {}, disconnect: () => {} }
             : io(socketUrl);
 
-        if (user?.role === 'super_admin' || user?.role === 'college_admin') {
+        if (user && user.role !== 'student') {
             socketRef.current.on('new_notification', (data) => {
-                if (user.role === 'college_admin' && data.collegeId && data.collegeId !== user.collegeId) {
-                    return;
+                if (data.collegeId && ['college_admin', 'trainer', 'regional_manager', 'asst_rm'].includes(user.role)) {
+                    const collegesList = [
+                        ...(user.collegeId ? [user.collegeId.toString()] : []),
+                        ...(Array.isArray(user.assignedColleges) ? user.assignedColleges.map(id => id.toString()) : [])
+                    ];
+                    if (collegesList.length > 0 && !collegesList.includes(data.collegeId.toString())) {
+                        return;
+                    }
                 }
                 setNotifications(prev => [data, ...prev].slice(0, 50));
                 setUnreadCount(prev => prev + 1);
@@ -376,7 +382,7 @@ const MainLayout = ({ children }) => {
                         )}
 
                         {/* Notification Bell Dropdown */}
-                        {(user?.role === 'super_admin' || user?.role === 'college_admin') && (
+                        {user && user.role !== 'student' && (
                             <div className="relative">
                                 <button 
                                     onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
