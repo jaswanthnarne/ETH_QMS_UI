@@ -6,15 +6,18 @@ const useCollegeStore = create(
         (set) => ({
             selectedCollegeId: null,
             selectedCollegeName: '',
+            selectedCollegeCode: '',
             
-            setSelectedCollege: (id, name) => set({ 
+            setSelectedCollege: (id, name, code = '') => set({ 
                 selectedCollegeId: id, 
-                selectedCollegeName: name 
+                selectedCollegeName: name,
+                selectedCollegeCode: code
             }),
             
             clearSelectedCollege: () => set({ 
                 selectedCollegeId: null, 
-                selectedCollegeName: '' 
+                selectedCollegeName: '',
+                selectedCollegeCode: ''
             }),
         }),
         {

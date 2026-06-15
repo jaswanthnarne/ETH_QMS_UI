@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { BarChart3, Download, Users, BookOpen, TrendingUp, ShieldCheck, Building, Filter, Calendar, School } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
@@ -50,26 +50,30 @@ const MetricCard = ({ label, value, icon: Icon, color, subtitle }) => {
 
 const Analytics = () => {
     const { token, user } = useAuthStore();
-    const { selectedCollegeId, selectedCollegeName } = useCollegeStore();
+    const { selectedCollegeId, selectedCollegeName, setSelectedCollege: setGlobalCollege, clearSelectedCollege: clearGlobalCollege } = useCollegeStore();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(false);
     const [colleges, setColleges] = useState([]);
     const [filters, setFilters] = useState({ 
-        collegeId: user?.role === 'college_admin' ? user.collegeId : (selectedCollegeId || ''),
+        collegeId: user?.role === 'college_admin' 
+            ? user.collegeId 
+            : (selectedCollegeId || (user?.role === 'trainer' && user?.collegeId ? user.collegeId : '')),
         trainerId: '', 
         courseId: '', 
         timeRange: '7d' 
     });
     const [filterData, setFilterData] = useState({ trainers: [], courses: [] });
+    const [isInitialized, setIsInitialized] = useState(false);
+    const latestRequestRef = useRef(0);
 
-    // Fetch colleges list for super admin
+    // Fetch colleges list for super admin and trainers
     useEffect(() => {
-        if (user?.role === 'super_admin') {
+        if (user?.role === 'super_admin' || user?.role === 'trainer') {
             axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, {
                 headers: { Authorization: `Bearer ${token}` }
             }).then(res => {
                 if (res.data.success) {
-                    setColleges(res.data.data);
+                    setColleges(res.data.data || []);
                 }
             }).catch(e => console.error('Failed to fetch colleges for filters', e));
         }
@@ -78,9 +82,29 @@ const Analytics = () => {
     // Keep store college selection in sync with filters
     useEffect(() => {
         if (user?.role !== 'college_admin') {
-            setFilters(f => ({ ...f, collegeId: selectedCollegeId || '', trainerId: '', courseId: '' }));
+            if (!isInitialized) {
+                if (selectedCollegeId) {
+                    setFilters(f => ({ ...f, collegeId: selectedCollegeId, trainerId: '', courseId: '' }));
+                    setIsInitialized(true);
+                } else if (user?.role === 'trainer' && user?.collegeId) {
+                    setFilters(f => ({ ...f, collegeId: user.collegeId, trainerId: '', courseId: '' }));
+                    if (colleges.length > 0) {
+                        const coll = colleges.find(c => c._id === user.collegeId);
+                        if (coll) {
+                            setGlobalCollege(coll._id, coll.name, coll.code);
+                            setIsInitialized(true);
+                        }
+                    }
+                } else {
+                    setFilters(f => ({ ...f, collegeId: '', trainerId: '', courseId: '' }));
+                    setIsInitialized(true);
+                }
+            } else {
+                setFilters(f => ({ ...f, collegeId: selectedCollegeId || '', trainerId: '', courseId: '' }));
+            }
         }
-    }, [selectedCollegeId, user]);
+    }, [selectedCollegeId, user, colleges, isInitialized, setGlobalCollege]);
+
 
     const fetchFilters = useCallback(async () => {
         if (user?.role === 'trainer') return;
@@ -103,13 +127,16 @@ const Analytics = () => {
     }, [fetchFilters, token, user]);
 
     const fetchData = async () => {
+        const requestId = ++latestRequestRef.current;
         try {
             setLoading(true);
             let url;
             const cid = user.role === 'college_admin' ? user.collegeId : filters.collegeId;
             const days = filters.timeRange.replace('d', '');
             if (user.role === 'trainer') {
-                url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/trainer-stats?days=${days}`;
+                const params = new URLSearchParams({ days });
+                if (filters.collegeId) params.append('collegeId', filters.collegeId);
+                url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/trainer-stats?${params.toString()}`;
             } else {
                 const params = new URLSearchParams({ days });
                 if (cid) params.append('collegeId', cid);
@@ -118,9 +145,14 @@ const Analytics = () => {
                 url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/college-stats?${params.toString()}`;
             }
             const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-            setStats(res.data.data);
-        } catch (e) { console.error('Failed to fetch analytics', e); }
-        finally { setLoading(false); }
+            if (requestId === latestRequestRef.current) {
+                setStats(res.data.data);
+            }
+        } catch (e) { 
+            if (requestId === latestRequestRef.current) console.error('Failed to fetch analytics', e); 
+        } finally { 
+            if (requestId === latestRequestRef.current) setLoading(false); 
+        }
     };
 
     useEffect(() => { fetchData(); }, [filters.collegeId, token, user, filters.courseId, filters.trainerId, filters.timeRange]);

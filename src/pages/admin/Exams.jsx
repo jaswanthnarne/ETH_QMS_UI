@@ -35,6 +35,8 @@ const Exams = () => {
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
     const effectiveCollegeId = selectedCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null);
 
+    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+
     const fetchExams = async () => {
         try {
             setLoading(true);
@@ -141,9 +143,11 @@ const Exams = () => {
                     <button onClick={() => handleExport('all', 'All_Exams')} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
                         <Download size={15} /> Export
                     </button>
-                    <button onClick={() => navigate('/admin/exams/create')} className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] shadow-sm active:scale-95 transition-all">
-                        <Plus size={16} /> New Exam
-                    </button>
+                    {!isReadOnly && (
+                        <button onClick={() => navigate('/admin/exams/create')} className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] shadow-sm active:scale-95 transition-all">
+                            <Plus size={16} /> New Exam
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -259,22 +263,26 @@ const Exams = () => {
 
                             {/* Card Footer */}
                             <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50/40 flex items-center justify-between rounded-b-xl">
-                                {exam.status === 'draft' ? (
-                                    <button
-                                        disabled={publishing === exam._id}
-                                        onClick={() => handlePublish(exam._id)}
-                                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-50"
-                                    >
-                                        {publishing === exam._id ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
-                                        Publish
-                                    </button>
+                                {!isReadOnly ? (
+                                    exam.status === 'draft' ? (
+                                        <button
+                                            disabled={publishing === exam._id}
+                                            onClick={() => handlePublish(exam._id)}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                                        >
+                                            {publishing === exam._id ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                                            Publish
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleUnpublish(exam._id)}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                                        >
+                                            <XCircle size={13} /> Unpublish
+                                        </button>
+                                    )
                                 ) : (
-                                    <button
-                                        onClick={() => handleUnpublish(exam._id)}
-                                        className="flex items-center gap-1.5 px-4 py-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold transition-all active:scale-95"
-                                    >
-                                        <XCircle size={13} /> Unpublish
-                                    </button>
+                                    <span className="text-xs text-slate-400 font-medium italic">View Only</span>
                                 )}
 
                                 <div className="flex items-center gap-0.5">
@@ -283,15 +291,21 @@ const Exams = () => {
                                             <Download size={14} />
                                         </button>
                                     )}
-                                    <button onClick={() => navigate(`/admin/exams/edit/${exam._id}`)} className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                                        <Edit size={14} />
-                                    </button>
-                                    <button onClick={() => handleClone(exam._id, exam.title)} className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Clone">
-                                        <Copy size={14} />
-                                    </button>
-                                    <button onClick={() => handleDelete(exam._id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Delete">
-                                        <Trash2 size={14} />
-                                    </button>
+                                    {!isReadOnly && (
+                                        <>
+                                            {user?.role !== 'college_admin' && (
+                                                <button onClick={() => navigate(`/admin/exams/edit/${exam._id}`)} className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                                    <Edit size={14} />
+                                                </button>
+                                            )}
+                                            <button onClick={() => handleClone(exam._id, exam.title)} className="p-2 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Clone">
+                                                <Copy size={14} />
+                                            </button>
+                                            <button onClick={() => handleDelete(exam._id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Delete">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

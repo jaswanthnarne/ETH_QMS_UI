@@ -296,7 +296,7 @@ const NotFound = () => {
                                             setUnpaidInternships(e.target.value);
                                             setCalcResult(null);
                                         }}
-                                        className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3 text-sm font-semibold text-slate-350 focus:border-indigo-500 focus:outline-none"
+                                        className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3 text-sm font-semibold text-slate-400 focus:border-indigo-500 focus:outline-none"
                                     >
                                         <option value="0">0 (I want to buy food)</option>
                                         <option value="1">1 (Ready to survive on instant noodles)</option>
@@ -333,7 +333,7 @@ const NotFound = () => {
                                             </span>
                                         </div>
                                         {/* Fake progress bar */}
-                                        <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-850">
+                                        <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
                                             <div
                                                 className={`h-full rounded-full transition-all duration-500 ${calcResult.percentage > 70 ? 'bg-emerald-500' : calcResult.percentage > 40 ? 'bg-amber-500' : 'bg-red-500'}`}
                                                 style={{ width: `${calcResult.percentage}%` }}
@@ -370,7 +370,7 @@ const NotFound = () => {
                                     <select
                                         onChange={handleExcuseSubmit}
                                         value={excuse}
-                                        className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 text-sm font-semibold text-slate-350 focus:border-indigo-500 focus:outline-none"
+                                        className="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 text-sm font-semibold text-slate-400 focus:border-indigo-500 focus:outline-none"
                                     >
                                         <option value="">-- Choose your excuse path --</option>
                                         <option value="timer">"I was trying to bypass the assessment countdown timer."</option>
@@ -423,7 +423,7 @@ const NotFound = () => {
 
                     <button
                         onClick={() => navigate(isAuthenticated ? '/admin/courses' : '/portal')}
-                        className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-white text-sm font-bold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 group cursor-pointer"
+                        className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white text-sm font-bold rounded-2xl transition-all active:scale-[0.97] flex items-center justify-center gap-2 group cursor-pointer"
                     >
                         <BookOpen size={16} className="text-indigo-400" />
                         Explore 'High-Paying' Syllabus

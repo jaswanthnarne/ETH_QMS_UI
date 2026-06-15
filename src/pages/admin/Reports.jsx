@@ -1,36 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Download, FileText, Loader2, Database, AlertTriangle, CheckCircle2, School, Search, User, Users } from 'lucide-react';
+import { Download, FileText, Loader2, Database, AlertTriangle, CheckCircle2, School, Search, User, Users, BookOpen, Copy } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 
 const Reports = () => {
     const { token, user } = useAuthStore();
-    const { selectedCollegeId, selectedCollegeName } = useCollegeStore();
+    const { selectedCollegeId, selectedCollegeName, setSelectedCollege: setGlobalCollege, clearSelectedCollege: clearGlobalCollege } = useCollegeStore();
     
     // Core states
     const [colleges, setColleges] = useState([]);
     const [trainers, setTrainers] = useState([]);
+    const [courses, setCourses] = useState([]);
     const [allotments, setAllotments] = useState([]);
     
     // Filter states
-    const [selectedCollege, setSelectedCollege] = useState('all');
+    const [selectedCollege, setSelectedCollege] = useState(selectedCollegeId || (user?.role === 'trainer' && user?.collegeId ? user.collegeId : 'all'));
     const [selectedTrainer, setSelectedTrainer] = useState('all');
+    const [selectedCourse, setSelectedCourse] = useState('all');
     const [selectedBatch, setSelectedBatch] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [copiedKey, setCopiedKey] = useState(null);
+    const latestRequestRef = useRef(0);
 
     // Sync selected college with global store selection
     useEffect(() => {
-        if (selectedCollegeId) {
-            setSelectedCollege(selectedCollegeId);
+        if (!isInitialized) {
+            if (selectedCollegeId) {
+                setSelectedCollege(selectedCollegeId);
+                setIsInitialized(true);
+            } else if (user?.role === 'trainer' && user?.collegeId) {
+                setSelectedCollege(user.collegeId);
+                // Also update the global store if colleges list is loaded
+                if (colleges.length > 0) {
+                    const coll = colleges.find(c => c._id === user.collegeId);
+                    if (coll) {
+                        setGlobalCollege(coll._id, coll.name, coll.code);
+                        setIsInitialized(true);
+                    }
+                }
+            } else {
+                setSelectedCollege('all');
+                setIsInitialized(true);
+            }
         } else {
-            setSelectedCollege('all');
+            // Once initialized, follow the global store selection strictly
+            if (selectedCollegeId) {
+                setSelectedCollege(selectedCollegeId);
+            } else {
+                setSelectedCollege('all');
+            }
         }
         setSelectedBatch('all');
-    }, [selectedCollegeId]);
+        setSelectedCourse('all');
+    }, [selectedCollegeId, user, colleges, isInitialized, setGlobalCollege]);
+
 
     // Initial Fetch: Colleges
     useEffect(() => {
@@ -45,12 +73,12 @@ const Reports = () => {
         }
     }, [token, user]);
 
-    // Fetch Trainers when college filter changes
+    // Fetch Trainers and Courses when college filter changes
     useEffect(() => {
         if (!token || !user) return;
-        if (user.role === 'trainer') return; // Trainers don't need other trainers
 
         const fetchTrainers = async () => {
+            if (user.role === 'trainer') return;
             try {
                 const collegeParam = selectedCollege !== 'all' ? `?collegeId=${selectedCollege}` : '';
                 const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/trainers${collegeParam}`, {
@@ -64,15 +92,32 @@ const Reports = () => {
             }
         };
 
+        const fetchCourses = async () => {
+            try {
+                const collegeParam = selectedCollege !== 'all' ? `?collegeId=${selectedCollege}` : '';
+                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/courses${collegeParam}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.data.success) {
+                    setCourses(res.data.data || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch courses', err);
+            }
+        };
+
         fetchTrainers();
-        // Reset trainer and batch filters when changing college
+        fetchCourses();
+        // Reset trainer, batch and course filters when changing college
         setSelectedTrainer('all');
         setSelectedBatch('all');
+        setSelectedCourse('all');
     }, [selectedCollege, token, user]);
 
     // Fetch Allotments
     const fetchReportData = async () => {
         if (!token || !user) return;
+        const requestId = ++latestRequestRef.current;
         setLoading(true);
 
         try {
@@ -82,13 +127,17 @@ const Reports = () => {
             const allotmentsRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/allotments${allotmentParam}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if (allotmentsRes.data.success) {
+            if (requestId === latestRequestRef.current && allotmentsRes.data.success) {
                 setAllotments(allotmentsRes.data.data || []);
             }
         } catch (err) {
-            console.error('Failed to load report data', err);
+            if (requestId === latestRequestRef.current) {
+                console.error('Failed to load report data', err);
+            }
         } finally {
-            setLoading(false);
+            if (requestId === latestRequestRef.current) {
+                setLoading(false);
+            }
         }
     };
 
@@ -128,6 +177,52 @@ const Reports = () => {
         }
     };
 
+    // Export Entity Report (College, Trainer, Course)
+    const handleExportEntityReport = async (exportType) => {
+        let id = '';
+        let title = '';
+        if (exportType === 'college') {
+            id = user?.role === 'college_admin' ? (selectedCollegeId || user.collegeId) : selectedCollege;
+            if (!id || id === 'all') return;
+            const coll = colleges.find(c => c._id === id);
+            title = coll ? coll.name : 'College';
+        } else if (exportType === 'trainer') {
+            id = selectedTrainer;
+            if (!id || id === 'all') return;
+            const tr = trainers.find(t => t._id === id);
+            title = tr ? `${tr.firstName}_${tr.lastName}` : 'Trainer';
+        } else if (exportType === 'course') {
+            id = selectedCourse;
+            if (!id || id === 'all') return;
+            const crs = courses.find(c => c._id === id);
+            title = crs ? crs.name : 'Course';
+        }
+
+        setActionLoading(exportType);
+        try {
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/export?type=${exportType}&id=${id}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${title.replace(/\s+/g, '_')}_Performance_Report.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        } catch (error) {
+            console.error('Export failed:', error);
+            alert(`Failed to generate ${exportType} performance report.`);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     // Extract unique batches from allotments list
     const uniqueBatches = Array.from(
         new Set(allotments.map(a => a.batchId?._id).filter(Boolean))
@@ -143,23 +238,54 @@ const Reports = () => {
         const matchesBatch = selectedBatch === 'all' || 
                              (selectedBatch === 'General' && !a.batchId) || 
                              (a.batchId?._id === selectedBatch);
-        return matchesSearch && matchesTrainer && matchesBatch;
+        const matchesCourse = selectedCourse === 'all' || 
+                              a.examId?.courseId?._id === selectedCourse || 
+                              a.examId?.courseId === selectedCourse;
+        return matchesSearch && matchesTrainer && matchesBatch && matchesCourse;
     });
 
     // College display strings
-    const showCollegeSelector = user?.role === 'super_admin' || user?.role === 'trainer';
+    const showCollegeSelector = (user?.role === 'super_admin' && !selectedCollegeId) || user?.role === 'trainer';
     const currentCollegeName = colleges.find(c => c._id === selectedCollege)?.name;
 
     return (
         <div className="space-y-6 animate-fade-in duration-300 pb-12">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                         <Database className="text-[#004AAD]" size={26} />
                         Exam Reports
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">Export comprehensive multi-sheet reports, analysis, integrity logs, and cohort statistics</p>
+                </div>
+                
+                {/* Entity Export Actions */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                        onClick={() => handleExportEntityReport('college')}
+                        disabled={actionLoading !== false || (selectedCollege === 'all' && user?.role !== 'college_admin')}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                        {actionLoading === 'college' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        Export College
+                    </button>
+                    <button
+                        onClick={() => handleExportEntityReport('trainer')}
+                        disabled={actionLoading !== false || selectedTrainer === 'all'}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                        {actionLoading === 'trainer' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        Export Trainer
+                    </button>
+                    <button
+                        onClick={() => handleExportEntityReport('course')}
+                        disabled={actionLoading !== false || selectedCourse === 'all'}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                        {actionLoading === 'course' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        Export Course
+                    </button>
                 </div>
             </div>
 
@@ -172,7 +298,18 @@ const Reports = () => {
                         <select 
                             className="text-sm bg-transparent outline-none text-slate-700 font-semibold min-w-[180px] cursor-pointer"
                             value={selectedCollege}
-                            onChange={(e) => setSelectedCollege(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSelectedCollege(val);
+                                if (val === 'all') {
+                                    clearGlobalCollege();
+                                } else {
+                                    const coll = colleges.find(c => c._id === val);
+                                    if (coll) {
+                                        setGlobalCollege(coll._id, coll.name, coll.code);
+                                    }
+                                }
+                            }}
                         >
                             <option value="all">All Colleges</option>
                             {colleges.map(c => (<option key={c._id} value={c._id}>{c.name}</option>))}
@@ -201,6 +338,21 @@ const Reports = () => {
                         </select>
                     </div>
                 )}
+
+                {/* Course Filter */}
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 hover:border-slate-300 transition-all">
+                    <BookOpen size={16} className="text-slate-400 shrink-0" />
+                    <select 
+                        className="text-sm bg-transparent outline-none text-slate-700 font-semibold min-w-[180px] cursor-pointer"
+                        value={selectedCourse}
+                        onChange={(e) => setSelectedCourse(e.target.value)}
+                    >
+                        <option value="all">All Courses</option>
+                        {courses.map(c => (
+                            <option key={c._id} value={c._id}>{c.name}</option>
+                        ))}
+                    </select>
+                </div>
 
                 {/* Batch Filter */}
                 <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 hover:border-slate-300 transition-all">
@@ -303,8 +455,27 @@ const Reports = () => {
                                                     {a.batchId?.batchName || 'General'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <code className="px-2.5 py-1 bg-slate-900 text-emerald-400 rounded-lg text-xs font-mono font-bold tracking-wide">{a.uniqueKey}</code>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-1.5">
+                                                    <code className="px-2.5 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-mono font-semibold tracking-wide shadow-xs">
+                                                        {a.uniqueKey}
+                                                    </code>
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(a.uniqueKey);
+                                                            setCopiedKey(a._id);
+                                                            setTimeout(() => setCopiedKey(null), 1500);
+                                                        }}
+                                                        title="Copy Access Key"
+                                                        className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-[#004AAD] transition-colors cursor-pointer"
+                                                    >
+                                                        {copiedKey === a._id ? (
+                                                            <CheckCircle2 size={13} className="text-emerald-500" />
+                                                        ) : (
+                                                            <Copy size={13} />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <button 

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
+import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 import { AlertModal } from '../../components/Modals';
 
@@ -33,6 +34,7 @@ const StatCard = ({ label, value, icon: Icon, color, sub }) => {
 
 const TrainerDashboard = () => {
     const { user, token } = useAuthStore();
+    const { selectedCollegeId } = useCollegeStore();
     const navigate = useNavigate();
     const [assignedExams, setAssignedExams] = useState([]);
     const [stats, setStats] = useState(null);
@@ -43,9 +45,10 @@ const TrainerDashboard = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
+            const collegeQuery = selectedCollegeId ? `?collegeId=${selectedCollegeId}` : '';
             const [examsRes, statsRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/exams`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/stats`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/exams${collegeQuery}`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/stats${collegeQuery}`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
             setAssignedExams(examsRes.data.data || []);
             setStats(statsRes.data.data || {});
@@ -53,7 +56,7 @@ const TrainerDashboard = () => {
         finally { setLoading(false); }
     };
 
-    useEffect(() => { if (token) fetchData(); }, [token]);
+    useEffect(() => { if (token) fetchData(); }, [token, selectedCollegeId]);
     useSocketUpdate(() => fetchData(), ['exams']);
 
     const copyKey = (key, id) => {

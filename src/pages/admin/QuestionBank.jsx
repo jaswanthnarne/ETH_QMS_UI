@@ -44,6 +44,7 @@ const BloomsBadge = ({ level }) => {
 const QuestionBank = () => {
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
+    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     const headers = { Authorization: `Bearer ${token}` };
 
@@ -195,9 +196,11 @@ const QuestionBank = () => {
                     <h1 className="text-2xl font-bold text-slate-900">Question Bank</h1>
                     <p className="text-sm text-slate-500 mt-1">Course-based question repository categorized by Subject, Difficulty & Bloom's Taxonomy</p>
                 </div>
-                <button onClick={() => setAddOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm">
-                    <Plus size={16} /> Add Question
-                </button>
+                {!isReadOnly && (
+                    <button onClick={() => setAddOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm">
+                        <Plus size={16} /> Add Question
+                    </button>
+                )}
             </div>
 
             {/* Stats Cards */}
@@ -340,9 +343,11 @@ const QuestionBank = () => {
                                     </div>
                                     <div className="flex items-center gap-2 flex-shrink-0">
                                         <span className="text-sm font-bold text-slate-600">{q.points} pts</span>
-                                        <button onClick={() => handleDelete(q._id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
-                                            <Trash2 size={14} />
-                                        </button>
+                                        {!isReadOnly && (
+                                            <button onClick={() => handleDelete(q._id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

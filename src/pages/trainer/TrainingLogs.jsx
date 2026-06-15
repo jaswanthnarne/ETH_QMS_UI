@@ -4,7 +4,9 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
+import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
+import { AlertModal, ConfirmModal } from '../../components/Modals';
 
 const DEFAULT_BATCH = () => ({
     batchName: '',
@@ -26,6 +28,7 @@ const normalizeId = (id) => {
 
 const TrainingLogs = () => {
     const { token, user } = useAuthStore();
+    const { selectedCollegeId } = useCollegeStore();
     const [logs, setLogs] = useState([]);
     const [colleges, setColleges] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -36,6 +39,10 @@ const TrainingLogs = () => {
     const [creatingCourse, setCreatingCourse] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     
+    // Custom modals states
+    const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+    const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+
     // Modal states
     const [formOpen, setFormOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -63,7 +70,8 @@ const TrainingLogs = () => {
     const fetchLogs = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/logs`, {
+            const collegeQuery = selectedCollegeId ? `?collegeId=${selectedCollegeId}` : '';
+            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/logs${collegeQuery}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setLogs(res.data.data || []);
@@ -120,7 +128,7 @@ const TrainingLogs = () => {
             fetchColleges();
             fetchTrainerBatches();
         }
-    }, [token]);
+    }, [token, selectedCollegeId]);
 
     useSocketUpdate(() => {
         fetchLogs();
@@ -134,7 +142,7 @@ const TrainingLogs = () => {
     const handleOpenCreate = () => {
         fetchTrainerBatches();
         setFormData({
-            collegeId: '',
+            collegeId: selectedCollegeId || '',
             courseId: '',
             startDate: new Date().toISOString().slice(0, 10),
             logDate: new Date().toISOString().slice(0, 10),
@@ -191,7 +199,12 @@ const TrainingLogs = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.collegeId || !formData.courseId || !formData.startDate || !formData.logDate) {
-            alert('Please fill out all required course information.');
+            setAlertState({
+                isOpen: true,
+                title: 'Validation Error',
+                message: 'Please fill out all required course information.',
+                type: 'error'
+            });
             return;
         }
 
@@ -201,17 +214,32 @@ const TrainingLogs = () => {
                 await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/logs/${editingLogId}`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                alert('Daily training log updated!');
+                setAlertState({
+                    isOpen: true,
+                    title: 'Success',
+                    message: 'Daily training log updated!',
+                    type: 'success'
+                });
             } else {
                 await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/logs`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                alert('Daily training log created!');
+                setAlertState({
+                    isOpen: true,
+                    title: 'Success',
+                    message: 'Daily training log created!',
+                    type: 'success'
+                });
             }
             setFormOpen(false);
             fetchLogs();
         } catch (error) {
-            alert(error.response?.data?.error || 'Failed to submit log');
+            setAlertState({
+                isOpen: true,
+                title: 'Action Failed',
+                message: error.response?.data?.error || 'Failed to submit log',
+                type: 'error'
+            });
         } finally {
             setSubmitting(false);
         }
@@ -220,11 +248,21 @@ const TrainingLogs = () => {
     const handleCreateCourseInline = async (e) => {
         e.preventDefault();
         if (!formData.collegeId) {
-            alert('Please select a college first.');
+            setAlertState({
+                isOpen: true,
+                title: 'Validation Error',
+                message: 'Please select a college first.',
+                type: 'error'
+            });
             return;
         }
         if (!courseForm.name || !courseForm.code) {
-            alert('Course Name and Course Code are required.');
+            setAlertState({
+                isOpen: true,
+                title: 'Validation Error',
+                message: 'Course Name and Course Code are required.',
+                type: 'error'
+            });
             return;
         }
 
@@ -235,7 +273,12 @@ const TrainingLogs = () => {
                 courseForm,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('New course created and mapped to college!');
+            setAlertState({
+                isOpen: true,
+                title: 'Success',
+                message: 'New course created and mapped to college!',
+                type: 'success'
+            });
             
             // Reload courses for current college
             const updatedCoursesRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges/${formData.collegeId}/courses`, {
@@ -254,29 +297,50 @@ const TrainingLogs = () => {
             setCourseModalOpen(false);
             setCourseForm({ name: '', code: '', description: '' });
         } catch (error) {
-            alert(error.response?.data?.error || 'Failed to create course');
+            setAlertState({
+                isOpen: true,
+                title: 'Action Failed',
+                message: error.response?.data?.error || 'Failed to create course',
+                type: 'error'
+            });
         } finally {
             setCreatingCourse(false);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to permanently delete this daily log?')) return;
-        try {
-            await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/logs/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchLogs();
-        } catch (error) {
-            alert(error.response?.data?.error || 'Failed to delete daily log');
-        }
+        setConfirmState({
+            isOpen: true,
+            title: 'Delete Daily Log',
+            message: 'Are you sure you want to permanently delete this daily log?',
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/logs/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    fetchLogs();
+                } catch (error) {
+                    setAlertState({
+                        isOpen: true,
+                        title: 'Delete Failed',
+                        message: error.response?.data?.error || 'Failed to delete daily log',
+                        type: 'error'
+                    });
+                }
+            }
+        });
     };
 
-    const [selectedCollege, setSelectedCollege] = useState('all');
+    const [selectedCollege, setSelectedCollege] = useState(selectedCollegeId || 'all');
     const [selectedCourse, setSelectedCourse] = useState('all');
     const [filterCourses, setFilterCourses] = useState([]);
     const [loadingFilterCourses, setLoadingFilterCourses] = useState(false);
     const [exportLoading, setExportLoading] = useState(false);
+
+    // Sync selectedCollege filter when selectedCollegeId context changes
+    useEffect(() => {
+        setSelectedCollege(selectedCollegeId || 'all');
+    }, [selectedCollegeId]);
 
     const fetchFilterCourses = async (collegeId) => {
         if (!collegeId || collegeId === 'all') {
@@ -339,7 +403,12 @@ const TrainingLogs = () => {
             link.parentNode.removeChild(link);
         } catch (error) {
             console.error('Failed to export training logs', error);
-            alert('Failed to generate Excel export.');
+            setAlertState({
+                isOpen: true,
+                title: 'Export Failed',
+                message: 'Failed to generate Excel export.',
+                type: 'error'
+            });
         } finally {
             setExportLoading(false);
         }
@@ -386,7 +455,7 @@ const TrainingLogs = () => {
                             <select 
                                 value={selectedCollege} 
                                 onChange={(e) => setSelectedCollege(e.target.value)}
-                                className="text-xs font-semibold text-slate-650 bg-transparent outline-none cursor-pointer pr-4"
+                                className="text-xs font-semibold text-slate-600 bg-transparent outline-none cursor-pointer pr-4"
                             >
                                 <option value="all">All Colleges</option>
                                 {colleges.map(c => (
@@ -402,7 +471,7 @@ const TrainingLogs = () => {
                                 value={selectedCourse} 
                                 onChange={(e) => setSelectedCourse(e.target.value)}
                                 disabled={selectedCollege === 'all' || loadingFilterCourses}
-                                className="text-xs font-semibold text-slate-650 bg-transparent outline-none cursor-pointer pr-4 disabled:opacity-50"
+                                className="text-xs font-semibold text-slate-600 bg-transparent outline-none cursor-pointer pr-4 disabled:opacity-50"
                             >
                                 <option value="all">All Courses</option>
                                 {filterCourses.map(c => (
@@ -608,7 +677,7 @@ const TrainingLogs = () => {
                         {/* Modal form scroll content */}
                         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pr-1.5 space-y-6">
                             {/* Course / College metadata info card */}
-                            <div className="bg-slate-50 border border-slate-150 rounded-xl p-4 space-y-4">
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
                                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Course / College Mapping</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -1045,6 +1114,21 @@ const TrainingLogs = () => {
                     </div>
                 </div>
             )}
+            {/* Alerts & Confirms */}
+            <AlertModal 
+                isOpen={alertState.isOpen}
+                onClose={() => setAlertState({ ...alertState, isOpen: false })}
+                title={alertState.title}
+                message={alertState.message}
+                type={alertState.type}
+            />
+            <ConfirmModal 
+                isOpen={confirmState.isOpen}
+                onClose={() => setConfirmState({ ...confirmState, isOpen: false })}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+            />
         </div>
     );
 };

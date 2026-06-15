@@ -1,13 +1,13 @@
 import { AlertCircle, CheckCircle2, X } from 'lucide-react';
 
-export const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', type = 'warning' }) => {
+export const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', type = 'warning', maxWidthClass = 'max-w-sm' }) => {
     if (!isOpen) return null;
 
     const isDanger = type === 'danger';
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in">
-            <div className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className={`bg-white rounded-2xl shadow-xl border border-slate-100 w-full ${maxWidthClass} overflow-hidden animate-in zoom-in-95 duration-200`}>
                 <div className="p-6">
                     <div className="flex justify-between items-start mb-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isDanger ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-500'}`}>

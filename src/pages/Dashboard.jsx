@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
     School, BookOpen, Users, FileText, TrendingUp, Loader2, Activity,
     ChevronRight, Building2, UserPlus, Download, ShieldCheck, User,
-    GraduationCap, Trash2, Copy, Book, Clock
+    GraduationCap, Trash2, Copy, Book, Clock, Upload, Database, Layers, Send,
+    ArrowLeftRight
 } from 'lucide-react';
 import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -21,10 +22,10 @@ const StatCard = ({ label, value, icon: Icon, color, loading, onClick }) => {
     let borderHover = "hover:border-blue-200";
 
     if (color.includes("indigo")) {
-        bgClass = "bg-indigo-50 text-indigo-650";
+        bgClass = "bg-indigo-50 text-indigo-600";
         borderHover = "hover:border-indigo-200";
     } else if (color.includes("purple")) {
-        bgClass = "bg-purple-50 text-purple-650";
+        bgClass = "bg-purple-50 text-purple-600";
         borderHover = "hover:border-purple-200";
     } else if (color.includes("emerald")) {
         bgClass = "bg-emerald-50 text-emerald-600";
@@ -118,13 +119,65 @@ const CustomTooltip = ({ active, payload, label }) => {
 const Dashboard = () => {
     const navigate = useNavigate();
     const { user, token } = useAuthStore();
-    const { selectedCollegeId, selectedCollegeName } = useCollegeStore();
-    const [stats, setStats] = useState({ colleges: 0, courses: 0, trainers: 0, exams: 0, attempts: 0 });
+    const { selectedCollegeId, selectedCollegeName, setSelectedCollege, clearSelectedCollege } = useCollegeStore();
+
+    useEffect(() => {
+        if (user) {
+            if (user.role === 'college_admin' && user.collegeId) {
+                navigate(`/college/${user.collegeId}/dashboard`);
+            } else if (['regional_manager', 'asst_rm'].includes(user.role) && selectedCollegeId) {
+                navigate(`/college/${selectedCollegeId}/dashboard`);
+            }
+        }
+    }, [user, selectedCollegeId, navigate]);
+
+    const [assignedCollegesList, setAssignedCollegesList] = useState([]);
+    const [fetchingColleges, setFetchingColleges] = useState(false);
+
+    useEffect(() => {
+        if (user && ['regional_manager', 'asst_rm'].includes(user.role) && !selectedCollegeId) {
+            const fetchAssignedColleges = async () => {
+                setFetchingColleges(true);
+                try {
+                    const res = await axios.get(`${API}/admin/colleges`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setAssignedCollegesList(res.data.data || []);
+                } catch (e) {
+                    console.error('Failed to load assigned colleges', e);
+                } finally {
+                    setFetchingColleges(false);
+                }
+            };
+            fetchAssignedColleges();
+        }
+    }, [user, token, selectedCollegeId]);
+
+    const [stats, setStats] = useState({ colleges: 0, courses: 0, trainers: 0, exams: 0, attempts: 0, batches: 0, students: 0 });
     const [loading, setLoading] = useState(true);
     const [recentLogs, setRecentLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(true);
     const [analytics, setAnalytics] = useState(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
+    // College logo upload / details hooks (declared at top to prevent rules of hooks violation)
+    const logoInputRef = useRef(null);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [collegeData, setCollegeData] = useState(null);
+
+    // Fetch college details (for logo)
+    useEffect(() => {
+        if (!selectedCollegeId || !token) return;
+        const fetchCollege = async () => {
+            try {
+                const res = await axios.get(`${API}/admin/colleges/${selectedCollegeId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCollegeData(res.data.data);
+            } catch (e) { console.error('Failed to fetch college details', e); }
+        };
+        fetchCollege();
+    }, [selectedCollegeId, token]);
 
     // Fetch dashboard stats
     useEffect(() => {
@@ -147,7 +200,12 @@ const Dashboard = () => {
         const fetchLogs = async () => {
             setLogsLoading(true);
             try {
-                const res = await axios.get(`${API}/audit/logs?limit=6&page=1`, {
+                let url = `${API}/audit/logs?limit=5&page=1`;
+                const cid = selectedCollegeId || (user?.role === 'college_admin' ? user.collegeId : null);
+                if (cid) {
+                    url += `&collegeId=${cid}`;
+                }
+                const res = await axios.get(url, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setRecentLogs(res.data.data || []);
@@ -155,7 +213,7 @@ const Dashboard = () => {
             finally { setLogsLoading(false); }
         };
         if (token) fetchLogs();
-    }, [token]);
+    }, [token, selectedCollegeId, user]);
 
     // Fetch real analytics for performance charts
     useEffect(() => {
@@ -198,7 +256,6 @@ const Dashboard = () => {
         { label: 'Colleges', value: stats.colleges, icon: School, color: 'bg-blue-600', roles: ['super_admin'] },
         { label: 'Courses', value: stats.courses, icon: BookOpen, color: 'bg-indigo-600' },
         { label: 'Trainers', value: stats.trainers || 0, icon: UserPlus, color: 'bg-purple-600' },
-        { label: 'Exams', value: stats.exams, icon: FileText, color: 'bg-emerald-600' },
         { label: 'Attempts', value: stats.attempts || 0, icon: Users, color: 'bg-orange-600' },
     ];
 
@@ -246,13 +303,13 @@ const Dashboard = () => {
                             <div className="absolute right-full mr-2 inset-y-0 flex items-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                                 <div className="bg-slate-900 text-white text-xs whitespace-nowrap p-3 rounded-xl shadow-lg flex gap-3">
                                     <div className="flex flex-col">
-                                        <span className="text-slate-450 text-[10px] uppercase font-semibold tracking-wider">College</span>
+                                        <span className="text-slate-400 text-[10px] uppercase font-semibold tracking-wider">College</span>
                                         <span className="font-semibold">{trainer.collegeName}</span>
                                     </div>
-                                    <div className="w-px bg-slate-750" />
+                                    <div className="w-px bg-slate-700" />
                                     <div className="flex flex-col">
-                                        <span className="text-slate-450 text-[10px] uppercase font-semibold tracking-wider">Tests Done</span>
-                                        <span className="font-semibold text-emerald-450">{trainer.testsDone} tests</span>
+                                        <span className="text-slate-400 text-[10px] uppercase font-semibold tracking-wider">Tests Done</span>
+                                        <span className="font-semibold text-emerald-400">{trainer.testsDone} tests</span>
                                     </div>
                                 </div>
                             </div>
@@ -280,7 +337,7 @@ const Dashboard = () => {
             </div>
             <div className="space-y-1">
                 {logsLoading ? (
-                    Array.from({ length: 4 }).map((_, i) => (
+                    Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="flex gap-3 p-3 rounded-lg">
                             <div className="w-8 h-8 rounded-lg bg-slate-100 animate-pulse flex-shrink-0" />
                             <div className="flex-1 space-y-2">
@@ -330,7 +387,7 @@ const Dashboard = () => {
                     <Activity size={20} className="text-slate-400" />
                     <div>
                         <h3 className="text-lg font-bold text-slate-900">Performance Overview</h3>
-                        <p className="text-xs text-slate-450 mt-0.5">Last 7 days submission trends</p>
+                        <p className="text-xs text-slate-400 mt-0.5">Last 7 days submission trends</p>
                     </div>
                 </div>
                 {analytics?.summary && (
@@ -400,7 +457,138 @@ const Dashboard = () => {
     );
 
     // ═══════════════ Global view (no college selected) ═══════════════
+    // ═══════════════ Global / Landing view (no college selected) ═══════════════
     if (!selectedCollegeId) {
+        if (user && ['regional_manager', 'asst_rm'].includes(user.role)) {
+            const handleCollegeSelect = (c) => {
+                setSelectedCollege(c._id, c.name, c.code);
+                navigate(`/college/${c._id}/dashboard`);
+            };
+
+            const capabilities = user.role === 'regional_manager' ? [
+                { title: 'Scoped Access Scope', desc: 'Allows viewing and monitoring only the colleges assigned to you.', icon: ShieldCheck, color: 'text-[#004AAD] bg-blue-50' },
+                { title: 'Training & Log Reviews', desc: 'Inspect trainer sessions, progress entries, and classroom locations.', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50' },
+                { title: 'Student & Batch Directories', desc: 'Monitor active cohorts, USN rosters, and student enrollment records.', icon: Users, color: 'text-purple-600 bg-purple-50' },
+                { title: 'Write Protections Enabled', desc: 'All creation, editing, imports, and deletion rights are disabled.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
+            ] : [
+                { title: 'Scoped Assistant Access', desc: 'Allows assistant monitoring of your assigned colleges context.', icon: ShieldCheck, color: 'text-[#004AAD] bg-blue-50' },
+                { title: 'View Academic Performance', desc: 'View exams, allotments, syllabus details, and audit records.', icon: FileText, color: 'text-indigo-600 bg-indigo-50' },
+                { title: 'Attendance Analytics', desc: 'Check student attendance history and log records for trainer compliance.', icon: Activity, color: 'text-purple-600 bg-purple-50' },
+                { title: 'Write Protections Enabled', desc: 'System editing, logo uploads, and batch modifications are disabled.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
+            ];
+
+            return (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {/* Header banner */}
+                    <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div className="space-y-1.5">
+                                <span className="inline-block text-[10px] font-bold text-[#004AAD] bg-[#004AAD]/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                                    {user.role === 'regional_manager' ? 'Regional Manager' : 'Asst Regional Manager'} Scoped Session
+                                </span>
+                                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                    Welcome to your <span className="text-[#004AAD]">Management Workspace</span>
+                                </h1>
+                                <p className="text-sm text-slate-500 max-w-xl">
+                                    Select one of your assigned colleges to view metrics, manage batches, and audit compliance.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        {/* Left: Role Details and capabilities */}
+                        <div className="lg:col-span-5 space-y-6">
+                            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900">Your Access Privileges</h3>
+                                    <p className="text-xs text-slate-500 mt-1">Below is an overview of what your manager account role can do on the platform.</p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {capabilities.map((cap, i) => (
+                                        <div key={i} className="flex gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cap.color}`}>
+                                                <cap.icon size={18} />
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                <h4 className="text-xs font-bold text-slate-800">{cap.title}</h4>
+                                                <p className="text-[11px] text-slate-500 leading-relaxed">{cap.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: College context selection cards */}
+                        <div className="lg:col-span-7 space-y-6">
+                            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                                <div className="border-b border-slate-100 pb-4 mb-6">
+                                    <h3 className="text-lg font-bold text-slate-900">Assigned College Contexts</h3>
+                                    <p className="text-xs text-slate-500 mt-1">Please select one of the assigned institutions below to load its workspace.</p>
+                                </div>
+
+                                {fetchingColleges ? (
+                                    <div className="flex justify-center items-center py-20">
+                                        <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                                    </div>
+                                ) : assignedCollegesList.length === 0 ? (
+                                    <div className="p-12 text-center">
+                                        <School className="mx-auto text-slate-300 mb-4" size={48} />
+                                        <h4 className="font-bold text-slate-800 text-sm">No Colleges Assigned</h4>
+                                        <p className="text-xs text-slate-400 mt-2">Your account does not have any mapped colleges. Please contact support.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {assignedCollegesList.map((c) => (
+                                            <motion.div
+                                                key={c._id}
+                                                whileHover={{ y: -4, scale: 1.01 }}
+                                                onClick={() => handleCollegeSelect(c)}
+                                                className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between gap-5 hover:border-[#004AAD]/30 transition-all duration-300 cursor-pointer text-center relative overflow-hidden group shadow-sm hover:shadow-md"
+                                            >
+                                                <div className="absolute top-0 left-0 right-0 h-1 bg-[#004AAD]/5 group-hover:bg-[#004AAD] transition-all" />
+
+                                                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 shadow-inner">
+                                                    {c.logoUrl ? (
+                                                        <img src={c.logoUrl} alt={`${c.name} logo`} className="w-full h-full object-contain p-1.5" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 text-[#004AAD] flex items-center justify-center font-extrabold text-lg uppercase">
+                                                            {c.name.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                        {c.code}
+                                                    </span>
+                                                    <h4 className="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-[#004AAD] transition-colors">
+                                                        {c.name}
+                                                    </h4>
+                                                    {c.contactEmail && (
+                                                        <p className="text-[10px] text-slate-400 truncate">
+                                                            {c.contactEmail}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                <button className="w-full py-2 bg-slate-50 group-hover:bg-[#004AAD] text-slate-600 group-hover:text-white text-xs font-bold rounded-lg transition-all duration-300 border border-slate-150 group-hover:border-[#004AAD]">
+                                                    Open Dashboard
+                                                </button>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Otherwise, render general Platform Dashboard for global admins
         const visibleCards = statCards.filter(card => !card.roles || card.roles.includes(user?.role));
         const gridColsClass = visibleCards.length === 5 
             ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5' 
@@ -466,45 +654,253 @@ const Dashboard = () => {
         );
     }
 
-    // ═══════════════ College-specific view ═══════════════
-    const visibleCollegeCards = statCards.filter(card => !card.roles || card.roles.includes(user?.role));
-    const collegeGridColsClass = visibleCollegeCards.length === 5
-        ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'
-        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
+    const handleLogoUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { alert('File size exceeds the 5MB limit.'); return; }
+        const formData = new FormData();
+        formData.append('logo', file);
+        setUploadingLogo(true);
+        try {
+            const res = await axios.post(
+                `${API}/admin/colleges/${selectedCollegeId}/logo`,
+                formData,
+                { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
+            );
+            setCollegeData(res.data.data);
+        } catch (error) {
+            alert(error.response?.data?.error || 'Failed to upload logo');
+        } finally {
+            setUploadingLogo(false);
+            if (logoInputRef.current) logoInputRef.current.value = '';
+        }
+    };
+
+    const passRateValue = analytics?.summary?.passRate || 0;
+    const avgScoreValue = analytics?.summary?.avgScore || 0;
+
+    const collegeStatCards = [
+        { label: 'Mapped Courses', value: stats.courses, icon: BookOpen, color: 'indigo', path: `/college/${selectedCollegeId}/admin/courses` },
+        { label: 'Active Trainers', value: stats.trainers || 0, icon: UserPlus, color: 'purple', path: `/college/${selectedCollegeId}/admin/trainers` },
+        { label: 'Total Batches', value: stats.batches || 0, icon: Layers, color: 'orange', path: `/college/${selectedCollegeId}/admin/batches` },
+        { label: 'Enrolled Students', value: stats.students || 0, icon: Users, color: 'blue' },
+        { label: 'Submissions', value: stats.attempts || 0, icon: GraduationCap, color: 'indigo', path: `/college/${selectedCollegeId}/admin/allotments` },
+        { label: 'Pass Rate', value: `${passRateValue}%`, icon: TrendingUp, color: 'emerald' },
+    ];
+
+    const quickActions = [
+        { title: 'Manage Courses', desc: 'Map, view, and organize curricula delivered at this college.', icon: BookOpen, color: 'indigo', path: `/college/${selectedCollegeId}/admin/courses` },
+        { title: 'Manage Trainers', desc: 'Assign facilitators, update locations, and review profiles.', icon: UserPlus, color: 'purple', path: `/college/${selectedCollegeId}/admin/trainers` },
+        { title: 'Manage Exams', desc: 'Create, publish, and track assessment performance.', icon: FileText, color: 'emerald', path: `/college/${selectedCollegeId}/admin/exams` },
+        { title: 'Manage Batches', desc: 'Organize student cohorts by department and course.', icon: Layers, color: 'orange', path: `/college/${selectedCollegeId}/admin/batches` },
+    ];
+
+    const colorMap = {
+        indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100', hoverBorder: 'hover:border-indigo-200' },
+        purple: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100', hoverBorder: 'hover:border-purple-200' },
+        emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', hoverBorder: 'hover:border-emerald-200' },
+        orange: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100', hoverBorder: 'hover:border-orange-200' },
+        blue: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100', hoverBorder: 'hover:border-blue-200' },
+    };
+
+    const currentDate = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 bg-blue-50 text-[#004AAD] text-xs font-semibold rounded-md">{selectedCollegeName}</span>
+            {/* ── Hero Header ── */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div className="flex items-center gap-5">
+                        {(() => {
+                            const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+
+                            return (
+                                <div
+                                    onClick={isReadOnly ? undefined : () => logoInputRef.current?.click()}
+                                    className={`relative group w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 border-slate-100 flex items-center justify-center overflow-hidden ${isReadOnly ? 'cursor-default' : 'cursor-pointer'} bg-slate-50 shadow-inner flex-shrink-0 transition-all ${!isReadOnly ? 'hover:border-[#004AAD]/30' : ''}`}
+                                    title={isReadOnly ? undefined : "Click to upload or change college logo"}
+                                >
+                                    {collegeData?.logoUrl ? (
+                                        <img src={collegeData.logoUrl} alt={`${selectedCollegeName} logo`} className="w-full h-full object-contain p-1" />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 text-[#004AAD] flex items-center justify-center font-extrabold text-2xl uppercase">
+                                            {(selectedCollegeName || 'C').charAt(0)}
+                                        </div>
+                                    )}
+                                    {!isReadOnly && (
+                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl">
+                                            {uploadingLogo ? (
+                                                <Loader2 size={18} className="text-white animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <Upload size={16} className="text-white" />
+                                                    <span className="text-[9px] text-white font-bold mt-0.5 tracking-wide">UPLOAD</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+                        <input type="file" ref={logoInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" />
+
+                        <div>
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span className="px-3 py-1 bg-[#004AAD]/10 text-[#004AAD] text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                    {collegeData?.code || selectedCollegeName}
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Active Partner
+                                </span>
+                            </div>
+                            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                {selectedCollegeName || 'College'} <span className="text-[#004AAD]">Dashboard</span>
+                            </h1>
+                            <p className="text-sm text-slate-400 mt-1 flex items-center gap-1.5">
+                                <Clock size={12} /> {currentDate}
+                            </p>
+                        </div>
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-900">College Dashboard</h1>
-                    <p className="text-sm text-slate-500 mt-1">Performance overview and quick management</p>
+                    <div className="flex flex-wrap gap-3 items-center shrink-0">
+                        {user && ['regional_manager', 'asst_rm'].includes(user.role) && (
+                            <button
+                                onClick={() => {
+                                    clearSelectedCollege();
+                                    navigate('/dashboard');
+                                }}
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
+                            >
+                                <ArrowLeftRight size={14} /> Switch College
+                            </button>
+                        )}
+                        <button
+                            onClick={() => handleExport('college_profile', selectedCollegeId, collegeData?.code || 'College')}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer shrink-0"
+                        >
+                            <Download size={14} /> Export College Profile
+                        </button>
+                    </div>
                 </div>
-                <button
-                    onClick={() => handleExport('college', selectedCollegeId, selectedCollegeName)}
-                    title="Exports all student results, trainer summaries, and course breakdowns for this college as a multi-sheet Excel report"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm active:scale-95 cursor-pointer"
-                >
-                    <Download size={16} /> Export College Report
-                </button>
             </div>
 
-            {/* Stats */}
-            <div className={`grid ${collegeGridColsClass} gap-6`}>
-                {visibleCollegeCards.map((card, i) => {
-                    if (card.roles && !card.roles.includes(user?.role)) return null;
-                    return <StatCard key={i} {...card} loading={loading} />;
+            {/* ── Statistics Grid (6 cards) ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {collegeStatCards.map((card, i) => {
+                    const cm = colorMap[card.color] || colorMap.blue;
+                    return (
+                        <motion.div
+                            key={i}
+                            whileHover={card.path ? { y: -3, scale: 1.01 } : { y: -2 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            onClick={card.path ? () => navigate(card.path) : undefined}
+                            className={`bg-white p-5 rounded-2xl border border-slate-100 ${cm.hoverBorder} hover:shadow-md hover:shadow-slate-100/40 transition-all flex flex-col gap-3 ${card.path ? 'cursor-pointer' : ''}`}
+                        >
+                            <div className={`w-10 h-10 rounded-xl ${cm.bg} ${cm.text} flex items-center justify-center flex-shrink-0`}>
+                                <card.icon size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                                    {card.label}
+                                </p>
+                                {loading || (card.label === 'Pass Rate' && analyticsLoading) ? (
+                                    <div className="h-7 w-16 bg-slate-100 animate-pulse rounded-md mt-1" />
+                                ) : (
+                                    <h3 className="text-2xl font-bold tracking-tight text-slate-900 leading-none mt-1">
+                                        {card.value}
+                                    </h3>
+                                )}
+                            </div>
+                        </motion.div>
+                    );
                 })}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Performance Overview — Real Charts */}
-                <PerformancePanel />
+            {/* ── Performance Overview (Full Width) ── */}
+            <PerformancePanel />
 
-                {/* Recent Activity — Real Audit Logs */}
-                <RecentActivityPanel />
+            {/* ── Active Trainers + Recent Activity ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Active Trainers Panel */}
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <UserPlus size={18} className="text-[#004AAD]" />
+                            <h3 className="text-lg font-bold text-slate-900">Active Trainers</h3>
+                        </div>
+                        <button onClick={() => navigate(`/college/${selectedCollegeId}/admin/trainers`)} className="text-xs font-semibold text-[#004AAD] hover:underline flex items-center gap-1">
+                            Manage <ChevronRight size={14} />
+                        </button>
+                    </div>
+
+                    <div className="space-y-2.5 flex-1 overflow-y-auto pr-1 max-h-72">
+                        {loading ? (
+                            Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className="flex gap-3 p-3 rounded-xl border border-slate-100">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-100 animate-pulse flex-shrink-0" />
+                                    <div className="flex-1 space-y-2 py-1">
+                                        <div className="h-3.5 bg-slate-100 animate-pulse rounded w-3/4" />
+                                        <div className="h-3 bg-slate-50 animate-pulse rounded w-1/2" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : !stats.activeTrainers || stats.activeTrainers.length === 0 ? (
+                            <div className="py-8 text-center text-slate-400">
+                                <UserPlus size={24} className="mx-auto text-slate-200 mb-2" />
+                                <p className="text-sm">No trainers assigned yet</p>
+                            </div>
+                        ) : (
+                            stats.activeTrainers.map((trainer) => (
+                                <div key={trainer.id} className="relative group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#004AAD]/20 hover:bg-blue-50/30 transition-all cursor-default">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#004AAD] flex items-center justify-center font-bold text-sm">
+                                        {trainer.initials}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-bold text-slate-900 truncate">{trainer.name}</h4>
+                                        <p className="text-xs text-slate-500 truncate">{trainer.collegeName}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xs font-semibold text-[#004AAD] bg-blue-50 px-2.5 py-1 rounded-lg">
+                                            {trainer.testsDone} tests
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Recent Activity (full 2 cols) */}
+                <div className="lg:col-span-2">
+                    <RecentActivityPanel />
+                </div>
+            </div>
+
+            {/* ── Quick Navigation Cards ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {quickActions.map((action, i) => {
+                    const cm = colorMap[action.color] || colorMap.blue;
+                    return (
+                        <motion.div
+                            key={i}
+                            whileHover={{ y: -4, scale: 1.01 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            onClick={() => navigate(action.path)}
+                            className={`bg-white p-6 rounded-2xl border border-slate-200/80 hover:shadow-lg ${cm.hoverBorder} transition-all cursor-pointer group flex flex-col justify-between shadow-sm min-h-[180px]`}
+                        >
+                            <div>
+                                <div className={`w-12 h-12 ${cm.bg} ${cm.text} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                                    <action.icon size={24} />
+                                </div>
+                                <h3 className="text-base font-bold text-slate-900 mb-1.5">{action.title}</h3>
+                                <p className="text-xs text-slate-500 leading-relaxed">{action.desc}</p>
+                            </div>
+                            <span className={`text-xs ${cm.text} font-bold flex items-center gap-1 mt-4`}>
+                                Open <ChevronRight size={14} />
+                            </span>
+                        </motion.div>
+                    );
+                })}
             </div>
         </div>
     );

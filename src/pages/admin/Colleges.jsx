@@ -3,7 +3,6 @@ import { School, Plus, Search, Edit2, Trash2, X, Loader2, Building2, Mail, Phone
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
-import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 
 const CollegeModal = ({ college, isOpen, onClose, onSave }) => {
@@ -47,8 +46,8 @@ const Colleges = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCollege, setSelectedCollege] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const { token } = useAuthStore();
-    const { setSelectedCollege: setContextCollege } = useCollegeStore();
+    const { token, user } = useAuthStore();
+    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
 
     const fetchColleges = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } }); setColleges(res.data.data); } catch (e) { console.error(e); } finally { setLoading(false); } };
     useEffect(() => { fetchColleges(); }, []);
@@ -56,8 +55,7 @@ const Colleges = () => {
     const handleSave = async (data) => { try { if (selectedCollege) { await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges/${selectedCollege._id}`, data, { headers: { Authorization: `Bearer ${token}` } }); } else { await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, data, { headers: { Authorization: `Bearer ${token}` } }); } setIsModalOpen(false); fetchColleges(); } catch (error) { alert(error.response?.data?.error || 'Failed to save college'); } };
     const handleDelete = async (id) => { if (window.confirm('Delete this college? All associated courses, trainers, and exams will be removed.')) { try { await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges/${id}`, { headers: { Authorization: `Bearer ${token}` } }); fetchColleges(); } catch (error) { alert(error.response?.data?.error || 'Failed to delete'); } } };
     const handleManage = (college) => {
-        setContextCollege(college._id, college.name);
-        navigate(`/college/${college._id}/dashboard`);
+        window.open(`/college/${college._id}/dashboard`, '_blank');
     };
     const handleExport = async (id, name) => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/export?type=college&id=${id}`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' }); const url = window.URL.createObjectURL(new Blob([res.data])); const a = document.createElement('a'); a.href = url; a.setAttribute('download', `${name}_Report.xlsx`); document.body.appendChild(a); a.click(); a.remove(); } catch { alert('Export failed'); } };
     const filteredColleges = colleges.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.code.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -71,7 +69,9 @@ const Colleges = () => {
                 </div>
                 <div className="flex gap-3">
                     <button onClick={() => handleExport('all', 'All_Colleges')} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"><Download size={16} /> Export All</button>
-                    <button onClick={() => { setSelectedCollege(null); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm"><Plus size={16} /> Add College</button>
+                    {!isReadOnly && (
+                        <button onClick={() => { setSelectedCollege(null); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm"><Plus size={16} /> Add College</button>
+                    )}
                 </div>
             </div>
 
@@ -90,15 +90,36 @@ const Colleges = () => {
                         ) : filteredColleges.length === 0 ? (<tr><td colSpan="4" className="px-6 py-16 text-center"><Building2 size={32} className="mx-auto text-slate-200 mb-2" /><p className="text-sm text-slate-400">No colleges found</p></td></tr>
                         ) : filteredColleges.map((college) => (
                             <tr key={college._id} className="hover:bg-slate-50/50 group">
-                                <td className="px-6 py-4"><div className="flex items-center gap-3"><div className="w-9 h-9 bg-blue-50 text-[#004AAD] rounded-lg flex items-center justify-center font-bold text-sm">{college.name.charAt(0)}</div><div><p className="text-sm font-semibold text-slate-900">{college.name}</p>{college.contactEmail && <p className="text-xs text-slate-400">{college.contactEmail}</p>}</div></div></td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        {college.logoUrl ? (
+                                            <img 
+                                                src={college.logoUrl} 
+                                                alt={`${college.name} logo`} 
+                                                className="w-9 h-9 object-contain rounded-lg border border-slate-100 bg-slate-50"
+                                            />
+                                        ) : (
+                                            <div className="w-9 h-9 bg-blue-50 text-[#004AAD] rounded-lg flex items-center justify-center font-bold text-sm">
+                                                {college.name.charAt(0)}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-900">{college.name}</p>
+                                            {college.contactEmail && <p className="text-xs text-slate-400">{college.contactEmail}</p>}
+                                        </div>
+                                    </div>
+                                </td>
                                 <td className="px-6 py-4"><code className="px-2 py-1 bg-slate-100 text-xs font-mono text-slate-600 rounded">{college.code}</code></td>
                                 <td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${college.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}><span className={`w-1.5 h-1.5 rounded-full ${college.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />{college.status}</span></td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-2 transition-opacity">
                                         <button onClick={() => handleManage(college)} className="px-3 py-1.5 bg-[#004AAD] text-white rounded-md text-xs font-medium hover:bg-[#003580] flex items-center gap-1"><ExternalLink size={12} /> Manage</button>
-                                        <button onClick={() => handleExport(college._id, college.name)} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50"><Download size={16} /></button>
-                                        <button onClick={() => { setSelectedCollege(college); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50"><Edit2 size={16} /></button>
-                                        <button onClick={() => handleDelete(college._id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-md hover:bg-red-50"><Trash2 size={16} /></button>
+                                        {!isReadOnly && (
+                                            <>
+                                                <button onClick={() => { setSelectedCollege(college); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50"><Edit2 size={16} /></button>
+                                                <button onClick={() => handleDelete(college._id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-md hover:bg-red-50"><Trash2 size={16} /></button>
+                                            </>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

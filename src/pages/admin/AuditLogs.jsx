@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { 
-    ShieldCheck, Search, Filter, ChevronLeft, ChevronRight, 
+import {
+    ShieldCheck, Search, Filter, ChevronLeft, ChevronRight,
     RefreshCw, User, Book, GraduationCap, FileText, Trash2, Copy
 } from 'lucide-react';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
+import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -16,9 +17,9 @@ const ACTION_ICONS = {
     DELETE_COLLEGE: { icon: Trash2, color: 'text-red-600', bg: 'bg-red-50' },
     CREATE_TRAINER: { icon: User, color: 'text-violet-600', bg: 'bg-violet-50' },
     DELETE_TRAINER: { icon: Trash2, color: 'text-red-600', bg: 'bg-red-50' },
-    CREATE_EXAM:    { icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    DELETE_EXAM:    { icon: Trash2, color: 'text-red-650', bg: 'bg-red-50' },
-    CLONE_EXAM:     { icon: Copy, color: 'text-amber-600', bg: 'bg-amber-50' },
+    CREATE_EXAM: { icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    DELETE_EXAM: { icon: Trash2, color: 'text-red-650', bg: 'bg-red-50' },
+    CLONE_EXAM: { icon: Copy, color: 'text-amber-600', bg: 'bg-amber-50' },
     BULK_IMPORT_QUESTIONS: { icon: Book, color: 'text-teal-600', bg: 'bg-teal-50' },
 };
 
@@ -28,19 +29,21 @@ const ACTION_LABELS = {
     DELETE_COLLEGE: 'Deleted College',
     CREATE_TRAINER: 'Created Trainer',
     DELETE_TRAINER: 'Deleted Trainer',
-    CREATE_EXAM:    'Created Exam',
-    DELETE_EXAM:    'Deleted Exam',
-    CLONE_EXAM:     'Cloned Exam',
+    CREATE_EXAM: 'Created Exam',
+    DELETE_EXAM: 'Deleted Exam',
+    CLONE_EXAM: 'Cloned Exam',
     BULK_IMPORT_QUESTIONS: 'Bulk Imported Questions',
 };
 
 const AuditLogs = () => {
     const { token } = useAuthStore();
+    const { selectedCollegeId } = useCollegeStore();
     const location = useLocation();
 
     // Derive college ID from URL as fallback
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
     const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
+    const effectiveCollegeId = selectedCollegeId || urlCollegeId;
 
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -62,7 +65,7 @@ const AuditLogs = () => {
                 limit: pagination.limit,
                 ...(debouncedSearch && { search: debouncedSearch }),
                 ...(actionFilter && { action: actionFilter }),
-                ...(urlCollegeId && { collegeId: urlCollegeId })
+                ...(effectiveCollegeId && { collegeId: effectiveCollegeId })
             });
             const res = await axios.get(`${API}/audit/logs?${params}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -74,7 +77,7 @@ const AuditLogs = () => {
         } finally {
             setLoading(false);
         }
-    }, [token, pagination.page, pagination.limit, debouncedSearch, actionFilter]);
+    }, [token, pagination.page, pagination.limit, debouncedSearch, actionFilter, effectiveCollegeId]);
 
     useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
@@ -84,14 +87,14 @@ const AuditLogs = () => {
 
     const formatDate = (iso) => {
         const d = new Date(iso);
-        return d.toLocaleString('en-IN', { 
+        return d.toLocaleString('en-IN', {
             day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', hour12: true 
+            hour: '2-digit', minute: '2-digit', hour12: true
         });
     };
 
-    const getActionMeta = (action) => ACTION_ICONS[action] || { 
-        icon: ShieldCheck, color: 'text-slate-600', bg: 'bg-slate-100' 
+    const getActionMeta = (action) => ACTION_ICONS[action] || {
+        icon: ShieldCheck, color: 'text-slate-600', bg: 'bg-slate-100'
     };
 
     return (
@@ -104,7 +107,7 @@ const AuditLogs = () => {
                         Track all admin actions — {pagination.total} total events
                     </p>
                 </div>
-                <button 
+                <button
                     onClick={fetchLogs}
                     className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors"
                 >
@@ -228,11 +231,10 @@ const AuditLogs = () => {
                                     <button
                                         key={p}
                                         onClick={() => setPagination(prev => ({ ...prev, page: p }))}
-                                        className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
-                                            pagination.page === p 
-                                                ? 'bg-[#004AAD] text-white' 
+                                        className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${pagination.page === p
+                                                ? 'bg-[#004AAD] text-white'
                                                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                                        }`}
+                                            }`}
                                     >
                                         {p}
                                     </button>

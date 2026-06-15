@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { ArrowRight, Mail, Lock, Loader2, Eye, EyeOff, Shield, ShieldCheck, KeyRound } from 'lucide-react';
 import useAuthStore from '../store/authStore';
+import useStudentAuthStore from '../store/studentAuthStore';
+import useCollegeStore from '../store/collegeStore';
 import PublicLayout from '../layouts/PublicLayout';
 
 /* ─── Animation Component (matches public pages) ─── */
@@ -35,7 +37,11 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const result = await login(email, password);
-        if (result.success) navigate('/dashboard');
+        if (result.success) {
+            useStudentAuthStore.getState().logoutStudent();
+            useCollegeStore.getState().clearSelectedCollege();
+            navigate('/dashboard');
+        }
     };
 
     return (

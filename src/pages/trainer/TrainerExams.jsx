@@ -6,7 +6,9 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
+import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
+import { AlertModal, ConfirmModal } from '../../components/Modals';
 
 const StatusBadge = ({ status }) => {
     const config = {
@@ -24,6 +26,7 @@ const StatusBadge = ({ status }) => {
 
 const TrainerExams = () => {
     const { token, user } = useAuthStore();
+    const { selectedCollegeId } = useCollegeStore();
     const navigate = useNavigate();
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -31,11 +34,16 @@ const TrainerExams = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [copiedKey, setCopiedKey] = useState(null);
+    
+    // Alerts and Confirm Modal State
+    const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+    const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
     const fetchExams = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/course-exams`, {
+            const collegeQuery = selectedCollegeId ? `?collegeId=${selectedCollegeId}` : '';
+            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/course-exams${collegeQuery}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setExams(res.data.data || []);
@@ -46,7 +54,7 @@ const TrainerExams = () => {
         }
     };
 
-    useEffect(() => { if (token) fetchExams(); }, [token]);
+    useEffect(() => { if (token) fetchExams(); }, [token, selectedCollegeId]);
     useSocketUpdate(() => fetchExams(), ['exams']);
 
     const handlePublish = async (id) => {
@@ -55,10 +63,20 @@ const TrainerExams = () => {
             await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/exams/${id}/publish`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('Exam published! Your access key is ready.');
+            setAlertState({
+                isOpen: true,
+                title: 'Success',
+                message: 'Exam published! Your access key is ready.',
+                type: 'success'
+            });
             fetchExams();
         } catch (error) {
-            alert(error.response?.data?.error || 'Failed to publish exam');
+            setAlertState({
+                isOpen: true,
+                title: 'Publish Failed',
+                message: error.response?.data?.error || 'Failed to publish exam',
+                type: 'error'
+            });
         } finally {
             setPublishing(null);
         }
@@ -73,31 +91,60 @@ const TrainerExams = () => {
             const a = document.createElement('a');
             a.href = url; a.setAttribute('download', `${title}_Results.xlsx`);
             document.body.appendChild(a); a.click(); a.remove();
-        } catch { alert('Export failed'); }
+        } catch {
+            setAlertState({
+                isOpen: true,
+                title: 'Export Failed',
+                message: 'Export failed. Please try again.',
+                type: 'error'
+            });
+        }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this exam? All student results will be permanently removed.')) return;
-        try {
-            await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchExams();
-        } catch (error) {
-            alert(error.response?.data?.error || 'Failed to delete exam');
-        }
+        setConfirmState({
+            isOpen: true,
+            title: 'Delete Exam',
+            message: 'Are you sure you want to delete this exam? All student results will be permanently removed.',
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    fetchExams();
+                } catch (error) {
+                    setAlertState({
+                        isOpen: true,
+                        title: 'Delete Failed',
+                        message: error.response?.data?.error || 'Failed to delete exam',
+                        type: 'error'
+                    });
+                }
+            }
+        });
     };
 
     const handleClone = async (id, title) => {
-        if (!window.confirm(`Clone "${title}"? A draft copy will be created.`)) return;
-        try {
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}/clone`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchExams();
-        } catch (error) {
-            alert(error.response?.data?.error || 'Failed to clone exam');
-        }
+        setConfirmState({
+            isOpen: true,
+            title: 'Clone Exam',
+            message: `Clone "${title}"? A draft copy will be created.`,
+            onConfirm: async () => {
+                try {
+                    await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}/clone`, {}, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    fetchExams();
+                } catch (error) {
+                    setAlertState({
+                        isOpen: true,
+                        title: 'Clone Failed',
+                        message: error.response?.data?.error || 'Failed to clone exam',
+                        type: 'error'
+                    });
+                }
+            }
+        });
     };
 
     const copyKey = (key) => {
@@ -346,6 +393,22 @@ const TrainerExams = () => {
                     })
                 )}
             </div>
+            
+            {/* Alerts & Confirms */}
+            <AlertModal 
+                isOpen={alertState.isOpen}
+                onClose={() => setAlertState({ ...alertState, isOpen: false })}
+                title={alertState.title}
+                message={alertState.message}
+                type={alertState.type}
+            />
+            <ConfirmModal 
+                isOpen={confirmState.isOpen}
+                onClose={() => setConfirmState({ ...confirmState, isOpen: false })}
+                title={confirmState.title}
+                message={confirmState.message}
+                onConfirm={confirmState.onConfirm}
+            />
         </div>
     );
 };

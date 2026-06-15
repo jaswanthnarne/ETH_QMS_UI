@@ -28,18 +28,22 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import useCheatDetection from '../hooks/useCheatDetection';
 import { ConfirmModal, AlertModal } from '../components/Modals';
+import useStudentAuthStore from '../store/studentAuthStore';
 
 const StudentExam = () => {
     const { key } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Retrieve logged-in student context
+    const { student } = useStudentAuthStore();
+
     // Identity persistence
-    const studentName = location.state?.studentName || localStorage.getItem('std_name');
-    const rollNumber = location.state?.rollNumber || localStorage.getItem('std_roll');
-    const mobile = location.state?.mobile || localStorage.getItem('std_mobile');
-    const email = location.state?.email || localStorage.getItem('std_email');
-    const department = location.state?.department || localStorage.getItem('std_dept');
+    const studentName = location.state?.studentName || student?.name || localStorage.getItem('std_name');
+    const rollNumber = location.state?.rollNumber || student?.usn || localStorage.getItem('std_roll');
+    const mobile = location.state?.mobile || student?.mobile || localStorage.getItem('std_mobile');
+    const email = location.state?.email || student?.email || localStorage.getItem('std_email');
+    const department = location.state?.department || student?.department || localStorage.getItem('std_dept');
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [timeLeft, setTimeLeft] = useState(0);
@@ -87,7 +91,7 @@ const StudentExam = () => {
     // Identity Validation and Storage
     useEffect(() => {
         if (!studentName || !rollNumber) {
-            navigate('/');
+            navigate(student ? '/student/dashboard' : '/');
             return;
         }
         localStorage.setItem('std_name', studentName);
@@ -238,7 +242,7 @@ const StudentExam = () => {
             } catch (error) {
                 console.error('Failed to load assessment:', error);
                 alert(error.response?.data?.error || 'Failed to load assessment. Please verify your access key.');
-                navigate('/');
+                navigate(student ? '/student/dashboard' : '/');
             }
         };
 
@@ -793,7 +797,7 @@ const StudentExam = () => {
                             </button>
                         )}
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate(student ? '/student/dashboard' : '/')}
                             className="flex-1 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                         >
                             Exit Session <ArrowRight size={15} />

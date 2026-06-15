@@ -169,6 +169,12 @@ const CreateExam = () => {
     const { selectedCollegeId } = useCollegeStore();
     const redirectPath = user?.role === 'trainer' ? '/trainer/exams' : '/admin/exams';
 
+    useEffect(() => {
+        if (user && ['regional_manager', 'asst_rm'].includes(user.role)) {
+            navigate(redirectPath);
+        }
+    }, [user, navigate, redirectPath]);
+
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
     const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
     const effectiveCollegeId = selectedCollegeId || urlCollegeId;

@@ -3,17 +3,21 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io } from 'socket.io-client';
 import { 
-    LayoutDashboard, School, BookOpen, Users, FileText, BarChart3, 
-    LogOut, Menu, X, Bell, ChevronDown, Search, Send, Globe, ArrowLeftRight, Trophy, ShieldCheck, Database, FileSpreadsheet
+    LayoutDashboard, School, BookOpen, Users, User, FileText, BarChart3, 
+    LogOut, Menu, X, Bell, ChevronDown, Search, Send, Globe, ArrowLeftRight, Trophy, ShieldCheck, Database, FileSpreadsheet,
+    CalendarCheck, Briefcase, Lock, CheckSquare
 } from 'lucide-react';
 import { SocketContext } from '../contexts/SocketContext';
 import useAuthStore from '../store/authStore';
+import useStudentAuthStore from '../store/studentAuthStore';
 import useCollegeStore from '../store/collegeStore';
 import axios from 'axios';
 
 const MainLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const { user, logout, token } = useAuthStore();
+    const { student, logoutStudent, token: studentToken } = useStudentAuthStore();
+    const isStudent = !!student;
     const { selectedCollegeId, selectedCollegeName, setSelectedCollege, clearSelectedCollege } = useCollegeStore();
     const [colleges, setColleges] = useState([]);
     const navigate = useNavigate();
@@ -98,20 +102,35 @@ const MainLayout = ({ children }) => {
 
     const prefix = selectedCollegeId ? `/college/${selectedCollegeId}` : '';
 
-    const menuItems = user?.role === 'trainer' ? [
+    const ALL_ADMINS = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin'];
+    const isGlobalAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm'].includes(user?.role);
+    const isRegionalOrAsstRM = ['regional_manager', 'asst_rm'].includes(user?.role);
+
+    const menuItems = isStudent ? [
+        { label: 'Enter Exam', icon: FileText, path: '/student/dashboard?tab=enter-exam' },
+        { label: 'Exam History', icon: Trophy, path: '/student/dashboard?tab=exam-history' },
+        { label: 'Profile', icon: User, path: '/student/dashboard?tab=profile' },
+        { label: 'Attendance', icon: CalendarCheck, path: '/student/dashboard?tab=attendance' },
+        { label: 'To-do List', icon: CheckSquare, path: '/student/dashboard?tab=todo' },
+        { label: 'Account Security', icon: Lock, path: '/student/dashboard?tab=security' }
+    ] : user?.role === 'trainer' ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { label: 'Exams', icon: FileText, path: '/trainer/exams' },
         { label: 'Courses', icon: BookOpen, path: '/trainer/courses' },
         { label: 'My Batches', icon: Users, path: '/trainer/batches' },
-        { label: 'Training Logs', icon: FileText, path: '/trainer/logs' },
+        { label: 'Attendance', icon: CalendarCheck, path: '/trainer/attendance' },
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
         { label: 'Reports & Exports', icon: Database, path: '/reports' }
-    ] : (user?.role === 'super_admin' && !selectedCollegeId) ? [
+    ] : (isRegionalOrAsstRM && !selectedCollegeId) ? [
+        { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' }
+    ] : (isGlobalAdmin && !selectedCollegeId) ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { label: 'Colleges', icon: School, path: '/admin/colleges' },
         { label: 'Courses', icon: BookOpen, path: '/admin/courses' },
         { label: 'Trainers', icon: Users, path: '/admin/trainers' },
+        { label: 'Attendance', icon: CalendarCheck, path: '/admin/attendance' },
         { label: 'Training Logs', icon: FileSpreadsheet, path: '/admin/logs' },
+        ...(['super_admin', 'ops_admin'].includes(user?.role) ? [{ label: 'Admins & Staff', icon: ShieldCheck, path: '/admin/users' }] : []),
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
         { label: 'Reports & Exports', icon: Database, path: '/reports' }
     ] : [
@@ -120,11 +139,11 @@ const MainLayout = ({ children }) => {
         { label: 'Exams', icon: FileText, path: `${prefix}/admin/exams` },
         { label: 'Trainers', icon: Users, path: `${prefix}/admin/trainers` },
         { label: 'Batches', icon: Users, path: `${prefix}/admin/batches` },
+        { label: 'Attendance', icon: CalendarCheck, path: `${prefix}/admin/attendance` },
         { label: 'Allotments', icon: Send, path: `${prefix}/admin/allotments` },
         { label: 'Training Logs', icon: FileSpreadsheet, path: `${prefix}/admin/logs` },
         { label: 'Analytics', icon: BarChart3, path: `${prefix}/analytics` },
         { label: 'Reports & Exports', icon: Database, path: `${prefix}/reports` },
-        // { label: 'Question Bank', icon: Database, path: `${prefix}/admin/question-bank` }, // Temporarily disabled
         { label: 'Audit Log', icon: ShieldCheck, path: `${prefix}/admin/audit` },
     ];
 
@@ -142,24 +161,40 @@ const MainLayout = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        if (user?.role === 'super_admin') {
+        if (!token) return;
+        const isAnyAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin'].includes(user?.role);
+        if (isAnyAdmin || user?.role === 'trainer') {
             const fetchColleges = async () => {
                 try {
                     const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    setColleges(res.data.data);
+                    setColleges(res.data.data || []);
                 } catch (e) { console.error('Failed to load colleges'); }
             };
             fetchColleges();
         }
     }, [user, token]);
 
+    useEffect(() => {
+        if (isGlobalAdmin && !location.pathname.startsWith('/college/') && selectedCollegeId) {
+            clearSelectedCollege();
+        }
+    }, [location.pathname, user, selectedCollegeId, clearSelectedCollege]);
+
     const handleLogout = () => {
         logout();
         clearSelectedCollege();
         navigate('/console/admin');
     };
+
+    const displayAvatar = isStudent ? (student?.name?.charAt(0) || 'S') : (user?.firstName?.charAt(0) || 'U');
+    const displayName = isStudent ? student?.name : user?.firstName;
+    const displayRole = isStudent ? 'Student' : user?.role?.replace('_', ' ');
+    const displayLogout = isStudent ? () => {
+        logoutStudent();
+        navigate('/portal');
+    } : handleLogout;
 
     return (
         <SocketContext.Provider value={socketRef.current}>
@@ -203,7 +238,7 @@ const MainLayout = ({ children }) => {
                 </div>
 
                 {/* Context Badge */}
-                {sidebarOpen && (
+                {sidebarOpen && !isStudent && (
                     <div className="px-4 pt-4">
                         <div className={`px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 ${selectedCollegeId ? 'bg-blue-50 text-[#004AAD] border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
                             {selectedCollegeId ? <School size={14} /> : <Globe size={14} />}
@@ -215,7 +250,9 @@ const MainLayout = ({ children }) => {
                 {/* Nav Items */}
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
                     {menuItems.map((item) => {
-                        const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+                        const isActive = isStudent 
+                            ? (location.pathname + location.search) === item.path || (item.path === '/student/dashboard?tab=enter-exam' && !location.search)
+                            : location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
                         return (
                             <NavLink
                                 key={item.path} to={item.path}
@@ -232,7 +269,7 @@ const MainLayout = ({ children }) => {
                         );
                     })}
 
-                    {selectedCollegeId && user?.role === 'super_admin' && (
+                    {!isStudent && selectedCollegeId && isGlobalAdmin && (
                         <button 
                             onClick={() => { 
                                 clearSelectedCollege(); 
@@ -241,10 +278,11 @@ const MainLayout = ({ children }) => {
                                     setSidebarOpen(false);
                                 }
                             }}
+                            title={isRegionalOrAsstRM ? 'Switch College' : 'Switch to Global'}
                             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors mt-4"
                         >
                             <ArrowLeftRight size={18} />
-                            {sidebarOpen && <span>Switch to Global</span>}
+                            {sidebarOpen && <span>{isRegionalOrAsstRM ? 'Switch College' : 'Switch to Global'}</span>}
                         </button>
                     )}
                 </nav>
@@ -253,16 +291,16 @@ const MainLayout = ({ children }) => {
                 <div className="p-4 border-t border-slate-100">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#004AAD] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                            {user?.firstName?.charAt(0)}
+                            {displayAvatar}
                         </div>
                         {sidebarOpen && (
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-slate-900 truncate">{user?.firstName}</p>
-                                <p className="text-xs text-slate-400 capitalize">{user?.role?.replace('_', ' ')}</p>
+                                <p className="text-sm font-semibold text-slate-900 truncate">{displayName}</p>
+                                <p className="text-xs text-slate-400 capitalize">{displayRole}</p>
                             </div>
                         )}
                         {sidebarOpen && (
-                            <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Logout">
+                            <button onClick={displayLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Logout">
                                 <LogOut size={16} />
                             </button>
                         )}
@@ -279,29 +317,62 @@ const MainLayout = ({ children }) => {
                             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
 
-                        <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg w-80">
-                            <Search size={16} className="text-slate-400" />
-                            <input type="text" placeholder="Search..." className="bg-transparent text-sm outline-none w-full text-slate-600 placeholder:text-slate-400" />
-                        </div>
+                        {!isStudent && (
+                            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg w-80">
+                                <Search size={16} className="text-slate-400" />
+                                <input type="text" placeholder="Search..." className="bg-transparent text-sm outline-none w-full text-slate-600 placeholder:text-slate-400" />
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* College Selector */}
-                        {user?.role === 'super_admin' && (
-                            <select 
-                                className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-[#004AAD] text-slate-600 min-w-[200px]"
-                                value={selectedCollegeId || ''}
-                                onChange={(e) => {
-                                    if (!e.target.value) { clearSelectedCollege(); navigate('/dashboard'); }
-                                    else {
-                                        const college = colleges.find(c => c._id === e.target.value);
-                                        if (college) { setSelectedCollege(college._id, college.name); navigate(`/college/${college._id}/dashboard`); }
-                                    }
-                                }}
-                            >
-                                <option value="">All Colleges</option>
-                                {colleges.map(c => (<option key={c._id} value={c._id}>{c.name}</option>))}
-                            </select>
+                        {/* College Selector / Read-only Student Badge */}
+                        {isStudent && student?.collegeName && (
+                            <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 font-semibold flex items-center gap-2 max-w-[280px] md:max-w-[360px] truncate shadow-sm">
+                                <School size={15} className="text-[#004AAD] flex-shrink-0" />
+                                <span className="truncate">{student.collegeName}</span>
+                            </div>
+                        )}
+                        {!isStudent && (isGlobalAdmin || user?.role === 'trainer') && (
+                            selectedCollegeId ? (
+                                <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 font-semibold flex items-center gap-2 max-w-[280px] md:max-w-[360px] truncate shadow-sm">
+                                    <School size={15} className="text-[#004AAD] flex-shrink-0" />
+                                    <span className="truncate">{selectedCollegeName}</span>
+                                    <button 
+                                        onClick={() => { 
+                                            clearSelectedCollege(); 
+                                            if (isGlobalAdmin) navigate('/dashboard'); 
+                                        }}
+                                        className="ml-1 text-slate-400 hover:text-red-500 font-bold transition-colors cursor-pointer"
+                                        title="Clear college context"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ) : (
+                                <select 
+                                    className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-[#004AAD] text-slate-600 min-w-[200px]"
+                                    value={selectedCollegeId || ''}
+                                    onChange={(e) => {
+                                        if (!e.target.value) { 
+                                            clearSelectedCollege(); 
+                                            if (isGlobalAdmin) navigate('/dashboard'); 
+                                        }
+                                        else {
+                                            const college = colleges.find(c => c._id === e.target.value);
+                                            if (college) { 
+                                                setSelectedCollege(college._id, college.name, college.code); 
+                                                if (isGlobalAdmin) {
+                                                    navigate(`/college/${college._id}/dashboard`); 
+                                                }
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <option value="">All Colleges</option>
+                                    {colleges.map(c => (<option key={c._id} value={c._id}>{c.name}</option>))}
+                                </select>
+                            )
                         )}
 
                         {/* Notification Bell Dropdown */}

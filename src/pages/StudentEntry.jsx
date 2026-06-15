@@ -1,116 +1,90 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    ArrowRight, 
-    Loader2, 
-    Zap, 
-    Shield, 
-    Lock, 
-    FileText, 
-    Cpu, 
-    CheckCircle2, 
-    User, 
-    Smartphone, 
-    Mail, 
-    BookOpen 
+import {
+    ArrowRight,
+    Loader2,
+    Zap,
+    Shield,
+    Lock,
+    FileText,
+    Cpu,
+    CheckCircle2,
+    User,
+    Smartphone,
+    Mail,
+    BookOpen,
+    Eye,
+    EyeOff,
+    KeyRound
 } from 'lucide-react';
-import axios from 'axios';
 import { AlertModal } from '../components/Modals';
 import PublicLayout from '../layouts/PublicLayout';
 import DemoOne from '@/components/ui/demo';
 import { AuroraHero } from '@/components/ui/hero-2';
 import { motion } from 'framer-motion';
 import { LetterSwapForward, LetterSwapPingPong } from '@/components/ui/letter-swap';
+import useStudentAuthStore from '../store/studentAuthStore';
+import useAuthStore from '../store/authStore';
 
 const StudentEntry = () => {
-    const [step, setStep] = useState(1);
-    const [examKey, setExamKey] = useState('');
-    const [examData, setExamData] = useState(null);
-    const [settings, setSettings] = useState(null);
-    
-    // Form fields
-    const [studentName, setStudentName] = useState('');
-    const [rollNumber, setRollNumber] = useState('');
-    const [mobile, setMobile] = useState('');
-    const [email, setEmail] = useState('');
-    const [department, setDepartment] = useState('');
-    
-    const [loading, setLoading] = useState(false);
     const [alertState, setAlertState] = useState({ open: false });
     const navigate = useNavigate();
 
-    const fetchSettings = async (e) => {
+    // Student Login & Setup states
+    const [activeTab, setActiveTab] = useState('login'); // 'login', 'setup'
+    const [loginVal, setLoginVal] = useState('');
+    const [loginPw, setLoginPw] = useState('');
+    const [showLoginPw, setShowLoginPw] = useState(false);
+    const { loginStudent, setupPassword, loading: studentAuthLoading } = useStudentAuthStore();
+
+    const [setupUsn, setSetupUsn] = useState('');
+    const [setupIdentifier, setSetupIdentifier] = useState('');
+    const [setupPasswordVal, setSetupPasswordVal] = useState('');
+    const [setupConfirmPassword, setSetupConfirmPassword] = useState('');
+
+    const handleStudentLogin = async (e) => {
         e.preventDefault();
-        if (!examKey.trim()) {
-            setAlertState({ open: true, title: 'Key Required', message: 'Please enter a valid exam key.', type: 'info' });
+        if (!loginVal.trim() || !loginPw.trim()) {
+            setAlertState({ open: true, title: 'Details Required', message: 'Please enter your Mobile number/USN and Password.', type: 'info' });
             return;
         }
-        
-        setLoading(true);
-        try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const res = await axios.get(`${baseURL}/exam/settings/${examKey.trim()}`);
-            if (res.data.success) {
-                setSettings(res.data.data.settings);
-                setExamData({ title: res.data.data.title, isActive: res.data.data.isActive });
-                setStep(2);
-            }
-        } catch (error) {
-            setAlertState({ open: true, title: 'Access Denied', message: error.response?.data?.error || 'Invalid access key. Please try again.', type: 'error' });
-        } finally {
-            setLoading(false);
+
+        const res = await loginStudent(loginVal.trim(), loginPw.trim());
+        if (res.success) {
+            useAuthStore.getState().logout();
+            navigate('/student/dashboard');
+        } else {
+            setAlertState({ open: true, title: 'Authentication Failed', message: res.error || 'Login failed. Please check your details.', type: 'error' });
         }
     };
 
-    const handleProceed = async (e) => {
+    const handleStudentSetupPassword = async (e) => {
         e.preventDefault();
-        
-        // Validation
-        if (!studentName.trim() || !rollNumber.trim()) {
-            setAlertState({ open: true, title: 'Incomplete Details', message: 'Name and Roll Number are required.', type: 'info' });
+        if (!setupUsn.trim() || !setupIdentifier.trim() || !setupPasswordVal.trim() || !setupConfirmPassword.trim()) {
+            setAlertState({ open: true, title: 'Incomplete Fields', message: 'All fields are required.', type: 'info' });
             return;
         }
-        if (settings?.collectMobile && !mobile.trim()) {
-             setAlertState({ open: true, title: 'Mobile Required', message: 'Please provide your mobile number.', type: 'info' });
-             return;
-        }
-        if (settings?.collectEmail && !email.trim()) {
-             setAlertState({ open: true, title: 'Email Required', message: 'Please provide your email address.', type: 'info' });
-             return;
-        }
-        if (settings?.collectDepartment && !department.trim()) {
-             setAlertState({ open: true, title: 'Department Required', message: 'Please provide your department.', type: 'info' });
-             return;
+
+        if (setupPasswordVal !== setupConfirmPassword) {
+            setAlertState({ open: true, title: 'Password Mismatch', message: 'Passwords do not match.', type: 'error' });
+            return;
         }
 
-        setLoading(true);
-        try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const res = await axios.post(`${baseURL}/exam/validate-key`, {
-                key: examKey.trim(), rollNumber: rollNumber.trim()
-            });
-            
-            if (res.data.success) {
-                localStorage.setItem('std_name', studentName.trim());
-                localStorage.setItem('std_roll', rollNumber.trim());
-                if (mobile.trim()) localStorage.setItem('std_mobile', mobile.trim());
-                if (email.trim()) localStorage.setItem('std_email', email.trim());
-                if (department.trim()) localStorage.setItem('std_dept', department.trim());
-                
-                navigate(`/exam/${examKey.trim()}`, {
-                    state: { 
-                        studentName: studentName.trim(), 
-                        rollNumber: rollNumber.trim(), 
-                        mobile: mobile.trim(),
-                        email: email.trim(),
-                        department: department.trim()
-                    }
-                });
-            }
-        } catch (error) {
-            setAlertState({ open: true, title: 'Access Check Failed', message: error.response?.data?.error || 'Failed to authorize this device.', type: 'error' });
-        } finally {
-            setLoading(false);
+        if (setupPasswordVal.length < 6) {
+            setAlertState({ open: true, title: 'Password Too Short', message: 'Password must be at least 6 characters long.', type: 'error' });
+            return;
+        }
+
+        const res = await setupPassword(setupUsn.trim().toUpperCase(), setupIdentifier.trim(), setupPasswordVal.trim());
+        if (res.success) {
+            setAlertState({ open: true, title: 'Setup Complete', message: 'Your password has been configured successfully. You can now log in.', type: 'success' });
+            setActiveTab('login');
+            setSetupUsn('');
+            setSetupIdentifier('');
+            setSetupPasswordVal('');
+            setSetupConfirmPassword('');
+        } else {
+            setAlertState({ open: true, title: 'Setup Failed', message: res.error || 'Verification failed. USN and mobile/email mismatch.', type: 'error' });
         }
     };
 
@@ -123,7 +97,7 @@ const StudentEntry = () => {
                 <div className="max-w-7xl mx-auto w-full relative z-10">
                     <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-start">
                         <div className="space-y-8">
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5 }}
@@ -138,7 +112,7 @@ const StudentEntry = () => {
                             </motion.div>
 
                             <div className="space-y-6">
-                                <motion.h1 
+                                <motion.h1
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: 0.1 }}
@@ -146,7 +120,7 @@ const StudentEntry = () => {
                                 >
                                     Bridging Academia with Industry for career-ready professionals.
                                 </motion.h1>
-                                <motion.p 
+                                <motion.p
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6, delay: 0.2 }}
@@ -156,7 +130,7 @@ const StudentEntry = () => {
                                 </motion.p>
                             </div>
 
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.3 }}
@@ -168,8 +142,8 @@ const StudentEntry = () => {
                                     { label: 'Student reach', value: '272k+ Students', icon: User },
                                     { label: 'Trusted reviews', value: '5240+ Google reviews', icon: CheckCircle2 },
                                 ].map((stat, index) => (
-                                    <div 
-                                        key={index} 
+                                    <div
+                                        key={index}
                                         className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-md p-5 shadow-sm hover:scale-[1.03] hover:shadow-[0_12px_40px_0_rgba(0,74,173,0.06)] hover:border-[#004AAD]/20 hover:bg-white/80 transition-all duration-300 group"
                                     >
                                         <div className="flex items-center justify-between">
@@ -188,7 +162,7 @@ const StudentEntry = () => {
                                 ))}
                             </motion.div>
 
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.4 }}
@@ -199,8 +173,8 @@ const StudentEntry = () => {
                                     { title: 'Recruitment support', description: 'Placement-ready student services.', icon: Zap },
                                     { title: 'Corporate programs', description: 'Career assessments and upskilling.', icon: FileText },
                                 ].map((item, index) => (
-                                    <div 
-                                        key={index} 
+                                    <div
+                                        key={index}
                                         className="rounded-3xl border border-white/50 bg-white/40 backdrop-blur-md p-5 shadow-sm hover:scale-[1.03] hover:shadow-[0_12px_40px_0_rgba(0,74,173,0.06)] hover:border-[#004AAD]/20 hover:bg-white/80 transition-all duration-300 group flex flex-col h-full"
                                     >
                                         <div className="flex items-center gap-2 mb-2">
@@ -221,118 +195,149 @@ const StudentEntry = () => {
                             <div className="bg-white/80 border border-white/60 shadow-[0_24px_64px_0_rgba(0,74,173,0.06)] rounded-[2.5rem] overflow-hidden backdrop-blur-xl">
                                 <div className="bg-gradient-to-r from-[#004AAD] to-[#003580] px-10 py-9">
                                     <h2 className="text-3xl font-extrabold text-white tracking-tight">Student Portal</h2>
-                                    <p className="mt-2.5 text-sm text-blue-100/90 leading-relaxed">Enter your exam access key to continue.</p>
+                                    <p className="mt-2.5 text-sm text-blue-100/90 leading-relaxed">
+                                        {activeTab === 'login' ? 'Sign in to access your placement dashboard.' : 'Set up your placement profile password.'}
+                                    </p>
                                 </div>
+
                                 <div className="p-10 space-y-8">
-                                    {step === 1 && (
-                                        <form onSubmit={fetchSettings} className="space-y-6">
+                                    {activeTab === 'login' && (
+                                        <form onSubmit={handleStudentLogin} className="space-y-6">
                                             <div className="space-y-2.5">
-                                                <label className="text-sm font-semibold text-slate-700 block">Exam access key</label>
-                                                <input
-                                                    type="text"
-                                                    required
-                                                    placeholder="Enter access key"
-                                                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
-                                                    value={examKey}
-                                                    onChange={(e) => setExamKey(e.target.value.toUpperCase())}
-                                                />
-                                            </div>
-
-                                            <button
-                                                type="submit"
-                                                disabled={loading || !examKey.trim()}
-                                                className="w-full py-4 bg-[#004AAD] text-white rounded-2xl text-base font-bold hover:bg-[#003580] active:scale-[0.98] transition duration-200 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {loading ? 'Verifying key...' : 'Verify access key'}
-                                            </button>
-                                        </form>
-                                    )}
-
-                                    {step === 2 && (
-                                        <form onSubmit={handleProceed} className="space-y-6">
-                                            {examData?.title && (
-                                                <div className="rounded-2xl bg-blue-50 border border-blue-100 p-5 shadow-sm">
-                                                    <p className="text-xs text-[#004AAD] uppercase tracking-[0.18em] font-bold">Exam</p>
-                                                    <p className="mt-2 text-base font-semibold text-slate-800 leading-snug">{examData.title}</p>
-                                                    {!examData.isActive && (
-                                                        <p className="mt-2 text-sm font-medium text-amber-600">Session is not currently active.</p>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            <div className="space-y-2.5">
-                                                <label className="text-sm font-semibold text-slate-700 block">Full legal name</label>
-                                                <input
-                                                    type="text"
-                                                    required
-                                                    placeholder="Enter your full name"
-                                                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
-                                                    value={studentName}
-                                                    onChange={(e) => setStudentName(e.target.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2.5">
-                                                <label className="text-sm font-semibold text-slate-700 block">Roll number / ID</label>
-                                                <input
-                                                    type="text"
-                                                    required
-                                                    placeholder="e.g. 21CS101"
-                                                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
-                                                    value={rollNumber}
-                                                    onChange={(e) => setRollNumber(e.target.value.toUpperCase())}
-                                                />
-                                            </div>
-
-                                            {settings?.collectMobile && (
-                                                <div className="space-y-2.5">
-                                                    <label className="text-sm font-semibold text-slate-700 block">Mobile number</label>
-                                                    <input
-                                                        type="tel"
-                                                        required
-                                                        placeholder="10-digit number"
-                                                        className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
-                                                        value={mobile}
-                                                        onChange={(e) => setMobile(e.target.value)}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {settings?.collectEmail && (
-                                                <div className="space-y-2.5">
-                                                    <label className="text-sm font-semibold text-slate-700 block">Email address</label>
-                                                    <input
-                                                        type="email"
-                                                        required
-                                                        placeholder="student@institution.edu"
-                                                        className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
-                                                        value={email}
-                                                        onChange={(e) => setEmail(e.target.value)}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {settings?.collectDepartment && (
-                                                <div className="space-y-2.5">
-                                                    <label className="text-sm font-semibold text-slate-700 block">Department / Stream</label>
+                                                <label className="text-sm font-semibold text-slate-700 block">Registered Mobile Number</label>
+                                                <div className="relative group">
+                                                    <Smartphone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
                                                     <input
                                                         type="text"
                                                         required
-                                                        placeholder="e.g. Computer Science"
-                                                        className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
-                                                        value={department}
-                                                        onChange={(e) => setDepartment(e.target.value)}
+                                                        placeholder="e.g. 9876543210"
+                                                        className="w-full pl-12 pr-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
+                                                        value={loginVal}
+                                                        onChange={(e) => setLoginVal(e.target.value)}
                                                     />
                                                 </div>
-                                            )}
+                                            </div>
+
+                                            <div className="space-y-2.5">
+                                                <label className="text-sm font-semibold text-slate-700 block">Password</label>
+                                                <div className="relative group">
+                                                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
+                                                    <input
+                                                        type={showLoginPw ? 'text' : 'password'}
+                                                        required
+                                                        placeholder="••••••••"
+                                                        className="w-full pl-12 pr-12 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
+                                                        value={loginPw}
+                                                        onChange={(e) => setLoginPw(e.target.value)}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowLoginPw(!showLoginPw)}
+                                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#004AAD] transition-colors p-1"
+                                                    >
+                                                        {showLoginPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                    </button>
+                                                </div>
+                                                <p className="text-slate-400 text-xs mt-1.5 leading-relaxed font-semibold">
+                                                    * Default password is <code className="bg-slate-100 text-blue-800 px-1 py-0.5 rounded font-mono">collegecode@3!</code>
+                                                </p>
+                                            </div>
 
                                             <button
                                                 type="submit"
-                                                disabled={loading}
-                                                className="w-full py-4 bg-[#004AAD] text-white rounded-2xl text-base font-bold hover:bg-[#003580] active:scale-[0.98] transition duration-200 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled={studentAuthLoading || !loginVal.trim() || !loginPw.trim()}
+                                                className="w-full py-4 bg-[#004AAD] text-white rounded-2xl text-base font-bold hover:bg-[#003580] active:scale-[0.98] transition duration-200 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                             >
-                                                {loading ? 'Authorizing...' : 'Enter assessment environment'}
+                                                {studentAuthLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+                                                Sign In to Dashboard <ArrowRight size={16} />
                                             </button>
+
+                                            <div className="text-center pt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveTab('setup')}
+                                                    className="text-sm font-semibold text-[#004AAD] hover:underline cursor-pointer"
+                                                >
+                                                    First-time logging in? Set up password
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+
+                                    {activeTab === 'setup' && (
+                                        <form onSubmit={handleStudentSetupPassword} className="space-y-6">
+                                            <div className="space-y-2.5">
+                                                <label className="text-sm font-semibold text-slate-700 block">Student USN</label>
+                                                <div className="relative group">
+                                                    <KeyRound size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        placeholder="e.g. 1CIT22CS001"
+                                                        className="w-full pl-12 pr-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm uppercase font-bold"
+                                                        value={setupUsn}
+                                                        onChange={(e) => setSetupUsn(e.target.value.toUpperCase())}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2.5">
+                                                <label className="text-sm font-semibold text-slate-700 block">Registered Mobile or Email</label>
+                                                <div className="relative group">
+                                                    <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        placeholder="Registered email or phone number"
+                                                        className="w-full pl-12 pr-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
+                                                        value={setupIdentifier}
+                                                        onChange={(e) => setSetupIdentifier(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2.5">
+                                                <label className="text-sm font-semibold text-slate-700 block">Create Password</label>
+                                                <input
+                                                    type="password"
+                                                    required
+                                                    placeholder="At least 6 characters"
+                                                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
+                                                    value={setupPasswordVal}
+                                                    onChange={(e) => setSetupPasswordVal(e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2.5">
+                                                <label className="text-sm font-semibold text-slate-700 block">Confirm Password</label>
+                                                <input
+                                                    type="password"
+                                                    required
+                                                    placeholder="Re-enter password"
+                                                    className="w-full px-5 py-4 bg-slate-50/50 border border-slate-200/80 rounded-2xl text-base text-slate-900 placeholder:text-slate-400 focus:border-[#004AAD] focus:bg-white focus:ring-4 focus:ring-blue-100 outline-none transition duration-200 shadow-sm"
+                                                    value={setupConfirmPassword}
+                                                    onChange={(e) => setSetupConfirmPassword(e.target.value)}
+                                                />
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                disabled={studentAuthLoading || !setupUsn.trim() || !setupIdentifier.trim() || !setupPasswordVal.trim()}
+                                                className="w-full py-4 bg-[#004AAD] text-white rounded-2xl text-base font-bold hover:bg-[#003580] active:scale-[0.98] transition duration-200 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                            >
+                                                {studentAuthLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+                                                Configure Profile Password <ArrowRight size={16} />
+                                            </button>
+
+                                            <div className="text-center pt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveTab('login')}
+                                                    className="text-sm font-semibold text-[#004AAD] hover:underline cursor-pointer"
+                                                >
+                                                    Back to Student Login
+                                                </button>
+                                            </div>
                                         </form>
                                     )}
 

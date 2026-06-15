@@ -8,8 +8,17 @@ import { Loader2 } from 'lucide-react';
 const CollegeContextWrapper = () => {
     const { collegeId } = useParams();
     const { token } = useAuthStore();
-    const { selectedCollegeId, setSelectedCollege } = useCollegeStore();
+    const { selectedCollegeId, selectedCollegeName, selectedCollegeCode, setSelectedCollege } = useCollegeStore();
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (selectedCollegeId === collegeId && selectedCollegeCode) {
+            document.title = `${selectedCollegeCode} X ETH`;
+        }
+        return () => {
+            document.title = 'Ethnotech Assessment';
+        };
+    }, [collegeId, selectedCollegeId, selectedCollegeCode]);
 
     useEffect(() => {
         const loadCollege = async () => {
@@ -17,7 +26,8 @@ const CollegeContextWrapper = () => {
                 setLoading(false);
                 return;
             }
-            if (selectedCollegeId === collegeId) {
+            const currentStore = useCollegeStore.getState();
+            if (currentStore.selectedCollegeId === collegeId && currentStore.selectedCollegeCode) {
                 setLoading(false);
                 return;
             }
@@ -29,7 +39,7 @@ const CollegeContextWrapper = () => {
                 if (res.data.success) {
                     const matched = res.data.data.find(c => c._id === collegeId);
                     if (matched) {
-                        setSelectedCollege(matched._id, matched.name);
+                        setSelectedCollege(matched._id, matched.name, matched.code);
                     }
                 }
             } catch (e) {
@@ -44,7 +54,7 @@ const CollegeContextWrapper = () => {
         } else {
             setLoading(false);
         }
-    }, [collegeId, token, selectedCollegeId, setSelectedCollege]);
+    }, [collegeId, token, setSelectedCollege]);
 
     if (loading) {
         return (
