@@ -411,7 +411,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
 
 const Courses = () => {
     const { user, token } = useAuthStore(); 
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
     const { selectedCollegeId, selectedCollegeName, selectedCollegeCode } = useCollegeStore();
     const location = useLocation();
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);

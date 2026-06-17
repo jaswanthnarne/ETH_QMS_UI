@@ -47,7 +47,7 @@ const Colleges = () => {
     const [selectedCollege, setSelectedCollege] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const { token, user } = useAuthStore();
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
     const fetchColleges = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } }); setColleges(res.data.data); } catch (e) { console.error(e); } finally { setLoading(false); } };
     useEffect(() => { fetchColleges(); }, []);

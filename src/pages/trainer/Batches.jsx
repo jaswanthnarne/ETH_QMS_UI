@@ -274,8 +274,8 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
 const Batches = () => {
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
-    const isAdmin = ['super_admin', 'college_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm'].includes(user?.role);
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isAdmin = ['super_admin', 'college_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'placement'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
     const location = useLocation();
     const [batches, setBatches] = useState([]);
     const [colleges, setColleges] = useState([]);

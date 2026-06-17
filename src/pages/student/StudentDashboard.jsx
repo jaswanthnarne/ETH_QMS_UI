@@ -60,7 +60,7 @@ const StudentDashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['dashboard', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history'].includes(tab)) {
+        if (tab && ['dashboard', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location.search]);
@@ -81,6 +81,8 @@ const StudentDashboard = () => {
     const [personalName, setPersonalName] = useState('');
     const [personalEmail, setPersonalEmail] = useState('');
     const [personalMobile, setPersonalMobile] = useState('');
+    const [personalCgpa, setPersonalCgpa] = useState('');
+    const [personalBacklogs, setPersonalBacklogs] = useState('');
     const [skillsInput, setSkillsInput] = useState('');
     const [skillsList, setSkillsList] = useState([]);
     const [capabilities, setCapabilities] = useState('');
@@ -124,6 +126,8 @@ const StudentDashboard = () => {
             setPersonalName(student.name || '');
             setPersonalEmail(student.email || '');
             setPersonalMobile(student.mobile || '');
+            setPersonalCgpa(student.cgpa !== undefined ? student.cgpa : '');
+            setPersonalBacklogs(student.backlogs !== undefined ? student.backlogs : '');
             setSkillsList(student.skills || []);
             setCapabilities(student.capabilities || '');
             if (student.jobPreferences) {
@@ -204,7 +208,9 @@ const StudentDashboard = () => {
         const data = {
             name: personalName.trim(),
             email: personalEmail.trim(),
-            mobile: personalMobile.trim()
+            mobile: personalMobile.trim(),
+            cgpa: personalCgpa !== '' ? parseFloat(personalCgpa) : 0,
+            backlogs: personalBacklogs !== '' ? parseInt(personalBacklogs) : 0
         };
         const res = await updateProfile(data);
         setProfileSaving(false);
@@ -866,6 +872,32 @@ const StudentDashboard = () => {
                                                     className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={personalMobile}
                                                     onChange={(e) => setPersonalMobile(e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">CGPA</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    max="10"
+                                                    placeholder="Enter your CGPA (e.g. 8.5)"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    value={personalCgpa}
+                                                    onChange={(e) => setPersonalCgpa(e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Active Backlogs</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    placeholder="Enter active backlogs"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    value={personalBacklogs}
+                                                    onChange={(e) => setPersonalBacklogs(e.target.value)}
                                                 />
                                             </div>
                                         </div>
@@ -1724,6 +1756,313 @@ const StudentDashboard = () => {
                 message={alertState.message}
                 type={alertState.type}
             />
+
+            {activeTab === 'placement' && (
+                <StudentPlacementTab token={token} student={student} setAlertState={setAlertState} />
+            )}
+        </div>
+    );
+};
+
+const StudentPlacementTab = ({ token, student, setAlertState }) => {
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [applyingId, setApplyingId] = useState(null);
+    const [embedFormJob, setEmbedFormJob] = useState(null);
+
+    const getEmbedUrl = (url) => {
+        if (!url) return '';
+        let formattedUrl = url.trim();
+        if (!/^https?:\/\//i.test(formattedUrl)) {
+            formattedUrl = 'https://' + formattedUrl;
+        }
+        try {
+            if (formattedUrl.includes('docs.google.com/forms')) {
+                const parsedUrl = new URL(formattedUrl);
+                if (parsedUrl.pathname.endsWith('/edit')) {
+                    parsedUrl.pathname = parsedUrl.pathname.slice(0, -5) + '/viewform';
+                } else if (parsedUrl.pathname.endsWith('/formResponse')) {
+                    parsedUrl.pathname = parsedUrl.pathname.slice(0, -13) + '/viewform';
+                } else if (!parsedUrl.pathname.endsWith('/viewform')) {
+                    parsedUrl.pathname = parsedUrl.pathname.replace(/\/?$/, '/viewform');
+                }
+                parsedUrl.searchParams.set('embedded', 'true');
+                return parsedUrl.toString();
+            }
+            return formattedUrl;
+        } catch (e) {
+            return formattedUrl;
+        }
+    };
+
+    const fetchJobs = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/placement/student/jobs`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setJobs(res.data.data || []);
+            }
+        } catch (e) {
+            console.error('Failed to load placement job opportunities', e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (token) {
+            fetchJobs();
+        }
+    }, [token]);
+
+    const handleApply = async (jobId) => {
+        try {
+            setApplyingId(jobId);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/placement/student/jobs/${jobId}/apply`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setAlertState({
+                    open: true,
+                    title: 'Application Successful',
+                    message: res.data.message || 'You have successfully applied for this job drive.',
+                    type: 'success'
+                });
+                fetchJobs();
+            }
+        } catch (e) {
+            setAlertState({
+                open: true,
+                title: 'Application Failed',
+                message: e.response?.data?.error || 'Failed to submit application.',
+                type: 'error'
+            });
+        } finally {
+            setApplyingId(null);
+        }
+    };
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'shortlisted': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+            case 'rejected': return 'bg-rose-50 text-rose-700 border-rose-100';
+            case 'screening_passed': return 'bg-teal-50 text-teal-700 border-teal-100';
+            case 'screening_failed': return 'bg-orange-50 text-orange-700 border-orange-100';
+            case 'sent_to_company': return 'bg-purple-50 text-purple-700 border-purple-100';
+            default: return 'bg-blue-50 text-blue-700 border-blue-100';
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                <span className="text-slate-400 text-sm font-semibold ml-2">Loading placement drives...</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-center gap-3">
+                <div className="p-3 bg-blue-50 text-[#004AAD] rounded-2xl">
+                    <Briefcase size={22} />
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-slate-800">Job Placements & Campus Drives</h3>
+                    <p className="text-slate-500 text-xs sm:text-sm">Opportunities targeted to your batch. Check your eligibility rules and apply.</p>
+                </div>
+            </div>
+
+            {jobs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    <Briefcase className="text-slate-400 mb-2.5" size={36} />
+                    <p className="text-slate-700 font-semibold text-sm">No Campus Drives Active</p>
+                    <p className="text-slate-400 text-xs mt-1">There are no active placement drives published for your batch currently.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {jobs.map((job) => {
+                        const isEligible = job.eligibility?.eligible;
+                        const reasons = job.eligibility?.reasons || [];
+                        const isApplied = job.isApplied;
+
+                        return (
+                            <div key={job._id} className="border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-[#004AAD]/20 transition-all duration-300 bg-white flex flex-col justify-between group">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <span className="text-[10px] font-semibold text-[#004AAD] uppercase bg-blue-50 px-2.5 py-1 rounded-full tracking-wider">
+                                            {job.company}
+                                        </span>
+                                        {isApplied ? (
+                                            <span className={`border text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${getStatusBadge(job.applicationStatus)}`}>
+                                                Applied • {job.applicationStatus?.replace('_', ' ')}
+                                            </span>
+                                        ) : isEligible ? (
+                                            <span className="bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full">Eligible</span>
+                                        ) : (
+                                            <span className="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full">Ineligible</span>
+                                        )}
+                                    </div>
+
+                                    <h4 className="text-base font-semibold text-slate-800 group-hover:text-[#004AAD] transition-colors leading-snug">
+                                        {job.title}
+                                    </h4>
+
+                                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{job.description}</p>
+
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-[11px] font-semibold text-slate-400">
+                                        {job.location && <span className="flex items-center gap-1"><MapPin size={12} /> {job.location}</span>}
+                                        {job.salaryPackage && <span className="flex items-center gap-1"><DollarSign size={12} /> Package: {job.salaryPackage}</span>}
+                                    </div>
+
+                                    {/* Criteria Rules UI */}
+                                    <div className="p-3 bg-slate-50 rounded-xl space-y-1.5 text-[11px] text-slate-600 font-semibold border border-slate-100">
+                                        <div className="flex justify-between">
+                                            <span>Min CGPA Requirement:</span>
+                                            <span className="text-slate-800">{job.rules?.minCgpa !== null ? job.rules.minCgpa : 'Open'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Max Active Backlogs:</span>
+                                            <span className="text-slate-800">{job.rules?.maxBacklogs !== null ? job.rules.maxBacklogs : 'Open'}</span>
+                                        </div>
+                                        {job.rules?.allowedDepartments && job.rules.allowedDepartments.length > 0 && (
+                                            <div className="flex justify-between">
+                                                <span>Eligible Branches:</span>
+                                                <span className="text-slate-800">{job.rules.allowedDepartments.join(', ')}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Warnings if ineligible */}
+                                    {!isEligible && (
+                                        <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl space-y-1 text-rose-700 text-xs font-semibold">
+                                            <p className="flex items-center gap-1"><AlertTriangle size={12} /> Eligibility Warnings:</p>
+                                            <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
+                                                {reasons.map((r, i) => <li key={i}>{r}</li>)}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-5 pt-3 border-t border-slate-50">
+                                    {isApplied ? (
+                                        <div className="text-center py-2 bg-slate-50 text-slate-400 text-xs font-bold rounded-xl border border-slate-100">
+                                            Application Submitted
+                                        </div>
+                                    ) : !isEligible ? (
+                                        <div className="text-center py-2 bg-slate-50 text-slate-400 text-xs font-bold rounded-xl border border-slate-100 cursor-not-allowed">
+                                            Criteria Not Met
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                if (job.googleFormUrl) {
+                                                    setEmbedFormJob(job);
+                                                } else {
+                                                    handleApply(job._id);
+                                                }
+                                            }}
+                                            disabled={applyingId === job._id}
+                                            className="w-full py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
+                                        >
+                                            {applyingId === job._id ? (
+                                                <Loader2 className="animate-spin" size={14} />
+                                            ) : (
+                                                <span>Apply for Role</span>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Google Form Embed Modal */}
+            <AnimatePresence>
+                {embedFormJob && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setEmbedFormJob(null)}
+                            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
+                        />
+
+                        {/* Modal Dialog */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white rounded-[2rem] border border-slate-100 shadow-2xl w-full max-w-4xl overflow-hidden z-10 flex flex-col max-h-[90vh] font-sans text-left"
+                        >
+                            <div className="px-6 py-5 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                        <Briefcase size={18} className="text-[#004AAD]" />
+                                        Application Form: {embedFormJob.company}
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">Role: {embedFormJob.title}</p>
+                                </div>
+                                <button 
+                                    onClick={() => setEmbedFormJob(null)}
+                                    className="text-slate-400 hover:text-slate-650 font-semibold text-xl p-1"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            <div className="p-6 space-y-4 flex-1 overflow-y-auto flex flex-col">
+                                <div className="p-3.5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-[#004AAD] font-medium leading-relaxed">
+                                    <strong>Instructions:</strong> Please fill out and submit the Google Form displayed below. After completing the form, you <strong>must</strong> click the <strong>"Confirm & Complete Application"</strong> button at the bottom to register your application in the placement system.
+                                </div>
+
+                                <div className="flex-1 w-full bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden relative min-h-[450px]">
+                                    <iframe 
+                                        src={getEmbedUrl(embedFormJob.googleFormUrl)} 
+                                        width="100%" 
+                                        height="100%" 
+                                        className="absolute inset-0 border-0 w-full h-full"
+                                        title="Google Form" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <span className="text-[11px] text-slate-500 font-semibold">
+                                    Your profile details and resume will be shared with the recruiter.
+                                </span>
+                                <div className="flex items-center gap-3 justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEmbedFormJob(null)}
+                                        className="px-5 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-650 font-semibold text-xs rounded-xl cursor-pointer transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            const id = embedFormJob._id;
+                                            setEmbedFormJob(null);
+                                            await handleApply(id);
+                                        }}
+                                        className="px-6 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/10 cursor-pointer transition"
+                                    >
+                                        Confirm & Complete Application
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

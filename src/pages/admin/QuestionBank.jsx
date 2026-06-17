@@ -44,7 +44,7 @@ const BloomsBadge = ({ level }) => {
 const QuestionBank = () => {
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     const headers = { Authorization: `Bearer ${token}` };
 

@@ -35,6 +35,8 @@ import UsersPage from './pages/admin/Users';
 import CollegeContextWrapper from './components/CollegeContextWrapper';
 import CollegeDetail from './pages/admin/CollegeDetail';
 import BatchDetail from './pages/admin/BatchDetail';
+import PlacementDashboard from './pages/placement/PlacementDashboard';
+import JobApplicants from './pages/placement/JobApplicants';
 import NotFound from './pages/NotFound';
 
 // Attendance Pages
@@ -45,7 +47,7 @@ import AdminAttendance from './pages/admin/AdminAttendance';
 
 
 
-const ALL_ADMINS = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin'];
+const ALL_ADMINS = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin', 'placement'];
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { isAuthenticated, user } = useAuthStore();
@@ -196,6 +198,16 @@ function App() {
                         <MainLayout><UsersPage /></MainLayout>
                     </ProtectedRoute>
                 } />
+                <Route path="/placement/dashboard" element={
+                    <ProtectedRoute allowedRoles={['placement', 'super_admin', 'ops_admin']}>
+                        <MainLayout><PlacementDashboard /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/placement/jobs/:jobId/applicants" element={
+                    <ProtectedRoute allowedRoles={['placement', 'super_admin', 'ops_admin']}>
+                        <MainLayout><JobApplicants /></MainLayout>
+                    </ProtectedRoute>
+                } />
 
 
                 {/* College-specific Unique Routes */}
@@ -279,6 +291,16 @@ function App() {
                     <Route path="admin/attendance" element={
                         <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><AdminAttendance /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="placement/dashboard" element={
+                        <ProtectedRoute allowedRoles={['placement', 'super_admin', 'ops_admin']}>
+                            <MainLayout><PlacementDashboard /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="placement/jobs/:jobId/applicants" element={
+                        <ProtectedRoute allowedRoles={['placement', 'super_admin', 'ops_admin']}>
+                            <MainLayout><JobApplicants /></MainLayout>
                         </ProtectedRoute>
                     } />
 

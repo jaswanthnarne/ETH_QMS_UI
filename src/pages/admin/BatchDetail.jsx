@@ -14,7 +14,7 @@ import { AlertModal } from '../../components/Modals';
 // ─── Student Modal ────────────────────────────────────────────────────────────
 const StudentModal = ({ student, isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
-        name: '', usn: '', email: '', mobile: '', semester: '', department: '', division: '', status: 'active'
+        name: '', usn: '', email: '', mobile: '', semester: '', department: '', division: '', status: 'active', cgpa: '', backlogs: ''
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -30,11 +30,13 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                 semester: student.semester || '',
                 department: student.department || '',
                 division: student.division || '',
-                status: student.status || 'active'
+                status: student.status || 'active',
+                cgpa: student.cgpa !== undefined ? student.cgpa : '',
+                backlogs: student.backlogs !== undefined ? student.backlogs : ''
             });
         } else {
             setFormData({
-                name: '', usn: '', email: '', mobile: '', semester: '', department: '', division: '', status: 'active'
+                name: '', usn: '', email: '', mobile: '', semester: '', department: '', division: '', status: 'active', cgpa: '', backlogs: ''
             });
         }
     }, [student, isOpen]);
@@ -150,6 +152,29 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                         </div>
                     </div>
 
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">CGPA</label>
+                            <input 
+                                type="number" step="0.01" min="0" max="10"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                placeholder="e.g. 8.5"
+                                value={formData.cgpa}
+                                onChange={e => setFormData({ ...formData, cgpa: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Active Backlogs</label>
+                            <input 
+                                type="number" min="0"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                placeholder="e.g. 0"
+                                value={formData.backlogs}
+                                onChange={e => setFormData({ ...formData, backlogs: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
                     {student && (
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
@@ -183,7 +208,7 @@ const BatchDetail = () => {
     const { token, user } = useAuthStore();
     const fileInputRef = useRef(null);
     const location = useLocation();
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
     const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
@@ -219,9 +244,9 @@ const BatchDetail = () => {
             // 1. Title Row
             sheet.addRow([`Student Roster — ${batch.batchName || 'Batch'}`]);
             sheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
-            sheet.mergeCells(1, 1, 1, 9);
+            sheet.mergeCells(1, 1, 1, 11);
             sheet.getRow(1).height = 28;
-
+ 
             // 2. Metadata Row
             const trainerName = batch.trainerId 
                 ? `${batch.trainerId.firstName || ''} ${batch.trainerId.lastName || ''}`.trim() 
@@ -229,19 +254,19 @@ const BatchDetail = () => {
             const metadataText = `College: ${batch.collegeId?.name || '—'}   |   Course: ${batch.courseId?.name || '—'}   |   Department: ${batch.department || '—'}${trainerName ? `   |   Trainer: ${trainerName}` : ''}   |   Generated: ${new Date().toLocaleDateString('en-IN')}`;
             sheet.addRow([metadataText]);
             sheet.getRow(2).font = { size: 10, italic: true, color: { argb: 'FF475569' } };
-            sheet.mergeCells(2, 1, 2, 9);
+            sheet.mergeCells(2, 1, 2, 11);
             sheet.getRow(2).height = 20;
-
+ 
             sheet.addRow([]); // Spacer
-
+ 
             // 3. Headers
-            const excelHeaders = ['S.No', 'Student Name', 'USN', 'Department', 'Semester', 'Division', 'Email', 'Mobile', 'Status'];
+            const excelHeaders = ['S.No', 'Student Name', 'USN', 'Department', 'Semester', 'Division', 'Email', 'Mobile', 'CGPA', 'Backlogs', 'Status'];
             const headerRow = sheet.addRow(excelHeaders);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
             headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRow.height = 28;
-
+ 
             // 4. Data Rows
             students.forEach((s, idx) => {
                 const row = sheet.addRow([
@@ -253,6 +278,8 @@ const BatchDetail = () => {
                     s.division || '—',
                     s.email || '—',
                     s.mobile || '—',
+                    s.cgpa !== undefined ? s.cgpa : '—',
+                    s.backlogs !== undefined ? s.backlogs : '—',
                     s.status || 'active'
                 ]);
                 row.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -261,7 +288,7 @@ const BatchDetail = () => {
                 row.getCell(3).font = { name: 'Inter', size: 10 };
                 row.getCell(7).alignment = { vertical: 'middle', horizontal: 'left' };
                 row.height = 22;
-
+ 
                 const rowBg = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
                 row.eachCell((cell) => {
                     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowBg } };
@@ -272,7 +299,7 @@ const BatchDetail = () => {
                     };
                 });
             });
-
+ 
             sheet.getColumn(1).width = 6;
             sheet.getColumn(2).width = 28;
             sheet.getColumn(3).width = 18;
@@ -281,7 +308,9 @@ const BatchDetail = () => {
             sheet.getColumn(6).width = 12;
             sheet.getColumn(7).width = 28;
             sheet.getColumn(8).width = 18;
-            sheet.getColumn(9).width = 12;
+            sheet.getColumn(9).width = 10;
+            sheet.getColumn(10).width = 10;
+            sheet.getColumn(11).width = 12;
 
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -389,6 +418,8 @@ const BatchDetail = () => {
             semester: '',
             department: '',
             division: '',
+            cgpa: '',
+            backlogs: '',
             error: 'Name and USN are required',
             originalUsn: '',
             originalError: null
@@ -717,6 +748,8 @@ const BatchDetail = () => {
                                     <th className="px-4 py-3 w-[90px]">Division</th>
                                     <th className="px-4 py-3">Email</th>
                                     <th className="px-4 py-3">Mobile</th>
+                                    <th className="px-4 py-3 w-[80px]">CGPA</th>
+                                    <th className="px-4 py-3 w-[80px]">Backlogs</th>
                                     <th className="px-4 py-3 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -845,6 +878,39 @@ const BatchDetail = () => {
                                                     />
                                                 ) : (
                                                     <span className="font-mono text-slate-500">{s.mobile || '—'}</span>
+                                                )}
+                                            </td>
+
+                                            {/* CGPA */}
+                                            <td className="px-4 py-3">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0" max="10"
+                                                        value={editFormData.cgpa !== undefined ? editFormData.cgpa : ''}
+                                                        onChange={e => setEditFormData(prev => ({ ...prev, cgpa: e.target.value }))}
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        placeholder="CGPA"
+                                                    />
+                                                ) : (
+                                                    <span className="font-semibold text-slate-650">{s.cgpa !== undefined ? s.cgpa : '—'}</span>
+                                                )}
+                                            </td>
+
+                                            {/* Backlogs */}
+                                            <td className="px-4 py-3">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        value={editFormData.backlogs !== undefined ? editFormData.backlogs : ''}
+                                                        onChange={e => setEditFormData(prev => ({ ...prev, backlogs: e.target.value }))}
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        placeholder="Backlogs"
+                                                    />
+                                                ) : (
+                                                    <span className="font-semibold text-slate-650">{s.backlogs !== undefined ? s.backlogs : '—'}</span>
                                                 )}
                                             </td>
 
@@ -1018,6 +1084,8 @@ const BatchDetail = () => {
                                 <th className="px-5 py-3">Department</th>
                                 <th className="px-5 py-3">Semester</th>
                                 <th className="px-5 py-3">Division</th>
+                                <th className="px-5 py-3">CGPA</th>
+                                <th className="px-5 py-3">Backlogs</th>
                                 <th className="px-5 py-3">Contact</th>
                                 <th className="px-5 py-3">Status</th>
                                 <th className="px-5 py-3 text-right">Actions</th>
@@ -1026,13 +1094,13 @@ const BatchDetail = () => {
                         <tbody className="divide-y divide-slate-100 text-sm">
                             {students.length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="px-5 py-12 text-center text-slate-400 font-medium">
+                                    <td colSpan="10" className="px-5 py-12 text-center text-slate-400 font-medium">
                                         No students in this batch yet. Download the template or add manually.
                                     </td>
                                 </tr>
                             ) : filteredStudents.length === 0 ? (
                                 <tr>
-                                    <td colSpan="8" className="px-5 py-12 text-center text-slate-400 font-medium">
+                                    <td colSpan="10" className="px-5 py-12 text-center text-slate-400 font-medium">
                                         No students match the search query.
                                     </td>
                                 </tr>
@@ -1053,6 +1121,12 @@ const BatchDetail = () => {
                                         </td>
                                         <td className="px-5 py-4 font-bold text-slate-500">
                                             {s.division || '—'}
+                                        </td>
+                                        <td className="px-5 py-4 font-semibold text-slate-700">
+                                            {s.cgpa !== undefined ? Number(s.cgpa).toFixed(2) : '0.00'}
+                                        </td>
+                                        <td className="px-5 py-4 font-semibold text-slate-700">
+                                            {s.backlogs !== undefined ? s.backlogs : '0'}
                                         </td>
                                         <td className="px-5 py-4 text-xs font-medium text-slate-500">
                                             <div className="font-mono">{s.mobile || 'No mobile'}</div>

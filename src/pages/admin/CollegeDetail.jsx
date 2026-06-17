@@ -13,7 +13,7 @@ const CollegeDetail = () => {
     const { collegeId } = useParams();
     const navigate = useNavigate();
     const { token, user } = useAuthStore();
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
     // Context & Detail states
     const [college, setCollege] = useState(null);

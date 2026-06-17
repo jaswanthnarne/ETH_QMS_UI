@@ -269,7 +269,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
 // ─── Trainer Profile Modal ───────────────────────────────────────────────────
 const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token, onRefresh, effectiveCollegeId, courses }) => {
     const { user } = useAuthStore();
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
     const [newPassword, setNewPassword] = useState('');
     const [resetting, setResetting] = useState(false);
     const [statusMsg, setStatusMsg] = useState(null);
@@ -1041,7 +1041,7 @@ const Trainers = () => {
     const [forceAssignConfirmState, setForceAssignConfirmState] = useState({ isOpen: false, existingTrainer: null });
 
     const { token, user } = useAuthStore();
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
     const { selectedCollegeId, selectedCollegeName, selectedCollegeCode } = useCollegeStore();
 
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);

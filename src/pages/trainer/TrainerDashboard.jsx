@@ -93,7 +93,7 @@ const TrainerDashboard = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">
-                        Welcome back, {user?.firstName || 'Trainer'} 👋
+                        Welcome back, {user?.firstName || 'Trainer'}
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">Manage your assigned assessments and monitor student progress</p>
                 </div>

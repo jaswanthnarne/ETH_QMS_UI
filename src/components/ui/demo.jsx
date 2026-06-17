@@ -7,37 +7,37 @@ const testimonials = [
     name: 'Karthik Rao',
     username: '@karthik.rao',
     body: "Ethnotech Academy's hands-on internship and corporate training programs successfully bridged the gap between our college syllabus and actual industry standards.",
-    college: 'MIT Mysore 🎓',
+    college: 'MIT Mysore',
   },
   {
     name: 'Priya Anand',
     username: '@priya.anand',
     body: 'The advanced technology upskilling workshops conducted by Ethnotech prepared me completely for my high-stakes technical interviews. Truly excellent mentors!',
-    college: 'Parul University 🎓',
+    college: 'Parul University',
   },
   {
     name: 'Sanjay Gowda',
     username: '@sanjay.gowda',
     body: "Ethnotech's expert placement guidance, industry connections, and mock training sessions gave me the confidence and tools needed to secure a top corporate job.",
-    college: 'TCE Gadag 🎓',
+    college: 'TCE Gadag',
   },
   {
     name: 'Adithya Nair',
     username: '@adithya.nair',
     body: "I attended Ethnotech Academy's advanced engineering bootcamps. The syllabus was extremely relevant, practical, and aligned with current global tech demands.",
-    college: 'FISAT 🎓',
+    college: 'FISAT',
   },
   {
     name: 'Meera Krishnan',
     username: '@meera.k',
     body: 'Ethnotech Academy provided phenomenal career support and helped connect our batch to premier placement opportunities at reputable multi-nationals.',
-    college: 'PSG Tech 🎓',
+    college: 'PSG Tech',
   },
   {
     name: 'Rahul Menon',
     username: '@rahul.menon',
     body: 'The real-world project experiences and mentorship during my Ethnotech Academy training program helped my profile stand out in our campus hiring drives.',
-    college: 'FISAT 🎓',
+    college: 'FISAT',
   },
 ];
 

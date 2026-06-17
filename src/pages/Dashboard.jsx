@@ -125,6 +125,8 @@ const Dashboard = () => {
         if (user) {
             if (user.role === 'college_admin' && user.collegeId) {
                 navigate(`/college/${user.collegeId}/dashboard`);
+            } else if (user.role === 'placement' && selectedCollegeId) {
+                navigate(`/college/${selectedCollegeId}/placement/dashboard`);
             } else if (['regional_manager', 'asst_rm'].includes(user.role) && selectedCollegeId) {
                 navigate(`/college/${selectedCollegeId}/dashboard`);
             }
@@ -135,7 +137,7 @@ const Dashboard = () => {
     const [fetchingColleges, setFetchingColleges] = useState(false);
 
     useEffect(() => {
-        if (user && ['regional_manager', 'asst_rm'].includes(user.role) && !selectedCollegeId) {
+        if (user && ['regional_manager', 'asst_rm', 'placement'].includes(user.role) && !selectedCollegeId) {
             const fetchAssignedColleges = async () => {
                 setFetchingColleges(true);
                 try {
@@ -459,10 +461,14 @@ const Dashboard = () => {
     // ═══════════════ Global view (no college selected) ═══════════════
     // ═══════════════ Global / Landing view (no college selected) ═══════════════
     if (!selectedCollegeId) {
-        if (user && ['regional_manager', 'asst_rm'].includes(user.role)) {
+        if (user && ['regional_manager', 'asst_rm', 'placement'].includes(user.role)) {
             const handleCollegeSelect = (c) => {
                 setSelectedCollege(c._id, c.name, c.code);
-                navigate(`/college/${c._id}/dashboard`);
+                if (user.role === 'placement') {
+                    navigate(`/college/${c._id}/placement/dashboard`);
+                } else {
+                    navigate(`/college/${c._id}/dashboard`);
+                }
             };
 
             const capabilities = user.role === 'regional_manager' ? [
@@ -470,6 +476,11 @@ const Dashboard = () => {
                 { title: 'Training & Log Reviews', desc: 'Inspect trainer sessions, progress entries, and classroom locations.', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50' },
                 { title: 'Student & Batch Directories', desc: 'Monitor active cohorts, USN rosters, and student enrollment records.', icon: Users, color: 'text-purple-600 bg-purple-50' },
                 { title: 'Write Protections Enabled', desc: 'All creation, editing, imports, and deletion rights are disabled.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
+            ] : user.role === 'placement' ? [
+                { title: 'Campus Placements Management', desc: 'Publish job drives, set dynamic eligibility rules, and track candidate progress.', icon: School, color: 'text-[#004AAD] bg-blue-50' },
+                { title: 'Assigned Batch Targeting', desc: 'Select specific course cohorts and batches when posting career opportunities.', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50' },
+                { title: 'Review Applicants & Resumes', desc: 'Audit applicant lists, evaluation scores, and download candidate resumes.', icon: Users, color: 'text-purple-600 bg-purple-50' },
+                { title: 'Institutional Directories', desc: 'Access read-only views of institution courses, trainers, and enrolled students.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
             ] : [
                 { title: 'Scoped Assistant Access', desc: 'Allows assistant monitoring of your assigned colleges context.', icon: ShieldCheck, color: 'text-[#004AAD] bg-blue-50' },
                 { title: 'View Academic Performance', desc: 'View exams, allotments, syllabus details, and audit records.', icon: FileText, color: 'text-indigo-600 bg-indigo-50' },
@@ -484,13 +495,13 @@ const Dashboard = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="space-y-1.5">
                                 <span className="inline-block text-[10px] font-bold text-[#004AAD] bg-[#004AAD]/10 px-3 py-1 rounded-full uppercase tracking-wider">
-                                    {user.role === 'regional_manager' ? 'Regional Manager' : 'Asst Regional Manager'} Scoped Session
+                                    {user.role === 'regional_manager' ? 'Regional Manager' : user.role === 'placement' ? 'Placement Officer' : 'Asst Regional Manager'} Scoped Session
                                 </span>
                                 <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
                                     Welcome to your <span className="text-[#004AAD]">Management Workspace</span>
                                 </h1>
                                 <p className="text-sm text-slate-500 max-w-xl">
-                                    Select one of your assigned colleges to view metrics, manage batches, and audit compliance.
+                                    Select one of the institutions below to load its workspace.
                                 </p>
                             </div>
                         </div>

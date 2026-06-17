@@ -35,7 +35,7 @@ const Exams = () => {
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
     const effectiveCollegeId = selectedCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null);
 
-    const isReadOnly = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
     const fetchExams = async () => {
         try {

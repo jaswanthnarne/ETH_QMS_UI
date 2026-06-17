@@ -40,11 +40,11 @@ const NotFound = () => {
 
     // Ethnotech Sarcastic Ticker Updates
     const tickerNews = [
-        "🚨 BATCH ALERT: 42 students placed as 'Unpaid LinkedIn Brand Evangelists'. CTC: Free tea & 'Exposure'!",
-        "🚨 SYLLABUS NEWS: We have replaced Java 8 with 'Resume Inflation 101' to align with modern corporate standards.",
-        "🚨 FEE EXEMPTION: Fine of ₹5,000 imposed on student Ajay M. for asking if 'Guaranteed Placement' means actual jobs.",
-        "🚨 SUCCESS STORY: Alumnus Priya S. bought a cycle after 2 months of training. 'Ethnotech taught me to stand on my own feet!'",
-        "🚨 TECH INSIGHT: Our AI-driven algorithms determined that 404 pages are the only bug-free pages in your final year project."
+        "[ALERT] BATCH ALERT: 42 students placed as 'Unpaid LinkedIn Brand Evangelists'. CTC: Free tea & 'Exposure'!",
+        "[ALERT] SYLLABUS NEWS: We have replaced Java 8 with 'Resume Inflation 101' to align with modern corporate standards.",
+        "[ALERT] FEE EXEMPTION: Fine of ₹5,000 imposed on student Ajay M. for asking if 'Guaranteed Placement' means actual jobs.",
+        "[ALERT] SUCCESS STORY: Alumnus Priya S. bought a cycle after 2 months of training. 'Ethnotech taught me to stand on my own feet!'",
+        "[ALERT] TECH INSIGHT: Our AI-driven algorithms determined that 404 pages are the only bug-free pages in your final year project."
     ];
 
     useEffect(() => {
@@ -195,19 +195,19 @@ const NotFound = () => {
                             onClick={() => setActiveTab("roast")}
                             className={`flex-1 py-4 text-center font-bold transition-all ${activeTab === 'roast' ? 'text-indigo-400 bg-slate-900/50 border-b-2 border-indigo-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/20'}`}
                         >
-                            📋 Academy Roast
+                            <span className="flex items-center justify-center gap-1.5"><Compass size={14} /> Academy Roast</span>
                         </button>
                         <button
                             onClick={() => setActiveTab("calculator")}
                             className={`flex-1 py-4 text-center font-bold transition-all ${activeTab === 'calculator' ? 'text-indigo-400 bg-slate-900/50 border-b-2 border-indigo-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/20'}`}
                         >
-                            🧮 Placement Luck Calc
+                            <span className="flex items-center justify-center gap-1.5"><Calculator size={14} /> Placement Luck Calc</span>
                         </button>
                         <button
                             onClick={() => setActiveTab("excuses")}
                             className={`flex-1 py-4 text-center font-bold transition-all ${activeTab === 'excuses' ? 'text-indigo-400 bg-slate-900/50 border-b-2 border-indigo-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/20'}`}
                         >
-                            💬 Submit Excuse
+                            <span className="flex items-center justify-center gap-1.5"><HelpCircle size={14} /> Submit Excuse</span>
                         </button>
                     </div>
 

@@ -11,6 +11,7 @@ import { SocketContext } from '../contexts/SocketContext';
 import useAuthStore from '../store/authStore';
 import useStudentAuthStore from '../store/studentAuthStore';
 import useCollegeStore from '../store/collegeStore';
+import { useToastStore } from '../store/toastStore';
 import axios from 'axios';
 
 const MainLayout = ({ children }) => {
@@ -19,6 +20,8 @@ const MainLayout = ({ children }) => {
     const { student, logoutStudent, token: studentToken } = useStudentAuthStore();
     const isStudent = !!student;
     const { selectedCollegeId, selectedCollegeName, setSelectedCollege, clearSelectedCollege } = useCollegeStore();
+    const toasts = useToastStore((state) => state.toasts);
+    const removeToast = useToastStore((state) => state.remove);
     const [colleges, setColleges] = useState([]);
     const navigate = useNavigate();
     const location = useLocation();
@@ -108,14 +111,15 @@ const MainLayout = ({ children }) => {
 
     const prefix = selectedCollegeId ? `/college/${selectedCollegeId}` : '';
 
-    const ALL_ADMINS = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin'];
-    const isGlobalAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm'].includes(user?.role);
-    const isRegionalOrAsstRM = ['regional_manager', 'asst_rm'].includes(user?.role);
+    const ALL_ADMINS = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin', 'placement'];
+    const isGlobalAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'placement'].includes(user?.role);
+    const isRegionalOrAsstRM = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
     const menuItems = isStudent ? [
         { label: 'Enter Exam', icon: FileText, path: '/student/dashboard?tab=enter-exam' },
         { label: 'Exam History', icon: Trophy, path: '/student/dashboard?tab=exam-history' },
         { label: 'Profile', icon: User, path: '/student/dashboard?tab=profile' },
+        { label: 'Placements', icon: Briefcase, path: '/student/dashboard?tab=placement' },
         { label: 'Attendance', icon: CalendarCheck, path: '/student/dashboard?tab=attendance' },
         { label: 'To-do List', icon: CheckSquare, path: '/student/dashboard?tab=todo' },
         { label: 'Account Security', icon: Lock, path: '/student/dashboard?tab=security' }
@@ -127,6 +131,14 @@ const MainLayout = ({ children }) => {
         { label: 'Attendance', icon: CalendarCheck, path: '/trainer/attendance' },
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
         { label: 'Reports & Exports', icon: Database, path: '/reports' }
+    ] : (user?.role === 'placement' && !selectedCollegeId) ? [
+        { label: 'Select College', icon: LayoutDashboard, path: '/dashboard' }
+    ] : user?.role === 'placement' ? [
+        { label: 'Placements', icon: Briefcase, path: `${prefix}/placement/dashboard` },
+        { label: 'Result Analytics', icon: BarChart3, path: `${prefix}/analytics` },
+        { label: 'Courses', icon: BookOpen, path: `${prefix}/admin/courses` },
+        { label: 'Batches', icon: Users, path: `${prefix}/admin/batches` },
+        { label: 'Trainers', icon: Users, path: `${prefix}/admin/trainers` }
     ] : (isRegionalOrAsstRM && !selectedCollegeId) ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' }
     ] : (isGlobalAdmin && !selectedCollegeId) ? [
@@ -168,7 +180,7 @@ const MainLayout = ({ children }) => {
 
     useEffect(() => {
         if (!token) return;
-        const isAnyAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin'].includes(user?.role);
+        const isAnyAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin', 'placement'].includes(user?.role);
         if (isAnyAdmin || user?.role === 'trainer') {
             const fetchColleges = async () => {
                 try {
@@ -275,7 +287,7 @@ const MainLayout = ({ children }) => {
                         );
                     })}
 
-                    {!isStudent && selectedCollegeId && isGlobalAdmin && (
+                    {!isStudent && selectedCollegeId && isGlobalAdmin && user?.role !== 'placement' && (
                         <button 
                             onClick={() => { 
                                 clearSelectedCollege(); 
@@ -367,9 +379,13 @@ const MainLayout = ({ children }) => {
                                         else {
                                             const college = colleges.find(c => c._id === e.target.value);
                                             if (college) { 
-                                                setSelectedCollege(college._id, college.name, college.code); 
+                                                setSelectedCollege(college._id, college.name, college.code);
                                                 if (isGlobalAdmin) {
-                                                    navigate(`/college/${college._id}/dashboard`); 
+                                                    if (user?.role === 'placement') {
+                                                        navigate(`/college/${college._id}/placement/dashboard`);
+                                                    } else {
+                                                        navigate(`/college/${college._id}/dashboard`);
+                                                    }
                                                 }
                                             }
                                         }
@@ -483,6 +499,49 @@ const MainLayout = ({ children }) => {
                         {children}
                     </div>
                 </main>
+            </div>
+
+            {/* Global Toasts Container */}
+            <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+                {toasts.map((t) => {
+                    let bg = 'bg-white border-emerald-100 shadow-emerald-100/50';
+                    let text = 'text-emerald-800';
+                    let progressBg = 'bg-emerald-500';
+                    if (t.type === 'error') {
+                        bg = 'bg-white border-rose-100 shadow-rose-100/50';
+                        text = 'text-rose-800';
+                        progressBg = 'bg-rose-500';
+                    } else if (t.type === 'warning') {
+                        bg = 'bg-white border-amber-100 shadow-amber-100/50';
+                        text = 'text-amber-800';
+                        progressBg = 'bg-amber-500';
+                    } else if (t.type === 'info') {
+                        bg = 'bg-white border-blue-100 shadow-blue-100/50';
+                        text = 'text-blue-800';
+                        progressBg = 'bg-blue-500';
+                    }
+
+                    return (
+                        <div 
+                            key={t.id} 
+                            className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl border shadow-lg ${bg} animate-in slide-in-from-top-5 fade-in duration-300 relative overflow-hidden`}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <span className={`w-2 h-2 rounded-full ${progressBg} animate-pulse`} />
+                                <p className={`text-sm font-semibold ${text}`}>{t.message}</p>
+                            </div>
+                            <button 
+                                onClick={() => removeToast(t.id)} 
+                                className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded-md hover:bg-slate-50 cursor-pointer"
+                            >
+                                <X size={15} />
+                            </button>
+                            <div className="absolute bottom-0 left-0 h-0.5 w-full bg-slate-100">
+                                <div className={`h-full ${progressBg}`} style={{ animation: 'shrink 4s linear forwards' }} />
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
         </SocketContext.Provider>
