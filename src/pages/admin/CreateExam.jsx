@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, Loader2, Clock, Target, Send, AlertCircle, ChevronDown, Bot, FileSpreadsheet, Upload, Download, X, Database, Users } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, Loader2, Clock, Target, Send, AlertCircle, ChevronDown, Bot, FileSpreadsheet, Upload, Download, X, Database, Users, Video, Mic, Monitor, ShieldAlert } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
@@ -209,7 +209,7 @@ const CreateExam = () => {
         courseId: '', department: '', duration: 60, passingPercentage: 40, instructions: '',
         scheduledDate: new Date().toISOString().slice(0, 16),
         expiryDate: '',
-        settings: { shuffleQuestions: true, showResultImmediately: true, allowReview: true, collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, randomizeQuestions: false, randomQuestionCount: 0 }
+        settings: { shuffleQuestions: true, showResultImmediately: true, allowReview: true, collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, randomizeQuestions: false, randomQuestionCount: 0, requireWebcam: false, requireMic: false, requireScreenshare: false }
     });
 
     const [questions, setQuestions] = useState([getDefaultQuestion()]);
@@ -263,6 +263,7 @@ const CreateExam = () => {
                     settings: {
                         shuffleQuestions: true, showResultImmediately: true, allowReview: true, 
                         collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, randomizeQuestions: false, randomQuestionCount: 0,
+                        requireWebcam: false, requireMic: false, requireScreenshare: false,
                         ...(exam.settings || {})
                     }
                 });
@@ -733,6 +734,33 @@ const CreateExam = () => {
                             </div>
                             <div className={`w-11 h-6 rounded-full transition-all relative flex-shrink-0 ${examData.settings.enableCertificate ? 'bg-amber-400' : 'bg-slate-200'}`}>
                                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${examData.settings.enableCertificate ? 'left-5' : 'left-0.5'}`} />
+                            </div>
+                        </div>
+
+                        {/* Proctoring Settings (Mock) */}
+                        <div className="border-t border-slate-100 pt-6 mt-6">
+                            <h4 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <ShieldAlert size={18} className="text-indigo-600" />
+                                AI Proctoring Configuration (Mock)
+                            </h4>
+                            <p className="text-xs text-slate-400 mb-4 font-medium">Require identity verification and device sharing permissions from students when entering the exam hall.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {[
+                                    { key: 'requireWebcam', label: 'Require Webcam', desc: 'Activates live stream preview card & eyesight focus tracking warnings', icon: <Video size={16} className="text-indigo-600" /> },
+                                    { key: 'requireMic', label: 'Require Microphone', desc: 'Requests voice verification and levels level testing permission', icon: <Mic size={16} className="text-emerald-600" /> },
+                                    { key: 'requireScreenshare', label: 'Require Screenshare', desc: 'Prompts student for secure tab, window, or desktop sharing', icon: <Monitor size={16} className="text-blue-600" /> }
+                                ].map(p => (
+                                    <label key={p.key} className={`flex items-start gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all ${examData.settings[p.key] ? 'bg-slate-50 border-slate-900' : 'bg-white border-slate-200/80 hover:border-slate-300'}`}>
+                                        <input type="checkbox" checked={examData.settings[p.key] || false} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [p.key]: e.target.checked } })} className="w-4 h-4 mt-0.5 rounded accent-slate-950" />
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                {p.icon}
+                                                <p className="text-sm font-bold text-slate-850">{p.label}</p>
+                                            </div>
+                                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{p.desc}</p>
+                                        </div>
+                                    </label>
+                                ))}
                             </div>
                         </div>
                     </div>

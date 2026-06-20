@@ -22,7 +22,10 @@ import {
     BarChart3,
     MessageSquare,
     X,
-    Megaphone
+    Megaphone,
+    Video,
+    Mic,
+    Monitor
 } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -64,6 +67,136 @@ const StudentExam = () => {
     const [certDownloading, setCertDownloading] = useState(false);
     const socket = useRef(null);
     const [showAwakeModal, setShowAwakeModal] = useState(false);
+
+    // Mock proctoring states
+    const [isWebcamActive, setIsWebcamActive] = useState(false);
+    const [isMicActive, setIsMicActive] = useState(false);
+    const [isScreenActive, setIsScreenActive] = useState(false);
+    const [mediaError, setMediaError] = useState(null);
+    const [requestingMedia, setRequestingMedia] = useState(false);
+    const [showSightWarning, setShowSightWarning] = useState(false);
+
+    const webcamStreamRef = useRef(null);
+    const micStreamRef = useRef(null);
+    const screenStreamRef = useRef(null);
+
+    const stopAllMediaTracks = useCallback(() => {
+        if (webcamStreamRef.current) {
+            webcamStreamRef.current.getTracks().forEach(track => track.stop());
+            webcamStreamRef.current = null;
+        }
+        if (micStreamRef.current) {
+            micStreamRef.current.getTracks().forEach(track => track.stop());
+            micStreamRef.current = null;
+        }
+        if (screenStreamRef.current) {
+            screenStreamRef.current.getTracks().forEach(track => track.stop());
+            screenStreamRef.current = null;
+        }
+        setIsWebcamActive(false);
+        setIsMicActive(false);
+        setIsScreenActive(false);
+    }, []);
+
+    // Cleanup streams on unmount
+    useEffect(() => {
+        return () => {
+            if (webcamStreamRef.current) webcamStreamRef.current.getTracks().forEach(t => t.stop());
+            if (micStreamRef.current) micStreamRef.current.getTracks().forEach(t => t.stop());
+            if (screenStreamRef.current) screenStreamRef.current.getTracks().forEach(t => t.stop());
+        };
+    }, []);
+
+    const handleStartExam = async () => {
+        setMediaError(null);
+        setRequestingMedia(true);
+
+        let localWebcamStream = null;
+        let localMicStream = null;
+        let localScreenStream = null;
+
+        try {
+            const needsWebcam = exam?.settings?.requireWebcam;
+            const needsMic = exam?.settings?.requireMic;
+            const needsScreen = exam?.settings?.requireScreenshare;
+
+            if (needsWebcam || needsMic) {
+                localWebcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: needsWebcam ? { width: 320, height: 240 } : false,
+                    audio: needsMic ? true : false
+                });
+
+                if (needsWebcam) {
+                    webcamStreamRef.current = localWebcamStream;
+                    setIsWebcamActive(true);
+                }
+                if (needsMic) {
+                    micStreamRef.current = localWebcamStream;
+                    setIsMicActive(true);
+                }
+            }
+
+            if (needsScreen) {
+                localScreenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: false
+                });
+                screenStreamRef.current = localScreenStream;
+                setIsScreenActive(true);
+
+                // Listen for manual screenshare stop from browser bar
+                localScreenStream.getVideoTracks()[0].onended = () => {
+                    setIsScreenActive(false);
+                    triggerViolation('screenshareStopped', 1);
+                };
+            }
+
+            // Request fullscreen
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+            } catch (err) {
+                console.error("Fullscreen failed:", err);
+            }
+
+            setHasEnteredEx(true);
+        } catch (err) {
+            console.error("Proctoring setup error:", err);
+            
+            // Clean up partially created tracks
+            if (localWebcamStream) localWebcamStream.getTracks().forEach(t => t.stop());
+            if (localScreenStream) localScreenStream.getTracks().forEach(t => t.stop());
+
+            let errMsg = "Permissions denied. Please allow camera, microphone, or screen sharing access to start the exam.";
+            if (err.name === 'NotAllowedError') {
+                errMsg = "Access denied: You must grant permission for the requested security devices (Camera, Microphone, or Screenshare) to begin this assessment.";
+            } else if (err.name === 'NotFoundError') {
+                errMsg = "Device error: The requested camera or microphone was not found on your system.";
+            }
+            setMediaError(errMsg);
+        } finally {
+            setRequestingMedia(false);
+        }
+    };
+
+    // Sight warnings popup effect
+    useEffect(() => {
+        if (!isWebcamActive || !isStarted || !hasEnteredEx || result || submitting) return;
+
+        // Triggers warning overlay every 2.5 minutes (150 seconds)
+        const warningInterval = setInterval(() => {
+            setShowSightWarning(true);
+
+            // Dismiss after 10 seconds
+            setTimeout(() => {
+                setShowSightWarning(false);
+            }, 10000);
+
+        }, 150000);
+
+        return () => clearInterval(warningInterval);
+    }, [isWebcamActive, isStarted, hasEnteredEx, result, submitting]);
 
     // Chat & Broadcast state
     const [chatOpen, setChatOpen] = useState(false);
@@ -356,6 +489,9 @@ const StudentExam = () => {
 
     const submitExam = async (status, isAutoSubmit = false) => {
         if (submitting) return;
+
+        // Stop all proctoring media streams first
+        stopAllMediaTracks();
 
         try {
             setSubmitting(true);
@@ -883,6 +1019,11 @@ const StudentExam = () => {
     }
 
     if (isStarted && !hasEnteredEx && !result && !submitting) {
+        const needsWebcam = exam?.settings?.requireWebcam;
+        const needsMic = exam?.settings?.requireMic;
+        const needsScreen = exam?.settings?.requireScreenshare;
+        const hasProctoring = needsWebcam || needsMic || needsScreen;
+
         return (
             <div className="min-h-screen bg-[#f8f9fb] flex flex-col items-center justify-center p-6 text-center font-sans">
                 <div className="bg-white p-10 md:p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 border-t-4 border-t-emerald-500 max-w-lg w-full flex flex-col items-center">
@@ -894,19 +1035,70 @@ const StudentExam = () => {
                         </span>
                     </div>
                     <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Session Started</h2>
-                    <p className="text-slate-500 text-[15px] leading-relaxed mb-8">The instructor has initiated the assessment. Enter full screen mode to begin securely.</p>
+                    <p className="text-slate-500 text-[15px] leading-relaxed mb-6">The instructor has initiated the assessment. Please confirm setup to begin securely.</p>
+
+                    {hasProctoring && (
+                        <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6 text-left">
+                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                                <ShieldCheck size={14} className="text-[#004AAD]" /> Security Verification Required
+                            </h4>
+                            <div className="space-y-2.5">
+                                {needsWebcam && (
+                                    <div className="flex items-center gap-3 text-sm font-semibold text-slate-700">
+                                        <div className="w-6 h-6 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+                                            <Video size={13} />
+                                        </div>
+                                        <span>Webcam Feed Authorization</span>
+                                    </div>
+                                )}
+                                {needsMic && (
+                                    <div className="flex items-center gap-3 text-sm font-semibold text-slate-700">
+                                        <div className="w-6 h-6 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                                            <Mic size={13} />
+                                        </div>
+                                        <span>Microphone Level Check</span>
+                                    </div>
+                                )}
+                                {needsScreen && (
+                                    <div className="flex items-center gap-3 text-sm font-semibold text-slate-700">
+                                        <div className="w-6 h-6 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                                            <Monitor size={13} />
+                                        </div>
+                                        <span>Desktop Screenshare Session</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {mediaError && (
+                        <div className="w-full bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl p-4 mb-6 text-xs font-semibold text-left flex items-start gap-2.5">
+                            <span className="text-sm">⚠️</span>
+                            <div>
+                                <p className="font-bold">Device Setup Failed</p>
+                                <p className="text-rose-600 font-medium mt-0.5 leading-relaxed">{mediaError}</p>
+                            </div>
+                        </div>
+                    )}
 
                     <button
-                        onClick={() => {
-                            document.documentElement.requestFullscreen().catch(() => { });
-                            setHasEnteredEx(true);
-                        }}
-                        className="w-full bg-[#004AAD] hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        onClick={handleStartExam}
+                        disabled={requestingMedia}
+                        className="w-full bg-[#004AAD] hover:bg-[#003580] text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
                     >
-                        Enter Fullscreen & Begin <ArrowRight size={18} />
+                        {requestingMedia ? (
+                            <>
+                                <Loader2 className="animate-spin" size={18} />
+                                Configuring Secure Stream...
+                            </>
+                        ) : (
+                            <>
+                                Enter Fullscreen & Begin <ArrowRight size={18} />
+                            </>
+                        )}
                     </button>
                     <p className="mt-6 text-[11px] font-semibold text-slate-400 max-w-[250px] leading-relaxed">
-                        Exiting full screen will trigger a security violation warning.
+                        Exiting full screen or altering window focus will log a security violation.
                     </p>
                 </div>
             </div>
@@ -929,10 +1121,33 @@ const StudentExam = () => {
                     <div className="h-7 w-px bg-slate-200 mx-1 hidden md:block" />
                     <div className="hidden md:block">
                         <h1 className="text-[13px] font-bold text-slate-900 uppercase tracking-wide line-clamp-1 truncate max-w-[250px] lg:max-w-none">{exam?.title}</h1>
-                        <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1.5 mt-1 tracking-wider uppercase">
-                            <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
-                            Secure Assessment Active
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                            <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1.5 tracking-wider uppercase">
+                                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
+                                Secure Assessment Active
+                            </p>
+                            {isWebcamActive && (
+                                <span className="h-4 w-px bg-slate-200 mx-1" />
+                            )}
+                            {isWebcamActive && (
+                                <span className="flex items-center gap-1 text-[9px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded px-1.5 py-0.5 uppercase tracking-wider">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" />
+                                    Cam
+                                </span>
+                            )}
+                            {isMicActive && (
+                                <span className="flex items-center gap-1 text-[9px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded px-1.5 py-0.5 uppercase tracking-wider">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                                    Mic
+                                </span>
+                            )}
+                            {isScreenActive && (
+                                <span className="flex items-center gap-1 text-[9px] font-extrabold text-blue-600 bg-blue-50 border border-blue-100 rounded px-1.5 py-0.5 uppercase tracking-wider">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                                    Screen
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -1251,6 +1466,47 @@ const StudentExam = () => {
                         </div>
                         <div className="mt-3 h-1 bg-indigo-100 rounded-full overflow-hidden">
                             <div className="h-full bg-indigo-500 rounded-full animate-[shrink_10s_linear_forwards]" style={{ animation: 'shrink 10s linear forwards' }} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ========== FLOATING WEBCAM CARD (MOCK PROCTORING) ========== */}
+            {isWebcamActive && !result && !submitting && (
+                <div className="fixed bottom-24 right-6 z-[90] w-48 bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200 shadow-xl overflow-hidden p-2 transition-all hover:scale-105 duration-300">
+                    <div className="relative aspect-video w-full rounded-xl bg-slate-950 overflow-hidden shadow-inner border border-slate-800">
+                        <video
+                            ref={(el) => {
+                                if (el && webcamStreamRef.current && el.srcObject !== webcamStreamRef.current) {
+                                    el.srcObject = webcamStreamRef.current;
+                                }
+                            }}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="w-full h-full object-cover scale-x-[-1]"
+                        />
+                        
+                        {/* Recording status dot */}
+                        <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded-full border border-white/10">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                            <span className="text-[8px] font-bold text-white uppercase tracking-wider">LIVE</span>
+                        </div>
+
+                        {/* Sight warning popup directly on the webcam video */}
+                        {showSightWarning && (
+                            <div className="absolute inset-0 bg-rose-900/95 flex flex-col items-center justify-center p-2 text-center animate-in fade-in duration-300">
+                                <AlertTriangle className="text-amber-400 animate-bounce mb-1" size={20} />
+                                <p className="text-[9px] font-black text-white uppercase tracking-widest leading-tight">Sight Warning</p>
+                                <p className="text-[8px] font-semibold text-rose-100 mt-0.5 max-w-[130px] leading-tight">Please keep your eyesight focused proper centered!</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-1.5 px-1 flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">AI Proctoring Active</span>
+                        <div className="flex gap-1">
+                            {isMicActive && <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full flex items-center justify-center text-[6px] text-white font-extrabold" title="Mic Active">M</span>}
+                            {isScreenActive && <span className="w-2.5 h-2.5 bg-blue-500 rounded-full flex items-center justify-center text-[6px] text-white font-extrabold" title="Screen Share Active">S</span>}
                         </div>
                     </div>
                 </div>
