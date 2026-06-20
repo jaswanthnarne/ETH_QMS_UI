@@ -282,7 +282,8 @@ const CreateExam = () => {
                         marks: q.points
                     })));
                 }
-            } catch (err) {
+            } catch (error) {
+                console.error('Load exam error:', error);
                 setAlertState({
                     open: true,
                     title: 'Load Failed',
@@ -309,8 +310,6 @@ const CreateExam = () => {
         if (endDate && endDate <= startDate) {
             errs.push('Expiry date must be set after the scheduled start time');
         }
-
-        const calculatedTotal = questions.reduce((acc, q) => acc + (parseInt(q.marks) || 0), 0);
         if (!examData.passingPercentage || parseInt(examData.passingPercentage) <= 0 || parseInt(examData.passingPercentage) > 100) errs.push('Passing percentage must be between 1 and 100');
         
         questions.forEach((q, i) => {
@@ -404,40 +403,102 @@ const CreateExam = () => {
         else setQuestions(questions.map(q => q.id === id ? { ...q, [field]: value } : q));
     };
 
+    const handleDownloadTemplate = async (e) => {
+        if (e) e.preventDefault();
+        try {
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/bulk-import/template`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.setAttribute('download', 'bulk_import_template.xlsx');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download template error:', error);
+            setAlertState({
+                open: true,
+                title: 'Download Failed',
+                message: 'Failed to download the template file. Please try again.',
+                type: 'error'
+            });
+        }
+    };
+
     const handleBulkImport = async () => {
         if (!bulkImport.file) return;
-        if (!isEditing) {
-            setAlertState({ open: true, title: 'Save First', message: 'Please create and save the exam first, then use bulk import to add questions.', type: 'warning' });
-            setBulkImport(prev => ({ ...prev, open: false }));
-            return;
-        }
         setBulkImport(prev => ({ ...prev, loading: true, result: null }));
         try {
             const formData = new FormData();
             formData.append('file', bulkImport.file);
-            formData.append('examId', id); // id from useParams (edit mode)
-            const res = await axios.post(
-                `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/bulk-import`,
-                formData,
-                { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
-            );
-            setBulkImport(prev => ({ ...prev, loading: false, result: res.data }));
-            // Refresh questions list
-            const examRes = await axios.get(
-                `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const fetchedQs = examRes.data.data.questions;
-            if (fetchedQs?.length > 0) {
-                setQuestions(fetchedQs.map(q => ({
-                    id: q._id,
-                    type: q.type,
-                    text: q.text,
-                    options: q.options?.choices?.map(c => c.text) || [],
-                    correctAnswer: q.type === 'multiple_correct' ? '' : q.correctAnswerText || (q.options?.choices?.find(c => c.isCorrect)?.text || ''),
-                    correctAnswers: q.type === 'multiple_correct' ? q.options?.choices?.filter(c => c.isCorrect).map(c => c.text) : [],
-                    marks: q.points
-                })));
+            
+            if (isEditing) {
+                formData.append('examId', id); // id from useParams (edit mode)
+                const res = await axios.post(
+                    `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/bulk-import`,
+                    formData,
+                    { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
+                );
+                setBulkImport(prev => ({ ...prev, loading: false, result: res.data }));
+                // Refresh questions list
+                const examRes = await axios.get(
+                    `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const fetchedQs = examRes.data.data.questions;
+                if (fetchedQs?.length > 0) {
+                    setQuestions(fetchedQs.map(q => ({
+                        id: q._id,
+                        type: q.type,
+                        text: q.text,
+                        options: q.options?.choices?.map(c => c.text) || [],
+                        correctAnswer: q.type === 'multiple_correct' ? '' : q.correctAnswerText || (q.options?.choices?.find(c => c.isCorrect)?.text || ''),
+                        correctAnswers: q.type === 'multiple_correct' ? q.options?.choices?.filter(c => c.isCorrect).map(c => c.text) : [],
+                        marks: q.points
+                    })));
+                }
+            } else {
+                // Parsing in Create mode (and returning questions as JSON)
+                const res = await axios.post(
+                    `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/bulk-import/parse`,
+                    formData,
+                    { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
+                );
+                
+                if (res.data.success) {
+                    const parsedQs = res.data.data || [];
+                    // Remove default blank question if user hasn't edited it
+                    const finalQuestions = (questions.length === 1 && !questions[0].text.trim() && !questions[0].correctAnswer) 
+                        ? parsedQs 
+                        : [...questions, ...parsedQs];
+                    
+                    setQuestions(finalQuestions);
+                    setBulkImport(prev => ({ 
+                        ...prev, 
+                        loading: false, 
+                        result: { 
+                            success: true, 
+                            imported: parsedQs.length, 
+                            errors: res.data.errors 
+                        } 
+                    }));
+                    
+                    // Close the modal after a short delay if no errors
+                    if (!res.data.errors || res.data.errors.length === 0) {
+                        setTimeout(() => {
+                            setBulkImport(prev => ({ ...prev, open: false, file: null, result: null }));
+                        }, 1500);
+                    }
+                } else {
+                    setBulkImport(prev => ({ ...prev, loading: false, result: { success: false, error: res.data.error || 'Import failed' } }));
+                }
             }
         } catch (error) {
             setBulkImport(prev => ({ ...prev, loading: false, result: { success: false, error: error.response?.data?.error || 'Import failed' } }));
@@ -774,9 +835,9 @@ const CreateExam = () => {
                         </div>
 
                         {!isEditing && (
-                            <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 font-medium">
+                            <div className="mb-5 p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700 font-medium">
                                 <AlertCircle size={14} className="inline mr-2" />
-                                This feature works for <strong>existing saved exams</strong>. Create and save the exam first, then come back to import questions.
+                                Importing questions will add them to the editor. You can review and modify them before saving your exam.
                             </div>
                         )}
 
@@ -806,14 +867,13 @@ const CreateExam = () => {
                             <p className="font-bold text-slate-700 mb-1">Expected column order:</p>
                             <p>A: Question Text &nbsp;|&nbsp; B: Type &nbsp;|&nbsp; C-F: Options A-D</p>
                             <p>G: Correct Answer &nbsp;|&nbsp; H: Marks &nbsp;|&nbsp; I: Difficulty</p>
-                            <a
-                                href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/bulk-import/template`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 mt-2 text-[#004AAD] font-semibold hover:underline"
+                            <button
+                                type="button"
+                                onClick={handleDownloadTemplate}
+                                className="inline-flex items-center gap-1 mt-2 text-[#004AAD] font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
                             >
                                 <Download size={12} /> Download Template (.xlsx)
-                            </a>
+                            </button>
                         </div>
 
                         {/* Result */}
@@ -839,7 +899,7 @@ const CreateExam = () => {
                         )}
 
                         <button
-                            disabled={!bulkImport.file || bulkImport.loading || !isEditing}
+                            disabled={!bulkImport.file || bulkImport.loading}
                             onClick={handleBulkImport}
                             className="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                         >
