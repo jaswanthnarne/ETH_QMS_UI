@@ -636,6 +636,70 @@ const StudentExam = () => {
         return () => clearInterval(checkStatusInterval);
     }, [loading, result, isStarted, isPaused, exam, key, submitting]);
 
+    const handleDownloadQuestionPaper = () => {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const questionsHtml = questions.map((q, i) => {
+            let optionsHtml = '';
+            if (q.options && q.options.length > 0) {
+                optionsHtml = `
+                    <ul style="list-style-type: upper-alpha; margin-left: 20px; font-family: 'Inter', sans-serif; font-size: 14px; color: #334155; line-height: 1.8; margin-top: 8px;">
+                        ${q.options.map(opt => `<li>${opt}</li>`).join('')}
+                    </ul>
+                `;
+            }
+            return `
+                <div style="margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
+                    <p style="font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: #1e293b; margin: 0 0 8px 0; line-height: 1.5;">
+                        Q${i + 1}. ${q.text} <span style="float: right; font-size: 12px; color: #64748b; font-weight: normal;">[Points: ${q.points || 1}]</span>
+                    </p>
+                    ${optionsHtml}
+                </div>
+            `;
+        }).join('');
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>${exam?.title || 'Question Paper'}</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+                        body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.5; }
+                        .header { border-bottom: 2px solid #004AAD; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .header h1 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; }
+                        .header p { font-size: 14px; color: #64748b; margin: 5px 0; font-weight: 500; }
+                        .footer { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 500; }
+                        .no-print-btn { background-color: #004AAD; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
+                        .no-print-btn:hover { background-color: #003580; }
+                        @media print {
+                            body { padding: 20px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+                        <button class="no-print-btn" onclick="window.print()">Print / Save as PDF</button>
+                    </div>
+                    <div class="header">
+                         <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Logo" style="height: 40px; width: 40px; margin-bottom: 10px;" />
+                         <h1>${exam?.title || 'Assessment Question Paper'}</h1>
+                         <p><strong>Duration:</strong> ${exam?.duration || ''} Min | <strong>Total Questions:</strong> ${questions.length} | <strong>Total Marks:</strong> ${questions.reduce((acc, q) => acc + (parseInt(q.points) || 0), 0)}</p>
+                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #004AAD; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
+                    </div>
+                    <div class="content">
+                         ${questionsHtml}
+                    </div>
+                    <div class="footer">
+                         Ethnotech Academy &copy; 2026. Secure Assessment Platform.
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    };
+
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
@@ -933,6 +997,12 @@ const StudentExam = () => {
                             </button>
                         )}
                         <button
+                            onClick={handleDownloadQuestionPaper}
+                            className="flex-1 py-3.5 rounded-xl bg-[#004AAD] hover:bg-[#003580] text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                            <FileText size={15} /> Print Question Paper
+                        </button>
+                        <button
                             onClick={() => navigate(student ? '/student/dashboard' : '/')}
                             className="flex-1 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                         >
@@ -1187,13 +1257,47 @@ const StudentExam = () => {
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Question {currentQuestion + 1} of {questions.length}</p>
                                 </div>
                             </div>
-                            <div className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
-                                Points: {currentQ?.points || 1}
+                            
+                            <div className="flex items-center gap-3">
+                                {/* Navigation Buttons at the Top */}
+                                <div className="flex gap-2">
+                                    <button
+                                        disabled={currentQuestion === 0}
+                                        onClick={() => {
+                                            flushCurrentQuestionTime();
+                                            setCurrentQuestion(prev => prev - 1);
+                                        }}
+                                        className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-all text-slate-600 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-sm"
+                                    >
+                                        <ChevronLeft size={13} /> Prev
+                                    </button>
+                                    {currentQuestion === questions.length - 1 ? (
+                                        <button
+                                            onClick={handleManualSubmit}
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                                        >
+                                            Submit <Send size={11} />
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                flushCurrentQuestionTime();
+                                                setCurrentQuestion(prev => prev + 1);
+                                            }}
+                                            className="bg-slate-900 hover:bg-black text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm active:scale-95"
+                                        >
+                                            Next <ChevronRight size={13} />
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
+                                    Points: {currentQ?.points || 1}
+                                </div>
                             </div>
                         </div>
 
                         <div className="p-8 md:p-10 flex-1 overflow-y-auto custom-scrollbar">
-                            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-relaxed mb-8">
+                            <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-relaxed mb-8 break-words whitespace-pre-wrap">
                                 {currentQ?.text}
                             </h2>
 
@@ -1272,36 +1376,61 @@ const StudentExam = () => {
                                 {marked.includes(currentQ.id) ? 'Review Mode Active' : 'Mark for Review'}
                             </button>
 
-                            <div className="flex gap-2">
+                            {currentQuestion === questions.length - 1 && (
                                 <button
-                                    disabled={currentQuestion === 0}
-                                    onClick={() => {
-                                        flushCurrentQuestionTime();
-                                        setCurrentQuestion(prev => prev - 1);
-                                    }}
-                                    className="px-4 py-2.5 bg-white border border-slate-200 rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-all text-slate-600 font-semibold text-[11px] uppercase tracking-widest flex items-center gap-1"
+                                    onClick={handleManualSubmit}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold text-xs shadow-xl active:scale-95 transition-all flex items-center gap-2 uppercase tracking-widest"
                                 >
-                                    <ChevronLeft size={16} /> Prev
+                                    Submit Assessment <Send size={14} />
                                 </button>
-                                <button
-                                    onClick={() => {
-                                        flushCurrentQuestionTime();
-                                        if (currentQuestion < questions.length - 1) {
-                                            setCurrentQuestion(prev => prev + 1);
-                                        }
-                                    }}
-                                    className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold text-xs shadow-xl hover:bg-black transition-all flex items-center gap-2 uppercase tracking-widest active:scale-95"
-                                >
-                                    {currentQuestion === questions.length - 1 ? 'Go to Summary' : 'Next Question'}
-                                    <ChevronRight size={16} />
-                                </button>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Tracking Sidebar */}
                 <div className="hidden xl:flex w-[22rem] flex-col gap-6 relative z-10">
+                    {/* Webcam Stream Card in Sidebar */}
+                    {isWebcamActive && (
+                        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex flex-col overflow-hidden">
+                            <div className="relative aspect-video w-full rounded-xl bg-slate-950 overflow-hidden shadow-inner border border-slate-800">
+                                <video
+                                    ref={(el) => {
+                                        if (el && webcamStreamRef.current && el.srcObject !== webcamStreamRef.current) {
+                                            el.srcObject = webcamStreamRef.current;
+                                        }
+                                    }}
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                    className="w-full h-full object-cover scale-x-[-1]"
+                                />
+                                
+                                {/* Recording status dot */}
+                                <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded-full border border-white/10">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                    <span className="text-[8px] font-bold text-white uppercase tracking-wider">LIVE</span>
+                                </div>
+
+                                {/* Sight warning popup directly on the webcam video */}
+                                {showSightWarning && (
+                                    <div className="absolute inset-0 bg-rose-900/95 flex flex-col items-center justify-center p-2 text-center animate-in fade-in duration-300">
+                                        <AlertTriangle className="text-amber-400 animate-bounce mb-1" size={20} />
+                                        <p className="text-[9px] font-black text-white uppercase tracking-widest leading-tight">Sight Warning</p>
+                                        <p className="text-[8px] font-semibold text-rose-100 mt-0.5 max-w-[130px] leading-tight">Please keep your eyesight focused proper centered!</p>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mt-2 flex items-center justify-between">
+                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">AI Proctoring Active</span>
+                                <div className="flex gap-1">
+                                    {isMicActive && <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full flex items-center justify-center text-[6px] text-white font-extrabold" title="Mic Active">M</span>}
+                                    {isScreenActive && <span className="w-2.5 h-2.5 bg-blue-500 rounded-full flex items-center justify-center text-[6px] text-white font-extrabold" title="Screen Share Active">S</span>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex flex-col overflow-hidden relative">
                         <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(0,74,173,0.02) 0%, transparent 100%)' }} />
                         <div className="flex items-center justify-between mb-6 relative z-10">
@@ -1315,7 +1444,10 @@ const StudentExam = () => {
                             {questions.map((_, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => setCurrentQuestion(i)}
+                                    onClick={() => {
+                                        flushCurrentQuestionTime();
+                                        setCurrentQuestion(i);
+                                    }}
                                     className={`
                                         h-10 rounded-lg text-[11px] font-bold transition-all relative
                                         ${currentQuestion === i
@@ -1471,9 +1603,9 @@ const StudentExam = () => {
                 </div>
             )}
 
-            {/* ========== FLOATING WEBCAM CARD (MOCK PROCTORING) ========== */}
+            {/* ========== FLOATING WEBCAM CARD (MOCK PROCTORING - MOBILE FALLBACK ONLY) ========== */}
             {isWebcamActive && !result && !submitting && (
-                <div className="fixed bottom-24 right-6 z-[90] w-48 bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200 shadow-xl overflow-hidden p-2 transition-all hover:scale-105 duration-300">
+                <div className="xl:hidden fixed bottom-24 right-6 z-[90] w-48 bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200 shadow-xl overflow-hidden p-2 transition-all hover:scale-105 duration-300">
                     <div className="relative aspect-video w-full rounded-xl bg-slate-950 overflow-hidden shadow-inner border border-slate-800">
                         <video
                             ref={(el) => {

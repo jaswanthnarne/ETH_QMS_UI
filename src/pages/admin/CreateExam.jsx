@@ -338,7 +338,19 @@ const CreateExam = () => {
         setSubmitting(true);
         try {
             const calculatedTotal = questions.reduce((acc, q) => acc + (parseInt(q.marks) || 0), 0);
-            const payload = { ...examData, batches: selectedBatches, totalMarks: calculatedTotal, questions: questions.map(q => ({ type: q.type, text: q.text, options: q.options, correctAnswer: q.type === 'multiple_correct' ? JSON.stringify(q.correctAnswers) : q.correctAnswer, marks: q.marks })) };
+            const payload = { 
+                ...examData, 
+                batches: selectedBatches, 
+                totalMarks: calculatedTotal, 
+                questions: questions.map(q => ({ 
+                    _id: typeof q.id === 'string' && q.id.length === 24 ? q.id : undefined,
+                    type: q.type, 
+                    text: q.text, 
+                    options: q.options, 
+                    correctAnswer: q.type === 'multiple_correct' ? JSON.stringify(q.correctAnswers) : q.correctAnswer, 
+                    marks: q.marks 
+                })) 
+            };
 
             if (isEditing) {
                 await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
