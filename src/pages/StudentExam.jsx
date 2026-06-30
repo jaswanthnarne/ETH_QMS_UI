@@ -252,7 +252,10 @@ const StudentExam = () => {
             setIsStarted(true);
         });
 
-        socket.current.on('session_ended', () => {
+        socket.current.on('session_ended', (data) => {
+            if (data?.resetRollNumber && data.resetRollNumber !== rollNumber) {
+                return; // Ignore reset if targeted for a different student
+            }
             window.location.reload();
         });
 

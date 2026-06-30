@@ -181,6 +181,31 @@ const WaitingRoom = () => {
         });
     };
 
+    const handleResetAttempt = (attemptId, studentName, rollNumber) => {
+        if (!attemptId) {
+            setAlertState({ open: true, title: 'Error', message: 'Cannot reset: Student has not joined yet.', type: 'error' });
+            return;
+        }
+        setConfirmState({
+            open: true,
+            title: 'Reset Student Attempt',
+            message: `Are you sure you want to reset the attempt for ${studentName} (${rollNumber})? This will delete their current responses and allow them to start the exam from scratch immediately.`,
+            type: 'danger',
+            confirmText: 'Reset Attempt',
+            onConfirm: async () => {
+                try {
+                    await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/waiting-room/${key}/attempts/${attemptId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setAlertState({ open: true, title: 'Success', message: `Attempt reset for ${studentName}. They can now retake the exam.`, type: 'success' });
+                    fetchRoomData();
+                } catch (error) {
+                    setAlertState({ open: true, title: 'Error Resetting Attempt', message: error.response?.data?.error || error.message, type: 'error' });
+                }
+            }
+        });
+    };
+
     const handleForceSubmit = async () => {
         setConfirmState({
             open: true,
@@ -471,6 +496,7 @@ const WaitingRoom = () => {
                                 <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Status</th>
                                 <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-center">Score</th>
                                 <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-center">Violations</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -506,6 +532,15 @@ const WaitingRoom = () => {
                                         ) : (
                                             <span className="text-xs text-emerald-500">✓ Clean</span>
                                         )}
+                                    </td>
+                                    <td className="px-6 py-3 text-right">
+                                        <button
+                                            onClick={() => handleResetAttempt(s.id, s.name, s.rollNumber)}
+                                            className="px-2.5 py-1.5 bg-red-50 text-red-600 border border-red-100 hover:bg-red-100/50 rounded-lg transition-all text-xs font-bold flex items-center gap-1 ml-auto shadow-sm active:scale-95 duration-100"
+                                            title="Reset student's attempt to allow retaking the exam"
+                                        >
+                                            <RefreshCw size={12} /> Reset
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

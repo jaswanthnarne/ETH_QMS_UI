@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { 
     Layers, BookOpen, Users, Phone, Mail, Edit2, Trash2, ArrowLeft, Loader2,
     Download, Upload, AlertTriangle, AlertCircle, FileSpreadsheet, Plus, X, RefreshCw, CheckCircle2,
-    Search
+    Search, Key
 } from 'lucide-react';
 import axios from 'axios';
 import ExcelJS from 'exceljs';
@@ -223,6 +223,12 @@ const BatchDetail = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [error, setError] = useState('');
     const [alertState, setAlertState] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+
+    // Reset Password States
+    const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
+    const [resetStudentObj, setResetStudentObj] = useState(null);
+    const [newStudentPassword, setNewStudentPassword] = useState('');
+    const [resettingPassword, setResettingPassword] = useState(false);
 
     // Upload & Template States
     const [uploading, setUploading] = useState(false);
@@ -550,6 +556,44 @@ const BatchDetail = () => {
                 message: err.response?.data?.error || 'Failed to remove student',
                 type: 'error'
             });
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        if (!newStudentPassword.trim() || newStudentPassword.length < 4) {
+            setAlertState({
+                isOpen: true,
+                title: 'Validation Error',
+                message: 'Password must be at least 4 characters.',
+                type: 'error'
+            });
+            return;
+        }
+        setResettingPassword(true);
+        try {
+            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            await axios.post(`${baseURL}/admin/batches/${batchId}/students/${resetStudentObj._id}/reset-password`, {
+                newPassword: newStudentPassword
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            
+            setIsResetPasswordOpen(false);
+            setNewStudentPassword('');
+            setAlertState({
+                isOpen: true,
+                title: 'Password Overridden',
+                message: `Password overridden successfully for ${resetStudentObj.name}.`,
+                type: 'success'
+            });
+        } catch (err) {
+            setAlertState({
+                isOpen: true,
+                title: 'Reset Failed',
+                message: err.response?.data?.error || 'Failed to reset password',
+                type: 'error'
+            });
+        } finally {
+            setResettingPassword(false);
         }
     };
 
@@ -1148,6 +1192,13 @@ const BatchDetail = () => {
                                                         >
                                                             <Edit2 size={16} />
                                                         </button>
+                                                        <button 
+                                                            onClick={() => { setResetStudentObj(s); setIsResetPasswordOpen(true); }}
+                                                            className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                                            title="Reset Password"
+                                                        >
+                                                            <Key size={16} />
+                                                        </button>
                                                         {user?.role !== 'trainer' && (
                                                             <button 
                                                                 onClick={() => handleDeleteStudent(s._id)}
@@ -1185,6 +1236,38 @@ const BatchDetail = () => {
                 message={alertState.message}
                 type={alertState.type}
             />
+
+            {isResetPasswordOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsResetPasswordOpen(false)} />
+                    <div className="bg-white max-w-sm w-full rounded-2xl shadow-2xl relative z-10 border border-slate-100 animate-in zoom-in-95 duration-150 overflow-hidden">
+                        <div className="px-6 py-5 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                            <h3 className="font-bold text-slate-800 text-base">Reset Student Password</h3>
+                            <button onClick={() => setIsResetPasswordOpen(false)} className="p-1 hover:bg-slate-200/60 rounded-lg text-slate-400"><X size={18} /></button>
+                        </div>
+                        <form onSubmit={handleResetPassword} className="p-6 space-y-4">
+                            <p className="text-xs text-slate-500 font-medium">Override password directly for <strong className="text-slate-800">{resetStudentObj?.name}</strong> (USN: {resetStudentObj?.usn}).</p>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">New Password *</label>
+                                <input 
+                                    type="text"
+                                    required
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-850 font-bold"
+                                    placeholder="Enter new password"
+                                    value={newStudentPassword}
+                                    onChange={e => setNewStudentPassword(e.target.value)}
+                                />
+                            </div>
+                            <div className="pt-2 flex gap-3">
+                                <button type="button" onClick={() => setIsResetPasswordOpen(false)} className="flex-1 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Cancel</button>
+                                <button type="submit" disabled={resettingPassword} className="flex-1 py-3 bg-amber-500 text-white rounded-xl text-xs font-extrabold hover:bg-amber-600 disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-amber-100">
+                                    {resettingPassword && <Loader2 size={14} className="animate-spin" />} Reset Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -190,6 +190,7 @@ const CreateExam = () => {
     const [confirmState, setConfirmState] = useState({ open: false });
     const [alertState, setAlertState] = useState({ open: false });
     const [bulkImport, setBulkImport] = useState({ open: false, loading: false, file: null, result: null });
+    const [overwriteQuestions, setOverwriteQuestions] = useState(true);
     const bulkFileRef = useRef(null);
 
     // Question Bank Import state
@@ -451,6 +452,7 @@ const CreateExam = () => {
         try {
             const formData = new FormData();
             formData.append('file', bulkImport.file);
+            formData.append('overwrite', overwriteQuestions);
             
             if (isEditing) {
                 formData.append('examId', id); // id from useParams (edit mode)
@@ -476,6 +478,8 @@ const CreateExam = () => {
                         correctAnswers: q.type === 'multiple_correct' ? q.options?.choices?.filter(c => c.isCorrect).map(c => c.text) : [],
                         marks: q.points
                     })));
+                } else {
+                    setQuestions([getDefaultQuestion()]);
                 }
             } else {
                 // Parsing in Create mode (and returning questions as JSON)
@@ -487,8 +491,8 @@ const CreateExam = () => {
                 
                 if (res.data.success) {
                     const parsedQs = res.data.data || [];
-                    // Remove default blank question if user hasn't edited it
-                    const finalQuestions = (questions.length === 1 && !questions[0].text.trim() && !questions[0].correctAnswer) 
+                    // Remove default blank question if user has selected overwrite or hasn't edited the default question
+                    const finalQuestions = (overwriteQuestions || (questions.length === 1 && !questions[0].text.trim() && !questions[0].correctAnswer)) 
                         ? parsedQs 
                         : [...questions, ...parsedQs];
                     
@@ -901,6 +905,17 @@ const CreateExam = () => {
                                 </>
                             )}
                         </div>
+
+                        {/* Replace/overwrite checkbox */}
+                        <label className="flex items-center gap-2 mb-4 text-xs font-semibold text-slate-700 cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                checked={overwriteQuestions} 
+                                onChange={(e) => setOverwriteQuestions(e.target.checked)} 
+                                className="w-4 h-4 rounded accent-emerald-600" 
+                            />
+                            <span>Replace existing questions in this exam</span>
+                        </label>
 
                         {/* Column format reminder */}
                         <div className="mb-5 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 space-y-1">
