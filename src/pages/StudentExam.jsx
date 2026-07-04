@@ -385,51 +385,59 @@ const StudentExam = () => {
         if (key && rollNumber) fetchExamData();
     }, [key, rollNumber, studentName, mobile, navigate]);
 
-    // Handle Selection
-    const handleAnswerChange = async (questionId, selectedOption) => {
-        const qType = questions.find(q => q.id === questionId)?.type || 'single_correct';
-        const isMultiple = qType === 'multiple' || qType === 'multiple_correct';
-
-        let finalAnswer;
-
-        // Use a temporary updated answers object to get the exact value we need to send to the server
-        setAnswers(prev => {
-            const currentVal = prev[questionId];
-            if (isMultiple) {
-                const prevAns = Array.isArray(currentVal) ? currentVal : (currentVal ? [currentVal] : []);
-                if (prevAns.includes(selectedOption)) {
-                    finalAnswer = prevAns.filter(opt => opt !== selectedOption);
-                } else {
-                    finalAnswer = [...prevAns, selectedOption];
-                }
-            } else {
-                finalAnswer = selectedOption;
-            }
-
-            // We need to trigger the API call WITH the new finalAnswer
-            // Since setState is async, we do the API call outside but with the calculated finalAnswer
-            syncAnswer(questionId, finalAnswer);
-
-            return { ...prev, [questionId]: finalAnswer };
-        });
-    };
-
-    const syncAnswer = async (questionId, answer) => {
-        // Flush time for that question
-        const qIdStr = questionId?.toString();
-        const timeSpent = questionTimeRef.current[qIdStr] || 0;
-        try {
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/update-progress`, {
-                examId: exam.id,
-                rollNumber: rollNumber,
-                questionId,
-                answer: Array.isArray(answer) ? answer : [answer],
-                timeSpent
-            });
-        } catch (error) {
-            console.error('Failed to sync response:', error);
-        }
-    };
+     // Handle Selection
+     const handleAnswerChange = async (questionId, selectedOption) => {
+         const qType = questions.find(q => q.id === questionId)?.type || 'single_correct';
+         const isMultiple = qType === 'multiple' || qType === 'multiple_correct';
+ 
+         let finalAnswer;
+ 
+         // Use a temporary updated answers object to get the exact value we need to send to the server
+         setAnswers(prev => {
+             const currentVal = prev[questionId];
+             if (isMultiple) {
+                 const prevAns = Array.isArray(currentVal) ? currentVal : (currentVal ? [currentVal] : []);
+                 if (prevAns.includes(selectedOption)) {
+                     finalAnswer = prevAns.filter(opt => opt !== selectedOption);
+                 } else {
+                     finalAnswer = [...prevAns, selectedOption];
+                 }
+             } else {
+                 finalAnswer = selectedOption;
+             }
+ 
+             return { ...prev, [questionId]: finalAnswer };
+         });
+ 
+         queueMicrotask(() => {
+             if (finalAnswer !== undefined) {
+                 syncAnswer(questionId, finalAnswer);
+             }
+         });
+     };
+ 
+     const syncAnswer = async (questionId, answer, retries = 2) => {
+         // Flush time for that question
+         const qIdStr = questionId?.toString();
+         const timeSpent = questionTimeRef.current[qIdStr] || 0;
+         try {
+             await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/update-progress`, {
+                 examId: exam.id,
+                 rollNumber: rollNumber,
+                 questionId,
+                 answer: Array.isArray(answer) ? answer : (answer !== undefined && answer !== null && answer !== '' ? [answer] : []),
+                 timeSpent
+             });
+         } catch (error) {
+             console.error('Failed to sync response:', error);
+             if (retries > 0) {
+                 console.log(`Retrying sync for question ${questionId} in 1.5 seconds... (${retries} attempts left)`);
+                 setTimeout(() => {
+                     syncAnswer(questionId, answer, retries - 1);
+                 }, 1500);
+             }
+         }
+     };
 
     // Compliance Management
     const handleViolation = async (type, count) => {
