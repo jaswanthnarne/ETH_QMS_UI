@@ -539,7 +539,7 @@ const WaitingRoom = () => {
                                             className="px-2.5 py-1.5 bg-red-50 text-red-600 border border-red-100 hover:bg-red-100/50 rounded-lg transition-all text-xs font-bold flex items-center gap-1 ml-auto shadow-sm active:scale-95 duration-100"
                                             title="Reset student's attempt to allow retaking the exam"
                                         >
-                                            <RefreshCw size={12} /> Reset
+                                            <RefreshCcw size={12} /> Reset
                                         </button>
                                     </td>
                                 </tr>
