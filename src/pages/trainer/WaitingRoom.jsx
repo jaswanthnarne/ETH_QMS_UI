@@ -60,6 +60,9 @@ const WaitingRoom = () => {
             });
             setExam(res.data.data.exam);
             setStudents(res.data.data.students);
+            if (res.data.data.chatMessages) {
+                setChatMessages(res.data.data.chatMessages);
+            }
         } catch (e) { console.error('Waiting room fetch failed', e); }
         finally { setLoading(false); }
     };
@@ -289,32 +292,52 @@ const WaitingRoom = () => {
 
     const formatTime = (s) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
+    const handleAddExtraTime = async (minutes) => {
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/waiting-room/${key}/extra-time`, { minutes }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAlertState({ open: true, title: 'Success', message: `Added ${minutes} minutes of extra time to the exam.`, type: 'success' });
+            fetchRoomData();
+        } catch (error) {
+            setAlertState({ open: true, title: 'Error Adding Time', message: error.response?.data?.error || error.message, type: 'error' });
+        }
+    };
+
     // Chat send handler
-    const handleSendChat = () => {
+    const handleSendChat = async () => {
         const msg = chatInput.trim();
-        if (!msg || !socket.current) return;
-        socket.current.emit('chat_message', {
-            examKey: key,
-            senderRole: 'trainer',
-            senderName: 'Trainer',
-            senderId: 'trainer',
-            message: msg
-        });
+        if (!msg) return;
         setChatInput('');
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/chat`, {
+                examKey: key,
+                senderRole: 'trainer',
+                senderName: 'Trainer',
+                senderId: 'trainer',
+                message: msg
+            });
+        } catch (error) {
+            console.error('Failed to send chat message:', error);
+        }
     };
 
     // Broadcast handler
-    const handleBroadcast = () => {
+    const handleBroadcast = async () => {
         const msg = broadcastMsg.trim();
-        if (!msg || !socket.current) return;
-        socket.current.emit('trainer_broadcast', {
-            examKey: key,
-            message: msg,
-            trainerName: 'Trainer'
-        });
+        if (!msg) return;
         setBroadcastMsg('');
         setBroadcastOpen(false);
-        setAlertState({ open: true, title: 'Broadcast Sent', message: 'Your announcement has been delivered to all active students.', type: 'success' });
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/broadcast`, {
+                examKey: key,
+                message: msg,
+                trainerName: 'Trainer'
+            });
+            setAlertState({ open: true, title: 'Broadcast Sent', message: 'Your announcement has been delivered to all active students.', type: 'success' });
+        } catch (error) {
+            setAlertState({ open: true, title: 'Error Sending Broadcast', message: error.response?.data?.error || error.message, type: 'error' });
+        }
     };
 
     // Auto-scroll chat
@@ -372,7 +395,7 @@ const WaitingRoom = () => {
                     {exam?.isStarted && exam?.isActive && !exam?.isPaused && (
                         <button 
                             onClick={handlePauseSession} 
-                            className="flex items-center gap-2 px-4 py-2 border border-amber-200 text-amber-600 bg-amber-50 text-sm font-semibold rounded-lg hover:bg-amber-100 transition-all"
+                            className="flex items-center gap-2 px-4 py-2 border border-amber-200 text-amber-600 bg-amber-50 text-sm font-semibold rounded-lg hover:bg-amber-100 transition-all whitespace-nowrap"
                         >
                             <Pause size={15} /> Pause
                         </button>
@@ -380,7 +403,7 @@ const WaitingRoom = () => {
                     {exam?.isStarted && exam?.isActive && exam?.isPaused && (
                         <button 
                             onClick={handleResumeSession} 
-                            className="flex items-center gap-2 px-4 py-2 border border-emerald-200 text-emerald-600 bg-emerald-50 text-sm font-semibold rounded-lg hover:bg-emerald-100 transition-all"
+                            className="flex items-center gap-2 px-4 py-2 border border-emerald-200 text-emerald-600 bg-emerald-50 text-sm font-semibold rounded-lg hover:bg-emerald-100 transition-all whitespace-nowrap"
                         >
                             <Play size={15} /> Resume
                         </button>
@@ -388,34 +411,48 @@ const WaitingRoom = () => {
                     {exam?.isStarted && exam?.isActive && (
                         <button 
                             onClick={handleForceSubmit} 
-                            className="flex items-center gap-2 px-4 py-2 border border-rose-200 text-rose-600 bg-rose-50 text-sm font-semibold rounded-lg hover:bg-rose-100 transition-all"
+                            className="flex items-center gap-2 px-4 py-2 border border-rose-200 text-rose-600 bg-rose-50 text-sm font-semibold rounded-lg hover:bg-rose-100 transition-all whitespace-nowrap"
                         >
                             <XCircle size={15} /> End Exam
                         </button>
                     )}
+                    {exam?.isStarted && exam?.isActive && (
+                        <div className="flex items-center gap-1 border border-slate-200 bg-slate-50 px-2 py-1 rounded-lg">
+                            <span className="text-[11px] text-slate-500 font-bold mr-1 whitespace-nowrap">Time:</span>
+                            {[5, 10, 15, 30].map(mins => (
+                                <button
+                                    key={mins}
+                                    onClick={() => handleAddExtraTime(mins)}
+                                    className="px-2 py-0.5 text-xs font-semibold bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 rounded transition-all active:scale-95 whitespace-nowrap"
+                                >
+                                    +{mins}m
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     {!exam?.isActive && (
                         <button 
                             onClick={handleRestartSession} 
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-all shadow-md"
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-all shadow-md whitespace-nowrap"
                         >
                             <RotateCcw size={15} /> Reopen Key
                         </button>
                     )}
-                    <button onClick={fetchRoomData} className="p-2 text-slate-400 hover:text-[#004AAD] border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors">
+                    <button onClick={fetchRoomData} className="p-2 text-slate-400 hover:text-[#004AAD] border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">
                         <RefreshCcw size={16} />
                     </button>
-                    <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
+                    <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors whitespace-nowrap">
                         <Download size={15} /> Export
                     </button>
                     <button 
                         onClick={() => setBroadcastOpen(true)} 
-                        className="flex items-center gap-2 px-4 py-2 border border-indigo-200 text-indigo-600 bg-indigo-50 text-sm font-semibold rounded-lg hover:bg-indigo-100 transition-all"
+                        className="flex items-center gap-2 px-4 py-2 border border-indigo-200 text-indigo-600 bg-indigo-50 text-sm font-semibold rounded-lg hover:bg-indigo-100 transition-all whitespace-nowrap"
                     >
                         <Megaphone size={15} /> Broadcast
                     </button>
                     <button 
                         onClick={() => setChatOpen(!chatOpen)} 
-                        className="relative flex items-center gap-2 px-4 py-2 border border-emerald-200 text-emerald-600 bg-emerald-50 text-sm font-semibold rounded-lg hover:bg-emerald-100 transition-all"
+                        className="relative flex items-center gap-2 px-4 py-2 border border-emerald-200 text-emerald-600 bg-emerald-50 text-sm font-semibold rounded-lg hover:bg-emerald-100 transition-all whitespace-nowrap"
                     >
                         <MessageSquare size={15} /> Chat
                         {unreadChat > 0 && (

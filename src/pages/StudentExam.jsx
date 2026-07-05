@@ -290,6 +290,11 @@ const StudentExam = () => {
             setTimeout(() => setBroadcast(null), 10000);
         });
 
+        // Time added listener
+        socket.current.on('time_added', (data) => {
+            setTimeLeft(prev => prev + (data.minutes * 60));
+        });
+
         return () => {
             if (socket.current) socket.current.disconnect();
         };
@@ -618,15 +623,15 @@ const StudentExam = () => {
         }
     }, [timeLeft, loading, exam, result]);
 
-    // Fallback polling for exam session state (started / paused / closed)
+    // Fallback polling for exam session state (started / paused / closed / chat / broadcasts / extra time)
     useEffect(() => {
         if (loading || result || !exam) return;
 
         const checkStatusInterval = setInterval(async () => {
             try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/settings/${key}`);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/poll/${key}/${rollNumber}`);
                 if (res.data.success) {
-                    const { isStarted: serverStarted, isPaused: serverPaused, isActive: serverActive } = res.data.data;
+                    const { isStarted: serverStarted, isPaused: serverPaused, isEnded, latestBroadcast, remainingSeconds, chatMessages: newChats } = res.data.data;
                     
                     if (serverStarted !== undefined && serverStarted !== isStarted) {
                         setIsStarted(serverStarted);
@@ -634,9 +639,20 @@ const StudentExam = () => {
                     if (serverPaused !== undefined && serverPaused !== isPaused) {
                         setIsPaused(serverPaused);
                     }
-                    if (serverActive === false && !submitting && !result) {
+                    if (isEnded && !submitting && !result) {
                         // Session has been forced closed by instructor
                         window.location.reload();
+                    }
+                    if (latestBroadcast) {
+                        setBroadcast(latestBroadcast);
+                    }
+                    if (remainingSeconds !== undefined) {
+                        if (Math.abs(timeLeft - remainingSeconds) > 5) {
+                            setTimeLeft(remainingSeconds);
+                        }
+                    }
+                    if (newChats) {
+                        setChatMessages(newChats.filter(m => m.senderRole === 'trainer' || m.senderId === rollNumber));
                     }
                 }
             } catch (err) {
@@ -645,7 +661,7 @@ const StudentExam = () => {
         }, 5000);
 
         return () => clearInterval(checkStatusInterval);
-    }, [loading, result, isStarted, isPaused, exam, key, submitting]);
+    }, [loading, result, isStarted, isPaused, exam, key, submitting, timeLeft]);
 
     const handleDownloadQuestionPaper = () => {
         const printWindow = window.open('', '_blank');
@@ -718,17 +734,22 @@ const StudentExam = () => {
     };
 
     // Chat send handler
-    const handleSendChat = () => {
+    const handleSendChat = async () => {
         const msg = chatInput.trim();
-        if (!msg || !socket.current) return;
-        socket.current.emit('chat_message', {
-            examKey: key,
-            senderRole: 'student',
-            senderName: studentName,
-            senderId: rollNumber,
-            message: msg
-        });
+        if (!msg) return;
         setChatInput('');
+        
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/chat`, {
+                examKey: key,
+                senderRole: 'student',
+                senderName: studentName,
+                senderId: rollNumber,
+                message: msg
+            });
+        } catch (error) {
+            console.error('Failed to send chat message:', error);
+        }
     };
 
     // Auto-scroll chat
