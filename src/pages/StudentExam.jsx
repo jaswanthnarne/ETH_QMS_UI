@@ -206,6 +206,11 @@ const StudentExam = () => {
     const [broadcast, setBroadcast] = useState(null);
     const chatEndRef = useRef(null);
     const chatOpenRef = useRef(false);
+    const chatCountRef = useRef(0);
+
+    useEffect(() => {
+        chatCountRef.current = chatMessages.length;
+    }, [chatMessages]);
 
     // Per-question time tracking
     const questionTimeRef = useRef({}); // { [questionId]: totalSecondsSpent }
@@ -629,7 +634,7 @@ const StudentExam = () => {
 
         const checkStatusInterval = setInterval(async () => {
             try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/poll/${key}/${rollNumber}`);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/poll/${key}/${rollNumber}?chatCount=${chatCountRef.current}`);
                 if (res.data.success) {
                     const { isStarted: serverStarted, isPaused: serverPaused, isEnded, latestBroadcast, remainingSeconds, chatMessages: newChats } = res.data.data;
                     
@@ -658,7 +663,7 @@ const StudentExam = () => {
             } catch (err) {
                 console.error('Failed to poll exam status:', err);
             }
-        }, 5000);
+        }, 10000);
 
         return () => clearInterval(checkStatusInterval);
     }, [loading, result, isStarted, isPaused, exam, key, submitting, timeLeft]);

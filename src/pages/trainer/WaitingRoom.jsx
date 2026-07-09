@@ -51,11 +51,16 @@ const WaitingRoom = () => {
     const [broadcastMsg, setBroadcastMsg] = useState('');
     const [unreadChat, setUnreadChat] = useState(0);
     const chatEndRef = useRef(null);
+    const chatCountRef = useRef(0);
+
+    useEffect(() => {
+        chatCountRef.current = chatMessages.length;
+    }, [chatMessages]);
 
     // Fetch initial HTTP data
     const fetchRoomData = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/waiting-room/${key}`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/trainer/waiting-room/${key}?chatCount=${chatCountRef.current}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setExam(res.data.data.exam);
@@ -116,7 +121,7 @@ const WaitingRoom = () => {
         // Fallback polling for serverless (Vercel) hosting
         const pollingInterval = setInterval(() => {
             fetchRoomData();
-        }, 5000);
+        }, 10000);
 
         return () => {
             if (socket.current) socket.current.disconnect();
