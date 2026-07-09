@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, Loader2, Clock, Target, Send, AlertCircle, ChevronDown, Bot, FileSpreadsheet, Upload, Download, X, Database, Users, Video, Mic, Monitor, ShieldAlert } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, Loader2, Clock, Target, Send, AlertCircle, ChevronDown, Bot, FileSpreadsheet, Upload, Download, X, Database, Users, Video, Mic, Monitor, ShieldAlert, CheckSquare, FileText } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../../store/authStore';
@@ -22,9 +22,10 @@ const getDefaultQuestion = (type = 'single_correct') => ({
     correctAnswer: '',
     correctAnswers: [],
     marks: 5,
+    sectionIndex: 0
 });
 
-const QuestionEditor = ({ question, index, onChange, onRemove, total }) => {
+const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, enableSections }) => {
     const q = question;
     const typeInfo = QUESTION_TYPES.find(t => t.id === q.type);
 
@@ -87,6 +88,19 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total }) => {
                         </select>
                         <p className="text-xs text-slate-400 mt-1">{typeInfo?.description}</p>
                     </div>
+                    {enableSections && (
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Section</label>
+                            <select value={q.sectionIndex || 0} onChange={(e) => onChange(q.id, 'sectionIndex', parseInt(e.target.value) || 0)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#004AAD] outline-none appearance-none cursor-pointer" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
+                                {sections && sections.length > 0 ? (
+                                    sections.map((s, sIdx) => <option key={sIdx} value={sIdx}>{s.name}</option>)
+                                ) : (
+                                    <option value="0">General</option>
+                                )}
+                            </select>
+                            <p className="text-xs text-slate-400 mt-1">Assign to exam section</p>
+                        </div>
+                    )}
                     <div className="w-32">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Marks</label>
                         <input type="number" min="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center focus:bg-white focus:border-[#004AAD] outline-none" value={q.marks} onChange={(e) => onChange(q.id, 'marks', parseInt(e.target.value) || 1)} />
@@ -210,7 +224,8 @@ const CreateExam = () => {
         courseId: '', department: '', duration: 60, passingPercentage: 40, instructions: '',
         scheduledDate: new Date().toISOString().slice(0, 16),
         expiryDate: '',
-        settings: { shuffleQuestions: true, showResultImmediately: true, allowReview: true, collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, randomizeQuestions: false, randomQuestionCount: 0, requireWebcam: false, requireMic: false, requireScreenshare: false }
+        sections: [],
+        settings: { shuffleQuestions: true, showResultImmediately: true, allowReview: true, collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, enableSections: false, enableNegativeMarking: false, negativeMarkValue: 0.25, randomizeQuestions: false, randomQuestionCount: 0, requireWebcam: false, requireMic: false, requireScreenshare: false, allowDownloadMarksheet: true, allowDownloadResponseMatrix: true, allowDownloadQuestionPaper: true }
     });
 
     const [questions, setQuestions] = useState([getDefaultQuestion()]);
@@ -261,10 +276,12 @@ const CreateExam = () => {
                     instructions: exam.instructions || '',
                     scheduledDate: exam.scheduledDate ? new Date(exam.scheduledDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
                     expiryDate: exam.expiryDate ? new Date(exam.expiryDate).toISOString().slice(0, 16) : '',
+                    sections: exam.sections || [],
                     settings: {
                         shuffleQuestions: true, showResultImmediately: true, allowReview: true, 
-                        collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, randomizeQuestions: false, randomQuestionCount: 0,
+                        collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, enableSections: false, enableNegativeMarking: false, negativeMarkValue: 0.25, randomizeQuestions: false, randomQuestionCount: 0,
                         requireWebcam: false, requireMic: false, requireScreenshare: false,
+                        allowDownloadMarksheet: true, allowDownloadResponseMatrix: true, allowDownloadQuestionPaper: true,
                         ...(exam.settings || {})
                     }
                 });
@@ -281,7 +298,8 @@ const CreateExam = () => {
                         options: q.options?.choices?.map(c => c.text) || [],
                         correctAnswer: q.type === 'multiple_correct' ? '' : q.correctAnswerText || (q.options?.choices?.find(c => c.isCorrect)?.text || ''),
                         correctAnswers: q.type === 'multiple_correct' ? q.options?.choices?.filter(c => c.isCorrect).map(c => c.text) : [],
-                        marks: q.points
+                        marks: q.points,
+                        sectionIndex: q.sectionIndex || 0
                     })));
                 }
             } catch (error) {
@@ -349,7 +367,8 @@ const CreateExam = () => {
                     text: q.text, 
                     options: q.options, 
                     correctAnswer: q.type === 'multiple_correct' ? JSON.stringify(q.correctAnswers) : q.correctAnswer, 
-                    marks: q.marks 
+                    marks: q.marks,
+                    sectionIndex: q.sectionIndex || 0
                 })) 
             };
 
@@ -476,7 +495,8 @@ const CreateExam = () => {
                         options: q.options?.choices?.map(c => c.text) || [],
                         correctAnswer: q.type === 'multiple_correct' ? '' : q.correctAnswerText || (q.options?.choices?.find(c => c.isCorrect)?.text || ''),
                         correctAnswers: q.type === 'multiple_correct' ? q.options?.choices?.filter(c => c.isCorrect).map(c => c.text) : [],
-                        marks: q.points
+                        marks: q.points,
+                        sectionIndex: q.sectionIndex || 0
                     })));
                 } else {
                     setQuestions([getDefaultQuestion()]);
@@ -491,10 +511,31 @@ const CreateExam = () => {
                 
                 if (res.data.success) {
                     const parsedQs = res.data.data || [];
-                    // Remove default blank question if user has selected overwrite or hasn't edited the default question
+                    let currentSections = [...(examData.sections || [])];
+                    const mappedParsedQs = parsedQs.map(q => {
+                        const sName = q.sectionName || 'General';
+                        let sIdx = currentSections.findIndex(s => s.name.toLowerCase() === sName.toLowerCase());
+                        if (sIdx === -1) {
+                            currentSections.push({ name: sName, description: `${sName} Section`, order: currentSections.length });
+                            sIdx = currentSections.length - 1;
+                        }
+                        return {
+                            id: q.id,
+                            type: q.type,
+                            text: q.text,
+                            options: q.options,
+                            correctAnswer: q.correctAnswer,
+                            correctAnswers: q.correctAnswers,
+                            marks: q.marks,
+                            sectionIndex: sIdx
+                        };
+                    });
+                    
+                    setExamData(prev => ({ ...prev, sections: currentSections }));
+                    
                     const finalQuestions = (overwriteQuestions || (questions.length === 1 && !questions[0].text.trim() && !questions[0].correctAnswer)) 
-                        ? parsedQs 
-                        : [...questions, ...parsedQs];
+                        ? mappedParsedQs 
+                        : [...questions, ...mappedParsedQs];
                     
                     setQuestions(finalQuestions);
                     setBulkImport(prev => ({ 
@@ -669,7 +710,16 @@ const CreateExam = () => {
                     </div>
 
                     {questions.map((q, i) => (
-                        <QuestionEditor key={q.id} question={q} index={i} onChange={handleQuestionChange} onRemove={removeQuestion} total={questions.length} />
+                        <QuestionEditor 
+                            key={q.id} 
+                            question={q} 
+                            index={i} 
+                            onChange={handleQuestionChange} 
+                            onRemove={removeQuestion} 
+                            total={questions.length} 
+                            sections={examData.sections}
+                            enableSections={examData.settings?.enableSections}
+                        />
                     ))}
 
                     {/* Quick add buttons */}
@@ -700,13 +750,82 @@ const CreateExam = () => {
                                 { key: 'collectEmail', label: 'Collect Email', desc: 'Require student email' },
                                 { key: 'collectMobile', label: 'Collect Mobile', desc: 'Require student phone number' },
                                 { key: 'collectDepartment', label: 'Collect Department', desc: 'Require student department' },
+                                { key: 'enableSections', label: 'Enable Sections', desc: 'Organize exam questions into topic-wise sections' },
+                                { key: 'enableNegativeMarking', label: 'Enable Negative Marking', desc: 'Deduct configured points for incorrect objective answers' },
                             ].map(s => (
                                 <label key={s.key} className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${examData.settings[s.key] ? 'bg-blue-50 border-[#004AAD]/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
-                                    <input type="checkbox" checked={examData.settings[s.key]} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [s.key]: e.target.checked } })} className="w-4 h-4 rounded accent-[#004AAD]" />
+                                    <input type="checkbox" checked={examData.settings[s.key] || false} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [s.key]: e.target.checked } })} className="w-4 h-4 rounded accent-[#004AAD]" />
                                     <div><p className="text-sm font-semibold text-slate-900">{s.label}</p><p className="text-xs text-slate-400">{s.desc}</p></div>
                                 </label>
                             ))}
                         </div>
+
+                        {examData.settings.enableSections && (
+                            <div className="border-t border-slate-100 pt-6 mt-6">
+                                <h4 className="text-sm font-bold text-slate-800 mb-2">Sections Configuration</h4>
+                                <p className="text-xs text-slate-400 mb-4 font-medium">Create the sections for your exam (e.g. GK, Maths, English). Students will write the exam section-by-section.</p>
+                                <div className="space-y-3 max-w-xl">
+                                    {(examData.sections || []).map((sec, sIdx) => (
+                                        <div key={sIdx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                            <span className="text-xs font-bold text-slate-500 w-8">Sec {sIdx + 1}</span>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Section Name (e.g. XYZ topic)" 
+                                                value={sec.name} 
+                                                onChange={(e) => {
+                                                    const updatedSecs = [...examData.sections];
+                                                    updatedSecs[sIdx].name = e.target.value;
+                                                    setExamData({ ...examData, sections: updatedSecs });
+                                                }}
+                                                className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded text-sm focus:border-[#004AAD] outline-none"
+                                            />
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const updatedSecs = examData.sections.filter((_, idx) => idx !== sIdx);
+                                                    setExamData({ ...examData, sections: updatedSecs });
+                                                    // Re-map questions in deleted section to index 0
+                                                    setQuestions(questions.map(q => q.sectionIndex === sIdx ? { ...q, sectionIndex: 0 } : (q.sectionIndex > sIdx ? { ...q, sectionIndex: q.sectionIndex - 1 } : q)));
+                                                }}
+                                                className="p-1.5 text-slate-400 hover:text-red-500 rounded animate-colors transition-colors"
+                                                title="Delete Section"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            const updatedSecs = [...(examData.sections || [])];
+                                            updatedSecs.push({ name: `Section ${updatedSecs.length + 1}`, description: '', order: updatedSecs.length });
+                                            setExamData({ ...examData, sections: updatedSecs });
+                                        }}
+                                        className="flex items-center gap-2 px-4 py-2 border border-dashed border-[#004AAD] text-[#004AAD] text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all w-full justify-center"
+                                    >
+                                        <Plus size={16} /> Add Section
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {examData.settings.enableNegativeMarking && (
+                            <div className="border-t border-slate-100 pt-6 mt-6 max-w-xs">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Negative Mark Value</label>
+                                <select 
+                                    value={examData.settings.negativeMarkValue || 0.25} 
+                                    onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, negativeMarkValue: parseFloat(e.target.value) || 0.25 } })} 
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#004AAD] outline-none appearance-none cursor-pointer"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
+                                >
+                                    <option value="0.25">0.25</option>
+                                    <option value="0.5">0.5</option>
+                                    <option value="0.75">0.75</option>
+                                    <option value="1">1.0</option>
+                                </select>
+                                <p className="text-xs text-slate-400 mt-1">Deducted per incorrect question attempt</p>
+                            </div>
+                        )}
 
                         {/* Dynamic Question Pooling Setting */}
                         <div className={`mt-6 flex flex-col gap-3 p-5 rounded-xl border-2 transition-all ${examData.settings.randomizeQuestions ? 'border-indigo-400 bg-indigo-50/50' : 'border-dashed border-slate-200 bg-white hover:border-indigo-300'}`}>
@@ -766,8 +885,35 @@ const CreateExam = () => {
                                     { key: 'requireMic', label: 'Require Microphone', desc: 'Requests voice verification and levels level testing permission', icon: <Mic size={16} className="text-emerald-600" /> },
                                     { key: 'requireScreenshare', label: 'Require Screenshare', desc: 'Prompts student for secure tab, window, or desktop sharing', icon: <Monitor size={16} className="text-blue-600" /> }
                                 ].map(p => (
-                                    <label key={p.key} className={`flex items-start gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all ${examData.settings[p.key] ? 'bg-slate-50 border-slate-900' : 'bg-white border-slate-200/80 hover:border-slate-300'}`}>
+                                    <label key={p.key} className={`flex items-start gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all ${examData.settings[p.key] ? 'bg-slate-50 border-slate-900' : 'bg-white border-slate-200/80 hover:border-slate-350'}`}>
                                         <input type="checkbox" checked={examData.settings[p.key] || false} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [p.key]: e.target.checked } })} className="w-4 h-4 mt-0.5 rounded accent-slate-950" />
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                {p.icon}
+                                                <p className="text-sm font-bold text-slate-850">{p.label}</p>
+                                            </div>
+                                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{p.desc}</p>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Student Download Permissions */}
+                        <div className="border-t border-slate-100 pt-6 mt-6">
+                            <h4 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <Download size={18} className="text-indigo-600" />
+                                Student Download Permissions
+                            </h4>
+                            <p className="text-xs text-slate-400 mb-4 font-medium">Configure which documents candidates are permitted to download on their assessment completion page.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {[
+                                    { key: 'allowDownloadMarksheet', label: 'Allow Marksheet', desc: 'Allows download of candidate details grid and summary calculations.', icon: <FileSpreadsheet size={16} className="text-indigo-600" /> },
+                                    { key: 'allowDownloadResponseMatrix', label: 'Allow Response Matrix', desc: 'Allows download of candidate objective choices, correct answers and grading details.', icon: <CheckSquare size={16} className="text-emerald-600" /> },
+                                    { key: 'allowDownloadQuestionPaper', label: 'Allow Question Paper', desc: 'Allows download of clean assessment questions without candidate markings.', icon: <FileText size={16} className="text-blue-600" /> }
+                                ].map(p => (
+                                    <label key={p.key} className={`flex items-start gap-3.5 p-4 rounded-xl border-2 cursor-pointer transition-all ${(examData.settings[p.key] ?? true) ? 'bg-slate-50 border-slate-900' : 'bg-white border-slate-200/80 hover:border-slate-350'}`}>
+                                        <input type="checkbox" checked={examData.settings[p.key] ?? true} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [p.key]: e.target.checked } })} className="w-4 h-4 mt-0.5 rounded accent-slate-950" />
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 {p.icon}

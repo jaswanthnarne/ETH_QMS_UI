@@ -14,11 +14,16 @@ import {
     ArrowRight,
     Trophy,
     FileText,
+    FileSpreadsheet,
+    CheckSquare,
     Target,
     XCircle,
     BookOpen,
     Timer,
     Award,
+    Lock,
+    Unlock,
+    PlayCircle,
     BarChart3,
     MessageSquare,
     X,
@@ -67,6 +72,113 @@ const StudentExam = () => {
     const [certDownloading, setCertDownloading] = useState(false);
     const socket = useRef(null);
     const [showAwakeModal, setShowAwakeModal] = useState(false);
+    const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+    const [maxUnlockedSection, setMaxUnlockedSection] = useState(0);
+
+    const [transitionState, setTransitionState] = useState({
+        active: false,
+        completedSectionIndex: -1,
+        nextSectionIndex: -1,
+        step: 'done',
+        count: 3
+    });
+
+    const triggerSectionTransition = (completedIdx, nextIdx) => {
+        setMaxUnlockedSection(nextIdx);
+        setTransitionState({
+            active: true,
+            completedSectionIndex: completedIdx,
+            nextSectionIndex: nextIdx,
+            step: 'done',
+            count: 3
+        });
+    };
+
+    const SARCASTIC_MESSAGES = [
+        "Section complete! Don't celebrate yet, the next section is designed to humble you. 😈",
+        "Look at you, graduating to the next section! Try not to guess all the answers this time. 🙄",
+        "Next section unlocked! Your brain cells survived the first part... let's see how they do here. 🧠💥",
+        "Wow, you actually made it. I'm as shocked as your instructor will be. 🤯",
+        "Entering the next section. Take a deep breath, or a nap. You'll need one of them. 💤",
+        "A new section begins! Try to use logic this time, not just pure blind luck. 🍀",
+        "One section down, more to go. Try not to mess this one up! 🙅‍♂️",
+        "Look who made it! Welcome to the danger zone of this assessment. ⚡",
+        "Section complete. Your reward? More questions! Yay. 🎉"
+    ];
+
+    const SARCASTIC_LOCKED_MESSAGES = [
+        "Nice try, but you can't teleport to the future yet. Complete the current section first! 🔒",
+        "Hold your horses! You need to finish the current section before unlocking this one. Patience is a virtue. 🔒",
+        "Are we trying to skip ahead? Complete all questions in the active section first, genius! 🔒",
+        "Not so fast! The gateway to this section is sealed until you answer every question in the current section. 🔒",
+        "We love your enthusiasm, but you're not getting in here until the previous section is 100% completed! 🔒"
+    ];
+
+    useEffect(() => {
+        if (!transitionState.active) return;
+
+        let timer;
+        if (transitionState.step === 'done') {
+            timer = setTimeout(() => {
+                setTransitionState(prev => ({ ...prev, step: 'countdown', count: 3 }));
+            }, 1500);
+        } else if (transitionState.step === 'countdown') {
+            if (transitionState.count > 0) {
+                timer = setTimeout(() => {
+                    setTransitionState(prev => ({ ...prev, count: prev.count - 1 }));
+                }, 1000);
+            } else {
+                setTransitionState(prev => ({ ...prev, step: 'start' }));
+            }
+        } else if (transitionState.step === 'start') {
+            timer = setTimeout(() => {
+                setActiveSectionIndex(transitionState.nextSectionIndex);
+                const firstQIndex = questions.findIndex(q => (q.sectionIndex || 0) === transitionState.nextSectionIndex);
+                if (firstQIndex !== -1) {
+                    setCurrentQuestion(firstQIndex);
+                }
+                setTransitionState({
+                    active: false,
+                    completedSectionIndex: -1,
+                    nextSectionIndex: -1,
+                    step: 'done',
+                    count: 3
+                });
+            }, 1500);
+        }
+
+        return () => clearTimeout(timer);
+    }, [transitionState.active, transitionState.step, transitionState.count, questions]);
+
+    const isSectionCompleted = (sIdx) => {
+        const secQuestions = questions.filter(q => (q.sectionIndex || 0) === sIdx);
+        if (secQuestions.length === 0) return true;
+        return secQuestions.every(q => answers[q.id] !== undefined && answers[q.id] !== null && answers[q.id] !== '');
+    };
+
+    const canAccessSection = (secIdx) => {
+        if (!exam?.settings?.enableSections || !exam?.sections?.length) return true;
+        for (let i = 0; i < secIdx; i++) {
+            if (!isSectionCompleted(i)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const canAccessQuestion = (qIdx) => {
+        if (!exam?.settings?.enableSections || !exam?.sections?.length) return true;
+        const q = questions[qIdx];
+        if (!q) return false;
+        return canAccessSection(q.sectionIndex || 0);
+    };
+
+    useEffect(() => {
+        if (questions && questions[currentQuestion]) {
+            const qSecIdx = questions[currentQuestion].sectionIndex || 0;
+            setActiveSectionIndex(qSecIdx);
+        }
+    }, [currentQuestion, questions]);
 
     // Mock proctoring states
     const [isWebcamActive, setIsWebcamActive] = useState(false);
@@ -582,10 +694,35 @@ const StudentExam = () => {
             return;
         }
 
+        // Section completeness check
+        let warningText = 'Are you certain you wish to finalize and submit your assessment? This action cannot be undone.';
+        if (exam?.settings?.enableSections && exam?.sections?.length > 0) {
+            const incompleteSections = [];
+            exam.sections.forEach((sec, sIdx) => {
+                const secQuestions = questions.filter(q => (q.sectionIndex || 0) === sIdx);
+                const answeredInSec = secQuestions.filter(q => answers[q.id]).length;
+                if (answeredInSec < secQuestions.length) {
+                    incompleteSections.push(`${sec.name} (${secQuestions.length - answeredInSec} unanswered)`);
+                }
+            });
+
+            if (incompleteSections.length > 0) {
+                warningText = `You have unanswered questions in some sections:\n` + 
+                    incompleteSections.map(s => `• ${s}`).join('\n') + 
+                    `\n\nAre you sure you want to submit? This action cannot be undone.`;
+            }
+        } else {
+            // Flat exam unanswered questions check
+            const unansweredCount = questions.length - Object.keys(answers).length;
+            if (unansweredCount > 0) {
+                warningText = `You have ${unansweredCount} unanswered questions. Are you sure you want to submit? This action cannot be undone.`;
+            }
+        }
+
         setConfirmState({
             open: true,
             title: 'Finalize Assessment',
-            message: 'Are you certain you wish to finalize and submit your assessment? This action cannot be undone.',
+            message: warningText,
             type: 'danger',
             confirmText: 'Submit Assessment',
             onConfirm: () => submitExam('completed', false)
@@ -667,6 +804,249 @@ const StudentExam = () => {
 
         return () => clearInterval(checkStatusInterval);
     }, [loading, result, isStarted, isPaused, exam, key, submitting, timeLeft]);
+
+    const handleDownloadMarksheet = () => {
+        if (!result) return;
+        const review = result.review || [];
+        const correctMarksSum = review.reduce((sum, q) => q.isCorrect ? sum + q.points : sum, 0);
+        const incorrectCount = review.filter(r => !r.isCorrect && r.studentAnswer && (Array.isArray(r.studentAnswer) ? r.studentAnswer.some(a => a) : r.studentAnswer)).length;
+        const penaltyValue = result.settings?.negativeMarkValue || exam?.settings?.negativeMarkValue || 0.25;
+        const rawPenalty = incorrectCount * penaltyValue;
+        const isPassedText = parseFloat(result.percentage) >= parseFloat(result.passingPercentage) ? 'Passed' : 'Not Passed';
+        const passedColor = parseFloat(result.percentage) >= parseFloat(result.passingPercentage) ? '#10b981' : '#ef4444';
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Mark Sheet - ${result.studentDetails?.name || 'Student'}</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+                        body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 700px; margin: 0 auto; line-height: 1.5; }
+                        .header { border-bottom: 2px solid #004AAD; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .header h1 { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; }
+                        .header p { font-size: 14px; color: #64748b; margin: 5px 0; font-weight: 500; }
+                        
+                        .section-title { font-size: 13px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-top: 25px; margin-bottom: 15px; }
+                        
+                        .info-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 15px 30px; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+                        .info-item { display: flex; flex-direction: column; }
+                        .info-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+                        .info-value { font-size: 13px; font-weight: 600; color: #334155; }
+                        
+                        .score-box { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 12px; padding: 25px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+                        .score-left h2 { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 5px 0; }
+                        .score-left .big-score { font-size: 48px; font-weight: 900; color: #ffffff; line-height: 1; margin: 0; }
+                        .score-left .big-score span { font-size: 20px; font-weight: 600; color: #94a3b8; }
+                        .score-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-top: 10px; border: 1px solid rgba(255,255,255,0.1); background-color: rgba(255,255,255,0.05); }
+                        
+                        .stats-row { display: grid; grid-template-cols: 1fr 1fr; gap: 12px; }
+                        .stat-card { background-color: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; text-align: center; }
+                        .stat-card p { margin: 0; }
+                        .stat-card .val { font-size: 18px; font-weight: 700; color: #ffffff; }
+                        
+                        .breakdown-grid { display: grid; grid-template-cols: 1fr 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+                        .breakdown-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; }
+                        .breakdown-lbl { font-size: 9px; font-weight: 750; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+                        .breakdown-val { font-size: 18px; font-weight: 900; margin: 8px 0 0 0; }
+                        
+                        .footer { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 45px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 500; }
+                        .no-print-btn { background-color: #004AAD; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
+                        .no-print-btn:hover { background-color: #003580; }
+                        @media print {
+                            .no-print { display: none; }
+                            body { padding: 20px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+                        <button class="no-print-btn" onclick="window.print()">Print / Save as PDF</button>
+                    </div>
+                    <div class="header">
+                         <h1>Assessment Mark Sheet</h1>
+                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #004AAD; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
+                    </div>
+
+                    <p class="section-title">Candidate Details</p>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Candidate Name</span>
+                            <span class="info-value">${result.studentDetails?.name || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">USN / Roll Number</span>
+                            <span class="info-value">${result.studentDetails?.rollNumber || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">College / Institution</span>
+                            <span class="info-value">${result.studentDetails?.college || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Assessment Course</span>
+                            <span class="info-value">${result.studentDetails?.course || 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <p class="section-title">Performance Summary</p>
+                    <div class="score-box">
+                        <div class="score-left">
+                            <h2>Overall Score</h2>
+                            <p class="big-score">${result.percentage}<span>%</span></p>
+                            <div class="score-status" style="color: ${passedColor}; border-color: ${passedColor}33; background-color: ${passedColor}0a;">
+                                <span style="display: inline-block; width: 6px; h: 6px; border-radius: 50%; background-color: ${passedColor};"></span>
+                                ${isPassedText}
+                            </div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stat-card">
+                                <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px;">Marks Obtained</p>
+                                <p class="val">${result.score} / ${result.totalMarks}</p>
+                            </div>
+                            <div class="stat-card">
+                                <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px;">Passing Criteria</p>
+                                <p class="val">${result.passingPercentage}%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="section-title">Score Breakdown</p>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-card">
+                            <p class="breakdown-lbl">Gross Marks</p>
+                            <p class="breakdown-val" style="color: #10b981;">+${correctMarksSum} pts</p>
+                        </div>
+                        <div class="breakdown-card">
+                            <p class="breakdown-lbl">Penalty Deductions</p>
+                            <p class="breakdown-val" style="color: #ef4444;">-${rawPenalty.toFixed(2)} pts</p>
+                        </div>
+                        <div class="breakdown-card">
+                            <p class="breakdown-lbl">Final Marks</p>
+                            <p class="breakdown-val" style="color: #004AAD;">${result.score} pts</p>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <p>© ${new Date().getFullYear()} Ethnotech Academy. All rights reserved. Generated on ${new Date().toLocaleDateString()}.</p>
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    };
+
+    const handleDownloadResponseMatrix = () => {
+        if (!result) return;
+        const review = result.review || [];
+        const isPassedText = parseFloat(result.percentage) >= parseFloat(result.passingPercentage) ? 'Passed' : 'Not Passed';
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const matrixHtml = review.map((q, idx) => {
+            const studentAns = Array.isArray(q.studentAnswer) ? q.studentAnswer : (q.studentAnswer ? [q.studentAnswer] : []);
+            const isSkipped = studentAns.length === 0 || studentAns.every(a => !a);
+            const correctAns = Array.isArray(q.correctAnswer) ? q.correctAnswer : (q.correctAnswer ? [q.correctAnswer] : []);
+            
+            let statusBadge = '';
+            if (isSkipped) {
+                statusBadge = '<span style="color: #64748b; font-weight: bold; font-size: 11px;">[Skipped]</span>';
+            } else if (q.isCorrect) {
+                statusBadge = '<span style="color: #10b981; font-weight: bold; font-size: 11px;">[Correct + ' + q.marksObtained + ']</span>';
+            } else {
+                statusBadge = '<span style="color: #ef4444; font-weight: bold; font-size: 11px;">[Wrong 0/' + q.points + ']</span>';
+            }
+
+            return `
+                <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; page-break-inside: avoid;">
+                    <p style="font-size: 13px; font-weight: 700; color: #1e293b; margin: 0 0 10px 0;">
+                        Q${idx + 1}. ${q.text} <span style="float: right;">${statusBadge}</span>
+                    </p>
+                    <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 15px; margin-top: 10px; font-size: 12px;">
+                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px;">
+                            <span style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 4px;">Candidate's Choice</span>
+                            <span style="font-weight: 600; color: ${q.isCorrect ? '#0f766e' : '#be123c'};">${isSkipped ? '—' : studentAns.join(', ')}</span>
+                        </div>
+                        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 6px;">
+                            <span style="font-size: 9px; font-weight: 700; color: #15803d; text-transform: uppercase; display: block; margin-bottom: 4px;">Correct Solution</span>
+                            <span style="font-weight: 600; color: #166534;">${correctAns.join(', ')}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Response Matrix - ${result.studentDetails?.name || 'Student'}</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+                        body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.5; }
+                        .header { border-bottom: 2px solid #004AAD; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .header h1 { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; }
+                        .header p { font-size: 14px; color: #64748b; margin: 5px 0; font-weight: 500; }
+                        
+                        .section-title { font-size: 13px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-top: 25px; margin-bottom: 15px; }
+                        
+                        .info-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 15px 30px; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+                        .info-item { display: flex; flex-direction: column; }
+                        .info-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+                        .info-value { font-size: 13px; font-weight: 600; color: #334155; }
+                        
+                        .footer { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 500; }
+                        .no-print-btn { background-color: #004AAD; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
+                        .no-print-btn:hover { background-color: #003580; }
+                        @media print {
+                            .no-print { display: none; }
+                            body { padding: 20px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+                        <button class="no-print-btn" onclick="window.print()">Print / Save as PDF</button>
+                    </div>
+                    <div class="header">
+                         <h1>Candidate Response Matrix</h1>
+                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #004AAD; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
+                    </div>
+
+                    <p class="section-title">Candidate Details</p>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Candidate Name</span>
+                            <span class="info-value">${result.studentDetails?.name || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">USN / Roll Number</span>
+                            <span class="info-value">${result.studentDetails?.rollNumber || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Exam Key</span>
+                            <span class="info-value">${result.sessionId?.uniqueKey || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Score / Percentage</span>
+                            <span class="info-value">${result.score} pts (${result.percentage}%) - ${isPassedText}</span>
+                        </div>
+                    </div>
+
+                    <p class="section-title">Response Analysis</p>
+                    <div>
+                        ${matrixHtml}
+                    </div>
+
+                    <div class="footer">
+                        <p>© ${new Date().getFullYear()} Ethnotech Academy. All rights reserved. Generated on ${new Date().toLocaleDateString()}.</p>
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    };
 
     const handleDownloadQuestionPaper = () => {
         const printWindow = window.open('', '_blank');
@@ -807,8 +1187,12 @@ const StudentExam = () => {
         const isPassed = parseFloat(result.percentage) >= parseFloat(result.passingPercentage);
         const review = result.review || [];
         const correctCount = review.filter(r => r.isCorrect).length;
-        const incorrectCount = review.filter(r => !r.isCorrect && r.studentAnswer?.length > 0).length;
+        const incorrectCount = review.filter(r => !r.isCorrect && r.studentAnswer && (Array.isArray(r.studentAnswer) ? r.studentAnswer.some(a => a) : r.studentAnswer)).length;
         const skippedCount = review.filter(r => !r.studentAnswer || r.studentAnswer.length === 0 || (Array.isArray(r.studentAnswer) && r.studentAnswer.every(a => !a))).length;
+
+        const correctMarksSum = review.reduce((sum, q) => q.isCorrect ? sum + q.points : sum, 0);
+        const penaltyValue = result.settings?.negativeMarkValue || exam?.settings?.negativeMarkValue || 0.25;
+        const rawPenalty = incorrectCount * penaltyValue;
 
         const filteredReview = reviewTab === 'correct' ? review.filter(r => r.isCorrect)
             : reviewTab === 'incorrect' ? review.filter(r => !r.isCorrect)
@@ -821,10 +1205,44 @@ const StudentExam = () => {
         };
 
         return (
-            <div className="min-h-screen bg-[#f8f9fb]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <div id="printable-area" className="min-h-screen bg-[#f8f9fb]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                {/* Print styles */}
+                <style>{`
+                    @media print {
+                        body {
+                            background: white !important;
+                            color: black !important;
+                            font-size: 12px !important;
+                        }
+                        .no-print {
+                            display: none !important;
+                        }
+                        #printable-area {
+                            background: white !important;
+                            padding: 0 !important;
+                            margin: 0 !important;
+                        }
+                        .bg-slate-50 {
+                            background-color: #f8fafc !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .bg-white {
+                            background-color: #ffffff !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .border {
+                            border-color: #e2e8f0 !important;
+                        }
+                        h1, h2, h3, p, span {
+                            color: black !important;
+                        }
+                    }
+                `}</style>
                 {/* ——— Top Hero Banner ——— */}
                 <div className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] overflow-hidden">
-                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 20%, rgba(0,74,173,0.15) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.08) 0%, transparent 50%)' }} />
+                    <div className="no-print absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 20%, rgba(0,74,173,0.15) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.08) 0%, transparent 50%)' }} />
                     <div className="max-w-3xl mx-auto px-6 pt-10 pb-28 relative z-10">
                         <div className="flex items-center gap-2.5 justify-center mb-10">
                             <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech" className="h-8 w-8 brightness-0 invert opacity-90" />
@@ -862,20 +1280,103 @@ const StudentExam = () => {
                                             </div>
                                         </div>
                                         {/* Marks & Pass */}
-                                        <div className="flex gap-3 w-full md:w-auto">
-                                            <div className="flex-1 md:w-28 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                                                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Marks</p>
-                                                <p className="text-xl font-bold text-slate-800">{result.score}<span className="text-sm font-medium text-slate-400">/{result.totalMarks}</span></p>
+                                        {/* Marks & Pass */}
+                                        <div className="flex flex-col gap-2 w-full md:w-[15rem]">
+                                            <div className="flex gap-3 w-full mb-1">
+                                                <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                                                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Marks</p>
+                                                    <p className="text-xl font-bold text-slate-800">{result.score}<span className="text-sm font-medium text-slate-400">/{result.totalMarks}</span></p>
+                                                </div>
+                                                <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                                                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Pass Mark</p>
+                                                    <p className="text-xl font-bold text-slate-800">{result.passingPercentage}%</p>
+                                                </div>
                                             </div>
-                                            <div className="flex-1 md:w-28 bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                                                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Pass Mark</p>
-                                                <p className="text-xl font-bold text-slate-800">{result.passingPercentage}%</p>
-                                            </div>
+                                            
+                                            {/* Download Buttons controlled by Admin Permissions */}
+                                            {result.settings?.allowDownloadMarksheet !== false && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleDownloadMarksheet}
+                                                    className="no-print w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#004AAD] hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95"
+                                                >
+                                                    <FileSpreadsheet size={13} /> Download Mark Sheet
+                                                </button>
+                                            )}
+                                            {result.settings?.allowDownloadResponseMatrix !== false && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleDownloadResponseMatrix}
+                                                    className="no-print w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95"
+                                                >
+                                                    <CheckSquare size={13} /> Download Response Matrix
+                                                </button>
+                                            )}
+                                            {result.settings?.allowDownloadQuestionPaper !== false && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleDownloadQuestionPaper}
+                                                    className="no-print w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-800 hover:bg-black text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95"
+                                                >
+                                                    <FileText size={13} /> Download Question Paper
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Candidate Information Grid */}
+                                <div className="p-7 md:p-9 border-t border-slate-100 bg-slate-50/50">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Candidate Name</p>
+                                            <p className="text-[13px] font-bold text-slate-800 mt-0.5">{result.studentDetails?.name || 'Test Student'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">USN / Roll Number</p>
+                                            <p className="text-[13px] font-bold text-slate-800 mt-0.5">{result.studentDetails?.rollNumber || 'TEST001'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">College / Institution</p>
+                                            <p className="text-[13px] font-bold text-slate-800 mt-0.5 truncate" title={result.studentDetails?.college}>{result.studentDetails?.college || 'N/A'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assessment Course</p>
+                                            <p className="text-[13px] font-bold text-slate-800 mt-0.5 truncate" title={result.studentDetails?.course}>{result.studentDetails?.course || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Marks Calculation Summary */}
+                                <div className="p-7 md:p-9 border-t border-slate-100">
+                                    <h3 className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-4 text-left">Detailed Score Breakdown</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+                                        <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col justify-between">
+                                            <div>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Gross Marks</p>
+                                                <p className="text-[11px] text-slate-455 mt-0.5 leading-relaxed">Total points earned from correct answers</p>
+                                            </div>
+                                            <p className="text-xl font-black text-emerald-600 mt-3">+{correctMarksSum} pts</p>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col justify-between">
+                                            <div>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Penalty Deductions</p>
+                                                <p className="text-[11px] text-slate-455 mt-0.5 leading-relaxed">{incorrectCount} incorrect attempts with negative marking ({penaltyValue} deduction weight)</p>
+                                            </div>
+                                            <p className="text-xl font-black text-rose-600 mt-3">-{rawPenalty.toFixed(2)} pts</p>
+                                        </div>
+                                        <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col justify-between">
+                                            <div>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Final Adjusted Marks</p>
+                                                <p className="text-[11px] text-slate-455 mt-0.5 leading-relaxed">Sum of points earned minus penalties (minimum capped at 0)</p>
+                                            </div>
+                                            <p className="text-xl font-black text-[#004AAD] mt-3">{result.score} / {result.totalMarks} pts</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Progress bar */}
-                                <div className="px-7 md:px-9 pb-7 md:pb-9">
+                                <div className="px-7 md:px-9 pb-7 md:pb-9 border-t border-slate-100 pt-6">
                                     <div className="flex justify-between text-[11px] font-medium text-slate-400 mb-2">
                                         <span>Performance</span>
                                         <span>{result.score} / {result.totalMarks} pts</span>
@@ -926,7 +1427,7 @@ const StudentExam = () => {
                         <div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                                 <h2 className="text-lg font-bold text-slate-900">Response Review</h2>
-                                <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200/80">
+                                <div className="no-print flex bg-slate-100 p-1 rounded-lg border border-slate-200/80">
                                     {[
                                         { id: 'all', label: `All (${review.length})` },
                                         { id: 'correct', label: `Correct (${correctCount})` },
@@ -1033,12 +1534,14 @@ const StudentExam = () => {
                                 {certDownloading ? <><Loader2 size={16} className="animate-spin" /> Generating...</> : <><Award size={16} /> Download Certificate</>}
                             </button>
                         )}
-                        <button
-                            onClick={handleDownloadQuestionPaper}
-                            className="flex-1 py-3.5 rounded-xl bg-[#004AAD] hover:bg-[#003580] text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                        >
-                            <FileText size={15} /> Print Question Paper
-                        </button>
+                        {result.settings?.allowDownloadQuestionPaper !== false && (
+                            <button
+                                onClick={handleDownloadQuestionPaper}
+                                className="flex-1 py-3.5 rounded-xl bg-[#004AAD] hover:bg-[#003580] text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                            >
+                                <FileText size={15} /> Print Question Paper
+                            </button>
+                        )}
                         <button
                             onClick={() => navigate(student ? '/student/dashboard' : '/')}
                             className="flex-1 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
@@ -1213,9 +1716,52 @@ const StudentExam = () => {
     }
 
     const currentQ = questions[currentQuestion];
+    const activeSecQs = exam?.settings?.enableSections && exam?.sections?.length > 0 
+        ? questions.filter(q => (q.sectionIndex || 0) === activeSectionIndex) 
+        : [];
+    const activeQIdx = exam?.settings?.enableSections && exam?.sections?.length > 0 
+        ? activeSecQs.findIndex(q => q.id === currentQ?.id) 
+        : -1;
 
     return (
         <div className="min-h-screen bg-[#f8f9fb] flex flex-col overflow-hidden select-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+
+            {/* Section Transition Overlay */}
+            {transitionState.active && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
+                    <div className="text-center">
+                        {transitionState.step === 'done' && (
+                            <div className="animate-fade-in">
+                                <CheckCircle2 size={64} className="text-emerald-400 mx-auto mb-6" />
+                                <p className="text-3xl font-extrabold text-white tracking-tight mb-2">
+                                    Section {transitionState.completedSectionIndex + 1} {exam?.sections?.[transitionState.completedSectionIndex]?.name} done
+                                </p>
+                                <p className="text-sm text-slate-400 font-medium mt-3">Preparing next section...</p>
+                            </div>
+                        )}
+
+                        {transitionState.step === 'countdown' && (
+                            <div key={transitionState.count} className="animate-count-pop">
+                                <p className="text-[120px] font-black text-white leading-none" style={{ textShadow: '0 0 60px rgba(59,130,246,0.5)' }}>
+                                    {transitionState.count > 0 ? transitionState.count : ''}
+                                </p>
+                                <p className="text-lg text-slate-400 font-bold uppercase tracking-widest mt-4">Get Ready</p>
+                            </div>
+                        )}
+
+                        {transitionState.step === 'start' && (
+                            <div className="animate-fade-in">
+                                <PlayCircle size={64} className="text-blue-400 mx-auto mb-6" />
+                                <p className="text-3xl font-extrabold text-white tracking-tight mb-2">
+                                    Section {transitionState.nextSectionIndex + 1} start
+                                </p>
+                                <p className="text-sm text-slate-400 font-medium mt-3">{exam?.sections?.[transitionState.nextSectionIndex]?.name}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <header className="bg-white border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between z-50 shadow-sm relative overflow-hidden">
                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(0,74,173,0.02) 0%, transparent 100%)' }} />
@@ -1285,13 +1831,83 @@ const StudentExam = () => {
                             />
                         </div>
 
+                        {exam?.settings?.enableSections && exam?.sections?.length > 0 && (
+                            <div className="flex border-b border-slate-100 bg-slate-50/50 p-2 overflow-x-auto gap-2">
+                                {exam.sections.map((sec, sIdx) => {
+                                    const secQuestions = questions.filter(q => (q.sectionIndex || 0) === sIdx);
+                                    const secQuestionsCount = secQuestions.length;
+                                    const secAnsweredCount = secQuestions.filter(q => answers[q.id]).length;
+                                    const isActive = activeSectionIndex === sIdx;
+                                    const isLocked = sIdx > maxUnlockedSection;
+                                    const isDone = secAnsweredCount === secQuestionsCount;
+                                    return (
+                                        <button
+                                            key={sIdx}
+                                            type="button"
+                                            onClick={() => {
+                                                if (!isLocked) {
+                                                    if (sIdx > activeSectionIndex && sIdx === maxUnlockedSection && maxUnlockedSection > activeSectionIndex) {
+                                                        flushCurrentQuestionTime();
+                                                        triggerSectionTransition(activeSectionIndex, sIdx);
+                                                    } else {
+                                                        const firstQIndex = questions.findIndex(q => (q.sectionIndex || 0) === sIdx);
+                                                        if (firstQIndex !== -1) {
+                                                            flushCurrentQuestionTime();
+                                                            setCurrentQuestion(firstQIndex);
+                                                            setActiveSectionIndex(sIdx);
+                                                        }
+                                                    }
+                                                } else {
+                                                    const randomMsg = SARCASTIC_LOCKED_MESSAGES[Math.floor(Math.random() * SARCASTIC_LOCKED_MESSAGES.length)];
+                                                    setAlertState({
+                                                        open: true,
+                                                        title: "Section Locked",
+                                                        message: randomMsg,
+                                                        type: "warning"
+                                                    });
+                                                }
+                                            }}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border-2 ${
+                                                isLocked 
+                                                    ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed opacity-60' 
+                                                    : isActive 
+                                                        ? 'bg-[#004AAD] text-white border-[#004AAD] shadow-md' 
+                                                        : 'bg-white text-slate-650 border-slate-200 hover:border-slate-350'
+                                            }`}
+                                        >
+                                            {isLocked ? (
+                                                <Lock size={12} className={isActive ? 'text-white' : 'text-slate-405'} />
+                                            ) : (
+                                                isDone && <CheckCircle2 size={12} className="text-emerald-500" />
+                                            )}
+                                            <span>{sec.name}</span>
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                                {secAnsweredCount}/{secQuestionsCount}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+
                         <div className="px-8 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div className="flex items-center gap-3">
                                 <span className="bg-blue-50 text-blue-700 border border-blue-100 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[13px]">
-                                    {currentQuestion + 1}
+                                    {exam?.settings?.enableSections && exam?.sections?.length > 0 ? activeQIdx + 1 : currentQuestion + 1}
                                 </span>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Question {currentQuestion + 1} of {questions.length}</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                        {exam?.settings?.enableSections && exam?.sections?.length > 0 ? (
+                                            <>Question {activeQIdx + 1} of {activeSecQs.length}</>
+                                        ) : (
+                                            <>Question {currentQuestion + 1} of {questions.length}</>
+                                        )}
+                                        {exam?.settings?.enableSections && exam?.sections?.[activeSectionIndex] && (
+                                            <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[9px] font-bold tracking-normal border border-blue-100 uppercase">
+                                                <Unlock size={8} /> Section: {exam.sections[activeSectionIndex].name}
+                                            </span>
+                                        )}
+                                    </p>
                                 </div>
                             </div>
                             
@@ -1299,7 +1915,11 @@ const StudentExam = () => {
                                 {/* Navigation Buttons at the Top */}
                                 <div className="flex gap-2">
                                     <button
-                                        disabled={currentQuestion === 0}
+                                        disabled={
+                                            currentQuestion === 0 || 
+                                            (exam?.settings?.enableSections && 
+                                             questions[currentQuestion - 1]?.sectionIndex !== activeSectionIndex)
+                                        }
                                         onClick={() => {
                                             flushCurrentQuestionTime();
                                             setCurrentQuestion(prev => prev - 1);
@@ -1308,23 +1928,81 @@ const StudentExam = () => {
                                     >
                                         <ChevronLeft size={13} /> Prev
                                     </button>
-                                    {currentQuestion === questions.length - 1 ? (
-                                        <button
-                                            onClick={handleManualSubmit}
-                                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                                        >
-                                            Submit <Send size={11} />
-                                        </button>
+                                    
+                                    {/* If sections are enabled, check if current question is last in the section */}
+                                    {exam?.settings?.enableSections && exam?.sections?.length > 0 ? (
+                                        (() => {
+                                            const activeSecQs = questions.filter(q => (q.sectionIndex || 0) === activeSectionIndex);
+                                            const isLastInSec = activeSecQs.length > 0 && activeSecQs[activeSecQs.length - 1].id === currentQ?.id;
+                                            const isFinalSection = activeSectionIndex === exam.sections.length - 1;
+
+                                            if (isLastInSec) {
+                                                if (isFinalSection) {
+                                                    return (
+                                                        <button
+                                                            onClick={handleManualSubmit}
+                                                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                                                        >
+                                                            Submit Exam <Send size={11} />
+                                                        </button>
+                                                    );
+                                                } else {
+                                                    return (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (isSectionCompleted(activeSectionIndex)) {
+                                                                    const nextSecIdx = activeSectionIndex + 1;
+                                                                    flushCurrentQuestionTime();
+                                                                    triggerSectionTransition(activeSectionIndex, nextSecIdx);
+                                                                } else {
+                                                                    setAlertState({
+                                                                        open: true,
+                                                                        title: "Section Incomplete",
+                                                                        message: `Complete all questions in the current section before proceeding to the next section!`,
+                                                                        type: "warning"
+                                                                    });
+                                                                }
+                                                            }}
+                                                            className="bg-[#004AAD] hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95 animate-pulse"
+                                                        >
+                                                            Next Section <ArrowRight size={11} />
+                                                        </button>
+                                                    );
+                                                }
+                                            } else {
+                                                return (
+                                                    <button
+                                                        onClick={() => {
+                                                            flushCurrentQuestionTime();
+                                                            setCurrentQuestion(prev => prev + 1);
+                                                        }}
+                                                        className="bg-slate-900 hover:bg-black text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm active:scale-95"
+                                                    >
+                                                        Next <ChevronRight size={13} />
+                                                    </button>
+                                                );
+                                            }
+                                        })()
                                     ) : (
-                                        <button
-                                            onClick={() => {
-                                                flushCurrentQuestionTime();
-                                                setCurrentQuestion(prev => prev + 1);
-                                            }}
-                                            className="bg-slate-900 hover:bg-black text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm active:scale-95"
-                                        >
-                                            Next <ChevronRight size={13} />
-                                        </button>
+                                        /* Standard flow (no sections) */
+                                        currentQuestion === questions.length - 1 ? (
+                                            <button
+                                                onClick={handleManualSubmit}
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                                            >
+                                                Submit <Send size={11} />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => {
+                                                    flushCurrentQuestionTime();
+                                                    setCurrentQuestion(prev => prev + 1);
+                                                }}
+                                                className="bg-slate-900 hover:bg-black text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1 shadow-sm active:scale-95"
+                                            >
+                                                Next <ChevronRight size={13} />
+                                            </button>
+                                        )
                                     )}
                                 </div>
                                 <div className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
@@ -1477,28 +2155,91 @@ const StudentExam = () => {
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-5 gap-2.5 overflow-y-auto pb-4 max-h-[360px] custom-scrollbar relative z-10">
-                            {questions.map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => {
-                                        flushCurrentQuestionTime();
-                                        setCurrentQuestion(i);
-                                    }}
-                                    className={`
-                                        h-10 rounded-lg text-[11px] font-bold transition-all relative
-                                        ${currentQuestion === i
-                                            ? 'ring-2 ring-blue-500 ring-offset-1 bg-blue-50 text-blue-700 border border-blue-200'
-                                            : marked.includes(questions[i].id)
-                                                ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
-                                                : answers[questions[i].id]
-                                                    ? 'bg-slate-800 text-white shadow-sm'
-                                                    : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'}
-                                    `}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
+                        <div className="overflow-y-auto pb-4 max-h-[360px] custom-scrollbar relative z-10 text-left">
+                            {exam?.settings?.enableSections && exam?.sections?.length > 0 ? (
+                                exam.sections.map((sec, sIdx) => {
+                                    const secQuestions = questions.filter(q => (q.sectionIndex || 0) === sIdx);
+                                    const isLocked = sIdx > maxUnlockedSection;
+                                    if (secQuestions.length === 0) return null;
+                                    return (
+                                        <div key={sIdx} className="mb-4">
+                                            <div className="flex items-center gap-1.5 mb-2 border-b border-slate-100 pb-1">
+                                                {isLocked ? (
+                                                    <Lock size={10} className="text-slate-400" />
+                                                ) : (
+                                                    <Unlock size={10} className="text-blue-500" />
+                                                )}
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                                    {sec.name}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-5 gap-2.5">
+                                                {questions.map((q, i) => {
+                                                    if ((q.sectionIndex || 0) !== sIdx) return null;
+                                                    const relativeQIndex = secQuestions.findIndex(sq => sq.id === q.id) + 1;
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => {
+                                                                if (isLocked) {
+                                                                    const randomMsg = SARCASTIC_LOCKED_MESSAGES[Math.floor(Math.random() * SARCASTIC_LOCKED_MESSAGES.length)];
+                                                                    setAlertState({
+                                                                        open: true,
+                                                                        title: "Section Locked",
+                                                                        message: randomMsg,
+                                                                        type: "warning"
+                                                                    });
+                                                                    return;
+                                                                }
+                                                                flushCurrentQuestionTime();
+                                                                setCurrentQuestion(i);
+                                                                setActiveSectionIndex(sIdx);
+                                                            }}
+                                                            className={`
+                                                                h-10 rounded-lg text-[11px] font-bold transition-all relative flex items-center justify-center
+                                                                ${isLocked ? 'opacity-50 cursor-not-allowed bg-slate-50 border border-slate-200 text-slate-300' : 
+                                                                  currentQuestion === i
+                                                                    ? 'ring-2 ring-blue-500 ring-offset-1 bg-blue-50 text-blue-700 border border-blue-200'
+                                                                    : marked.includes(q.id)
+                                                                        ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
+                                                                        : answers[q.id]
+                                                                            ? 'bg-slate-800 text-white shadow-sm'
+                                                                            : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'}
+                                                            `}
+                                                        >
+                                                            {relativeQIndex}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="grid grid-cols-5 gap-2.5">
+                                    {questions.map((q, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => {
+                                                flushCurrentQuestionTime();
+                                                setCurrentQuestion(i);
+                                            }}
+                                            className={`
+                                                h-10 rounded-lg text-[11px] font-bold transition-all relative flex items-center justify-center
+                                                ${currentQuestion === i
+                                                    ? 'ring-2 ring-blue-500 ring-offset-1 bg-blue-50 text-blue-700 border border-blue-200'
+                                                    : marked.includes(q.id)
+                                                        ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
+                                                        : answers[q.id]
+                                                            ? 'bg-slate-800 text-white shadow-sm'
+                                                            : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'}
+                                            `}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-8 space-y-3.5 pt-6 border-t border-slate-100 relative z-10">

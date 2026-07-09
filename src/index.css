@@ -98,6 +98,14 @@ input:focus, button:focus-visible {
 .animate-fadeUp-delay-2 { animation: fadeUp 0.7s 0.2s ease-out forwards; opacity: 0; }
 .animate-fadeUp-delay-3 { animation: fadeUp 0.7s 0.3s ease-out forwards; opacity: 0; }
 .animate-fadeIn { animation: fadeIn 1s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+@keyframes countPop {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-count-pop { animation: countPop 0.5s ease-out forwards; }
 .animate-float { animation: float 6s ease-in-out infinite; }
 
 /* Broadcast toast progress bar shrink */
