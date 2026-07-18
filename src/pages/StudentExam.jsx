@@ -58,6 +58,7 @@ const StudentExam = () => {
     const [showWarning, setShowWarning] = useState(null);
     const [answers, setAnswers] = useState({});
     const [marked, setMarked] = useState([]);
+    const [skipped, setSkipped] = useState([]);
     const [exam, setExam] = useState(null);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -153,7 +154,10 @@ const StudentExam = () => {
     const isSectionCompleted = (sIdx) => {
         const secQuestions = questions.filter(q => (q.sectionIndex || 0) === sIdx);
         if (secQuestions.length === 0) return true;
-        return secQuestions.every(q => answers[q.id] !== undefined && answers[q.id] !== null && answers[q.id] !== '');
+        return secQuestions.every(q => 
+            (answers[q.id] !== undefined && answers[q.id] !== null && answers[q.id] !== '') ||
+            (skipped && skipped.includes(q.id))
+        );
     };
 
     const canAccessSection = (secIdx) => {
@@ -463,11 +467,12 @@ const StudentExam = () => {
                     return;
                 }
 
-                const { exam: examInfo, questions: qList, existingAnswers } = res.data.data;
+                const { exam: examInfo, questions: qList, existingAnswers, existingSkipped } = res.data.data;
 
                 setExam(examInfo);
                 setQuestions(qList);
                 setAnswers(existingAnswers || {});
+                setSkipped(existingSkipped || []);
                 setTimeLeft(examInfo.duration * 60);
                 setIsStarted(examInfo.isStarted || false);
                 setIsPaused(examInfo.isPaused || false);
@@ -530,6 +535,9 @@ const StudentExam = () => {
  
              return { ...prev, [questionId]: finalAnswer };
          });
+
+         // Remove from skipped list if answered
+         setSkipped(prev => prev.filter(id => id !== questionId));
  
          queueMicrotask(() => {
              if (finalAnswer !== undefined) {
@@ -548,6 +556,7 @@ const StudentExam = () => {
                  rollNumber: rollNumber,
                  questionId,
                  answer: Array.isArray(answer) ? answer : (answer !== undefined && answer !== null && answer !== '' ? [answer] : []),
+                 isSkipped: false,
                  timeSpent
              });
          } catch (error) {
@@ -560,6 +569,57 @@ const StudentExam = () => {
              }
          }
      };
+
+      const handleSkipQuestion = async () => {
+          const qId = questions[currentQuestion]?.id;
+          if (!qId) return;
+
+          // Clear any selected answer locally for this question
+          setAnswers(prev => {
+              const nextAns = { ...prev };
+              delete nextAns[qId];
+              return nextAns;
+          });
+
+          // Add to skipped list
+          setSkipped(prev => {
+              if (!prev.includes(qId)) {
+                  return [...prev, qId];
+              }
+              return prev;
+          });
+
+          // Sync skipped status to backend
+          const qIdStr = qId.toString();
+          const timeSpent = questionTimeRef.current[qIdStr] || 0;
+          try {
+              await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/exam/update-progress`, {
+                  examId: exam.id,
+                  rollNumber: rollNumber,
+                  questionId: qId,
+                  answer: [],
+                  isSkipped: true,
+                  timeSpent
+              });
+          } catch (error) {
+              console.error('Failed to sync skip progress:', error);
+          }
+
+          // Navigate to the next question automatically if not the last question in the current viewable set
+          const activeSecQs = exam?.settings?.enableSections && exam?.sections?.length > 0 
+              ? questions.filter(q => (q.sectionIndex || 0) === activeSectionIndex) 
+              : questions;
+          const currentInSecIdx = activeSecQs.findIndex(q => q.id === qId);
+
+          if (currentInSecIdx !== -1 && currentInSecIdx < activeSecQs.length - 1) {
+              flushCurrentQuestionTime();
+              // Find the global index of the next question in activeSecQs
+              const nextQGlobalIdx = questions.findIndex(q => q.id === activeSecQs[currentInSecIdx + 1].id);
+              if (nextQGlobalIdx !== -1) {
+                  setCurrentQuestion(nextQGlobalIdx);
+              }
+          }
+      };
 
     // Compliance Management
     const handleViolation = async (type, count) => {
@@ -700,7 +760,7 @@ const StudentExam = () => {
             const incompleteSections = [];
             exam.sections.forEach((sec, sIdx) => {
                 const secQuestions = questions.filter(q => (q.sectionIndex || 0) === sIdx);
-                const answeredInSec = secQuestions.filter(q => answers[q.id]).length;
+                const answeredInSec = secQuestions.filter(q => answers[q.id] || skipped.includes(q.id)).length;
                 if (answeredInSec < secQuestions.length) {
                     incompleteSections.push(`${sec.name} (${secQuestions.length - answeredInSec} unanswered)`);
                 }
@@ -713,7 +773,7 @@ const StudentExam = () => {
             }
         } else {
             // Flat exam unanswered questions check
-            const unansweredCount = questions.length - Object.keys(answers).length;
+            const unansweredCount = questions.filter(q => !answers[q.id] && !skipped.includes(q.id)).length;
             if (unansweredCount > 0) {
                 warningText = `You have ${unansweredCount} unanswered questions. Are you sure you want to submit? This action cannot be undone.`;
             }
@@ -2083,13 +2143,25 @@ const StudentExam = () => {
                         </div>
 
                         <div className="px-8 py-5 border-t border-slate-100 flex justify-between items-center bg-white/50">
-                            <button
-                                onClick={() => setMarked(prev => prev.includes(currentQ.id) ? prev.filter(id => id !== currentQ.id) : [...prev, currentQ.id])}
-                                className={`px-4 py-2.5 rounded-lg border font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${marked.includes(currentQ.id) ? 'bg-amber-100 border-amber-200 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}
-                            >
-                                <AlertTriangle size={14} className={marked.includes(currentQ.id) ? 'text-amber-500' : ''} />
-                                {marked.includes(currentQ.id) ? 'Review Mode Active' : 'Mark for Review'}
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setMarked(prev => prev.includes(currentQ.id) ? prev.filter(id => id !== currentQ.id) : [...prev, currentQ.id])}
+                                    className={`px-4 py-2.5 rounded-lg border font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${marked.includes(currentQ.id) ? 'bg-amber-100 border-amber-200 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}
+                                >
+                                    <AlertTriangle size={14} className={marked.includes(currentQ.id) ? 'text-amber-500' : ''} />
+                                    {marked.includes(currentQ.id) ? 'Review Mode Active' : 'Mark for Review'}
+                                </button>
+
+                                {exam?.settings?.allowSkip && (
+                                    <button
+                                        onClick={handleSkipQuestion}
+                                        className={`px-4 py-2.5 rounded-lg border font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${skipped.includes(currentQ.id) ? 'bg-rose-100 border-rose-200 text-rose-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-rose-700 hover:bg-slate-100'}`}
+                                    >
+                                        <XCircle size={14} className={skipped.includes(currentQ.id) ? 'text-rose-500' : ''} />
+                                        {skipped.includes(currentQ.id) ? 'Skipped' : 'Skip Question'}
+                                    </button>
+                                )}
+                            </div>
 
                             {currentQuestion === questions.length - 1 && (
                                 <button
@@ -2201,8 +2273,10 @@ const StudentExam = () => {
                                                                   currentQuestion === i
                                                                     ? 'ring-2 ring-blue-500 ring-offset-1 bg-blue-50 text-blue-700 border border-blue-200'
                                                                     : marked.includes(q.id)
-                                                                        ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
-                                                                        : answers[q.id]
+                                                                          ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
+                                                                          : skipped.includes(q.id)
+                                                                              ? 'bg-rose-100/70 text-rose-700 border border-rose-200/50 hover:bg-rose-200'
+                                                                              : answers[q.id]
                                                                             ? 'bg-slate-800 text-white shadow-sm'
                                                                             : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'}
                                                             `}
@@ -2229,8 +2303,10 @@ const StudentExam = () => {
                                                 ${currentQuestion === i
                                                     ? 'ring-2 ring-blue-500 ring-offset-1 bg-blue-50 text-blue-700 border border-blue-200'
                                                     : marked.includes(q.id)
-                                                        ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
-                                                        : answers[q.id]
+                                                                          ? 'bg-amber-100/50 text-amber-700 border border-amber-200/50 hover:bg-amber-100'
+                                                                          : skipped.includes(q.id)
+                                                                              ? 'bg-rose-100/70 text-rose-700 border border-rose-200/50 hover:bg-rose-200'
+                                                                              : answers[q.id]
                                                             ? 'bg-slate-800 text-white shadow-sm'
                                                             : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'}
                                             `}
@@ -2246,7 +2322,8 @@ const StudentExam = () => {
                             {[
                                 { color: 'bg-slate-800', label: 'Answered', count: Object.keys(answers).length },
                                 { color: 'bg-amber-400', label: 'Review Later', count: marked.length },
-                                { color: 'bg-white border-2 border-slate-200', label: 'Unanswered', count: questions.length - Object.keys(answers).length }
+                                { color: 'bg-rose-100 border border-rose-200 text-rose-700', label: 'Skipped', count: skipped.length },
+                                { color: 'bg-white border-2 border-slate-200', label: 'Unanswered', count: questions.filter(q => !answers[q.id] && !skipped.includes(q.id)).length }
                             ].map(status => (
                                 <div key={status.label} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">

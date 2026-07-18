@@ -225,7 +225,7 @@ const CreateExam = () => {
         scheduledDate: new Date().toISOString().slice(0, 16),
         expiryDate: '',
         sections: [],
-        settings: { shuffleQuestions: true, showResultImmediately: true, allowReview: true, collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, enableSections: false, enableNegativeMarking: false, negativeMarkValue: 0.25, randomizeQuestions: false, randomQuestionCount: 0, requireWebcam: false, requireMic: false, requireScreenshare: false, allowDownloadMarksheet: true, allowDownloadResponseMatrix: true, allowDownloadQuestionPaper: true }
+        settings: { shuffleQuestions: true, showResultImmediately: true, allowReview: true, collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, enableSections: false, enableNegativeMarking: false, negativeMarkValue: 0.25, randomizeQuestions: false, randomQuestionCount: 0, requireWebcam: false, requireMic: false, requireScreenshare: false, allowDownloadMarksheet: true, allowDownloadResponseMatrix: true, allowDownloadQuestionPaper: true, allowSkip: false }
     });
 
     const [questions, setQuestions] = useState([getDefaultQuestion()]);
@@ -282,6 +282,7 @@ const CreateExam = () => {
                         collectEmail: true, collectMobile: true, collectDepartment: true, enableCertificate: false, enableSections: false, enableNegativeMarking: false, negativeMarkValue: 0.25, randomizeQuestions: false, randomQuestionCount: 0,
                         requireWebcam: false, requireMic: false, requireScreenshare: false,
                         allowDownloadMarksheet: true, allowDownloadResponseMatrix: true, allowDownloadQuestionPaper: true,
+                        allowSkip: false,
                         ...(exam.settings || {})
                     }
                 });
@@ -752,6 +753,7 @@ const CreateExam = () => {
                                 { key: 'collectDepartment', label: 'Collect Department', desc: 'Require student department' },
                                 { key: 'enableSections', label: 'Enable Sections', desc: 'Organize exam questions into topic-wise sections' },
                                 { key: 'enableNegativeMarking', label: 'Enable Negative Marking', desc: 'Deduct configured points for incorrect objective answers' },
+                                { key: 'allowSkip', label: 'Allow Skip Question', desc: 'Let students skip questions during the assessment' },
                             ].map(s => (
                                 <label key={s.key} className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${examData.settings[s.key] ? 'bg-blue-50 border-[#004AAD]/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
                                     <input type="checkbox" checked={examData.settings[s.key] || false} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [s.key]: e.target.checked } })} className="w-4 h-4 rounded accent-[#004AAD]" />
