@@ -171,6 +171,418 @@ const StudentDashboard = () => {
         }
     };
 
+    const handleExportProfile = () => {
+        if (!student) return;
+
+        const actualAttempts = attempts.filter(a => !a.isMock);
+        const examsTaken = actualAttempts.length;
+        const avgPercentage = examsTaken > 0 
+            ? (actualAttempts.reduce((sum, a) => sum + a.percentage, 0) / examsTaken).toFixed(2) 
+            : '0.00';
+
+        const attendanceRate = student.attendance ? student.attendance.percentage : 100;
+        const attendedSessions = student.attendance ? student.attendance.attended : 0;
+        const totalSessions = student.attendance ? student.attendance.totalSessions : 0;
+
+        // Build list of skills
+        const skillsBadges = student.skills && student.skills.length > 0
+            ? student.skills.map(s => `<span class="tag-badge">${s}</span>`).join('')
+            : '<span style="color:#64748b; font-size:13px;">No skills added yet</span>';
+
+        // Build exam history table rows
+        const attemptsRows = actualAttempts.map(attempt => {
+            const exam = attempt.examId;
+            const dateStr = attempt.completedAt 
+                ? new Date(attempt.completedAt).toLocaleDateString('en-IN') 
+                : new Date(attempt.createdAt).toLocaleDateString('en-IN');
+            const resultClass = attempt.result === 'pass' ? 'result-pass' : 'result-fail';
+            return `
+                <tr>
+                    <td style="font-weight: 600; color: #0f172a;">${exam?.title || 'Exam'}</td>
+                    <td>${exam?.courseId?.name || 'N/A'}</td>
+                    <td>${dateStr}</td>
+                    <td style="font-weight: 600;">${attempt.totalScore} / ${exam?.totalMarks || 0}</td>
+                    <td>${attempt.percentage.toFixed(1)}%</td>
+                    <td><span class="result-badge ${resultClass}">${attempt.result || 'N/A'}</span></td>
+                </tr>
+            `;
+        }).join('');
+
+        // Construct HTML content
+        let htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>${student.name} - Profile Report</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                        color: #1e293b;
+                        line-height: 1.5;
+                        margin: 0;
+                        padding: 40px;
+                        background-color: #ffffff;
+                    }
+                    .header {
+                        border-bottom: 3px solid #004AAD;
+                        padding-bottom: 20px;
+                        margin-bottom: 30px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                    }
+                    .header-left h1 {
+                        margin: 0;
+                        font-size: 28px;
+                        color: #0f172a;
+                        font-weight: 700;
+                    }
+                    .header-left p {
+                        margin: 5px 0 0 0;
+                        font-size: 14px;
+                        color: #64748b;
+                        font-weight: 500;
+                    }
+                    .header-right {
+                        text-align: right;
+                    }
+                    .institution-badge {
+                        background-color: #004AAD;
+                        color: white;
+                        padding: 6px 12px;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        font-weight: 700;
+                        letter-spacing: 0.5px;
+                        display: inline-block;
+                        margin-bottom: 5px;
+                    }
+                    .usn-text {
+                        font-family: monospace;
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #0f172a;
+                    }
+                    .grid-2 {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 25px;
+                        margin-bottom: 30px;
+                    }
+                    .section {
+                        margin-bottom: 30px;
+                    }
+                    .section-title {
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: #004AAD;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        border-bottom: 2px solid #f1f5f9;
+                        padding-bottom: 6px;
+                        margin-bottom: 15px;
+                    }
+                    .info-list {
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+                    }
+                    .info-list li {
+                        display: flex;
+                        margin-bottom: 8px;
+                        font-size: 13.5px;
+                    }
+                    .info-list .label {
+                        width: 140px;
+                        color: #64748b;
+                        font-weight: 600;
+                    }
+                    .info-list .value {
+                        color: #0f172a;
+                        font-weight: 500;
+                        flex: 1;
+                    }
+                    .stats-grid {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 15px;
+                        margin-bottom: 30px;
+                    }
+                    .stat-card {
+                        background-color: #f8fafc;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 10px;
+                        padding: 15px;
+                        text-align: center;
+                    }
+                    .stat-card .stat-val {
+                        font-size: 20px;
+                        font-weight: 700;
+                        color: #0f172a;
+                    }
+                    .stat-card .stat-lbl {
+                        font-size: 11px;
+                        color: #64748b;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        margin-top: 4px;
+                    }
+                    .badge-container {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 6px;
+                    }
+                    .tag-badge {
+                        background-color: #f1f5f9;
+                        color: #334155;
+                        border: 1px solid #e2e8f0;
+                        padding: 4px 10px;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        font-weight: 600;
+                    }
+                    .table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                    }
+                    .table th {
+                        background-color: #f8fafc;
+                        border-bottom: 2px solid #e2e8f0;
+                        color: #475569;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        font-size: 11px;
+                        letter-spacing: 0.5px;
+                        padding: 10px 12px;
+                        text-align: left;
+                    }
+                    .table td {
+                        border-bottom: 1px solid #f1f5f9;
+                        padding: 10px 12px;
+                        font-size: 13px;
+                        color: #334155;
+                    }
+                    .table tr:last-child td {
+                        border-bottom: none;
+                    }
+                    .result-badge {
+                        font-weight: 700;
+                        font-size: 11px;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        text-transform: uppercase;
+                    }
+                    .result-pass {
+                        background-color: #dcfce7;
+                        color: #15803d;
+                    }
+                    .result-fail {
+                        background-color: #fee2e2;
+                        color: #b91c1c;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        border-top: 1px solid #e2e8f0;
+                        padding-top: 15px;
+                        font-size: 11px;
+                        color: #94a3b8;
+                        text-align: center;
+                    }
+                    @media print {
+                        body {
+                            padding: 0;
+                        }
+                        .no-print {
+                            display: none;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="header-left">
+                        <h1>${student.name}</h1>
+                        <p>${student.department ? student.department.toUpperCase() : 'N/A'} Student | Semester ${student.semester || 'N/A'}</p>
+                    </div>
+                    <div class="header-right">
+                        <div class="institution-badge">ETHNOTECH ACADEMY</div>
+                        <div class="usn-text">USN: ${student.usn || 'N/A'}</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val">${examsTaken}</div>
+                        <div class="stat-lbl">Exams Taken</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val">${avgPercentage}%</div>
+                        <div class="stat-lbl">Average Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val">${attendanceRate}%</div>
+                        <div class="stat-lbl">Attendance Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val">${student.cgpa !== undefined ? student.cgpa : '0.0'}</div>
+                        <div class="stat-lbl">Current CGPA</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="section">
+                        <div class="section-title">Personal Contact Info</div>
+                        <ul class="info-list">
+                            <li>
+                                <span class="label">Email Address</span>
+                                <span class="value">${student.email || 'N/A'}</span>
+                            </li>
+                            <li>
+                                <span class="label">Mobile Number</span>
+                                <span class="value">${student.mobile || 'N/A'}</span>
+                            </li>
+                            <li>
+                                <span class="label">Division / Class</span>
+                                <span class="value">${student.division || 'N/A'}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Institutional Info</div>
+                        <ul class="info-list">
+                            <li>
+                                <span class="label">College Name</span>
+                                <span class="value">${student.collegeName || 'N/A'}</span>
+                            </li>
+                            <li>
+                                <span class="label">College Code</span>
+                                <span class="value">${student.collegeCode || 'N/A'}</span>
+                            </li>
+                            <li>
+                                <span class="label">Current Batch</span>
+                                <span class="value">${student.batchName || 'N/A'}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="section">
+                        <div class="section-title">Skills & Capabilities</div>
+                        <div style="margin-bottom: 12px;">
+                            <strong>Skills:</strong>
+                            <div class="badge-container" style="margin-top: 5px;">
+                                ${skillsBadges}
+                            </div>
+                        </div>
+                        <div>
+                            <strong>Summary:</strong>
+                            <p style="margin: 5px 0 0 0; font-size: 13px; color: #475569;">
+                                ${student.capabilities || 'No summary configured.'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Career Preferences</div>
+                        <ul class="info-list">
+                            <li>
+                                <span class="label">Job Type</span>
+                                <span class="value">${student.jobPreferences?.jobType || 'Any'}</span>
+                            </li>
+                            <li>
+                                <span class="label">Expected CTC</span>
+                                <span class="value">${student.jobPreferences?.expectedCTC || 'N/A'}</span>
+                            </li>
+                            <li>
+                                <span class="label">Preferred Roles</span>
+                                <span class="value">${student.jobPreferences?.preferredRoles && student.jobPreferences.preferredRoles.length > 0 
+                                    ? student.jobPreferences.preferredRoles.join(', ') 
+                                    : 'Any'
+                                }</span>
+                            </li>
+                            <li>
+                                <span class="label">Preferred Locations</span>
+                                <span class="value">${student.jobPreferences?.preferredLocations && student.jobPreferences.preferredLocations.length > 0 
+                                    ? student.jobPreferences.preferredLocations.join(', ') 
+                                    : 'Any'
+                                }</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Attendance Metrics</div>
+                    <ul class="info-list" style="margin-bottom: 15px;">
+                        <li>
+                            <span class="label">Sessions Attended</span>
+                            <span class="value">${attendedSessions} out of ${totalSessions} total sessions</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Assessment & Exam Performance History</div>
+                    ${examsTaken === 0 
+                        ? '<p style="color:#64748b; font-size:13px;">No completed assessments logged on the platform.</p>'
+                        : `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Assessment / Exam</th>
+                                    <th>Course</th>
+                                    <th>Date Taken</th>
+                                    <th>Score</th>
+                                    <th>Percentage</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${attemptsRows}
+                            </tbody>
+                        </table>
+                        `
+                    }
+                </div>
+
+                <div class="footer">
+                    Ethnotech Academy Placement Portal | Profile Report Generated on ${new Date().toLocaleDateString('en-IN')} ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Print using hidden iframe method
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+
+        const iframeDoc = iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+
+        // Give a small delay to load assets if any, and trigger printing
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            
+            // Remove the iframe after printing is initiated
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        }, 300);
+    };
+
     const handleAddSkill = (e) => {
         if (e.key === 'Enter' || e.key === ',') {
             e.preventDefault();
@@ -475,6 +887,15 @@ const StudentDashboard = () => {
                         <p className="text-blue-100/90 text-sm sm:text-base max-w-xl font-medium">
                             Keep track of your batch assessments, view evaluation certificates, and configure your career placement profile.
                         </p>
+                        <div className="pt-2 flex flex-wrap gap-3">
+                            <button
+                                type="button"
+                                onClick={handleExportProfile}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold transition-all duration-200 shadow-md cursor-pointer border border-emerald-500/20 active:scale-95"
+                            >
+                                <Download size={15} /> Export Profile
+                            </button>
+                        </div>
                     </div>
                     
                     <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-5 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
@@ -775,61 +1196,70 @@ const StudentDashboard = () => {
                             <div className="space-y-8 font-sans">
                                 
                                 {/* Profile Sub-navigation Tabs */}
-                                <div className="flex flex-wrap items-center gap-3 p-1.5 bg-slate-100/60 rounded-3xl w-fit max-w-full">
+                                <div className="flex flex-wrap items-center justify-between gap-4 w-full">
+                                    <div className="flex flex-wrap items-center gap-3 p-1.5 bg-slate-100/60 rounded-3xl w-fit max-w-full">
+                                        <button
+                                            type="button"
+                                            onClick={() => setProfileSubTab('personal')}
+                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                            profileSubTab === 'personal'
+                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            Personal Details
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProfileSubTab('academic')}
+                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                                profileSubTab === 'academic'
+                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            Academic Details
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProfileSubTab('skills')}
+                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                                profileSubTab === 'skills'
+                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            Skills
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProfileSubTab('resume')}
+                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                                profileSubTab === 'resume'
+                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            Resume
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProfileSubTab('preferences')}
+                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                                profileSubTab === 'preferences'
+                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            Career Preferences
+                                        </button>
+                                    </div>
                                     <button
                                         type="button"
-                                        onClick={() => setProfileSubTab('personal')}
-                                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                        profileSubTab === 'personal'
-                                                ? 'bg-[#004AAD] text-white shadow-sm'
-                                                : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
-                                        }`}
+                                        onClick={handleExportProfile}
+                                        className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold transition-all duration-200 shadow-sm cursor-pointer border border-emerald-500/20 active:scale-95 whitespace-nowrap"
                                     >
-                                        Personal Details
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setProfileSubTab('academic')}
-                                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                            profileSubTab === 'academic'
-                                                ? 'bg-[#004AAD] text-white shadow-sm'
-                                                : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
-                                        }`}
-                                    >
-                                        Academic Details
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setProfileSubTab('skills')}
-                                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                            profileSubTab === 'skills'
-                                                ? 'bg-[#004AAD] text-white shadow-sm'
-                                                : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
-                                        }`}
-                                    >
-                                        Skills
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setProfileSubTab('resume')}
-                                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                            profileSubTab === 'resume'
-                                                ? 'bg-[#004AAD] text-white shadow-sm'
-                                                : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
-                                        }`}
-                                    >
-                                        Resume
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setProfileSubTab('preferences')}
-                                        className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                            profileSubTab === 'preferences'
-                                                ? 'bg-[#004AAD] text-white shadow-sm'
-                                                : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
-                                        }`}
-                                    >
-                                        Career Preferences
+                                        <Download size={15} /> Export Profile
                                     </button>
                                 </div>
 
