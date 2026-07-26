@@ -35,6 +35,7 @@ import UsersPage from './pages/admin/Users';
 import CollegeContextWrapper from './components/CollegeContextWrapper';
 import CollegeDetail from './pages/admin/CollegeDetail';
 import BatchDetail from './pages/admin/BatchDetail';
+import THMRoomDetail from './pages/admin/THMRoomDetail';
 import PlacementDashboard from './pages/placement/PlacementDashboard';
 import JobApplicants from './pages/placement/JobApplicants';
 import NotFound from './pages/NotFound';
@@ -125,6 +126,11 @@ function App() {
                 <Route path="/admin/batches/:batchId" element={
                     <ProtectedRoute allowedRoles={ALL_ADMINS}>
                         <MainLayout><BatchDetail /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin/batches/:batchId/thm-rooms/:roomId" element={
+                    <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                        <MainLayout><THMRoomDetail /></MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/admin/courses" element={
@@ -336,6 +342,11 @@ function App() {
                 <Route path="/trainer/batches/:batchId" element={
                     <ProtectedRoute allowedRoles={['trainer']}>
                         <MainLayout><BatchDetail /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/trainer/batches/:batchId/thm-rooms/:roomId" element={
+                    <ProtectedRoute allowedRoles={['trainer']}>
+                        <MainLayout><THMRoomDetail /></MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/trainer/attendance" element={

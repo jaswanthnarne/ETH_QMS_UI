@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { 
     Layers, BookOpen, Users, Phone, Mail, Edit2, Trash2, ArrowLeft, Loader2,
     Download, Upload, AlertTriangle, AlertCircle, FileSpreadsheet, Plus, X, RefreshCw, CheckCircle2,
-    Search, Key
+    Search, Key, Calendar, ExternalLink
 } from 'lucide-react';
 import axios from 'axios';
 import ExcelJS from 'exceljs';
@@ -872,7 +872,7 @@ const BatchDetail = () => {
                         className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
                             rosterTab === 'roster' 
                                 ? 'border-[#004AAD] text-[#004AAD]' 
-                                : 'border-transparent text-slate-400 hover:text-slate-650'
+                                : 'border-transparent text-slate-400 hover:text-slate-655'
                         }`}
                     >
                         Student Roster
@@ -886,10 +886,24 @@ const BatchDetail = () => {
                         className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
                             rosterTab === 'thm' 
                                 ? 'border-[#004AAD] text-[#004AAD]' 
-                                : 'border-transparent text-slate-400 hover:text-slate-650'
+                                : 'border-transparent text-slate-400 hover:text-slate-655'
                         }`}
                     >
                         TryHackMe Assignments
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setRosterTab('thm-progress');
+                            fetchBatchTHMProgress();
+                        }}
+                        className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
+                            rosterTab === 'thm-progress' 
+                                ? 'border-[#004AAD] text-[#004AAD]' 
+                                : 'border-transparent text-slate-400 hover:text-slate-655'
+                        }`}
+                    >
+                        Assigned TryHackMe Rooms & Progress
                     </button>
                 </div>
             )}
@@ -1411,62 +1425,8 @@ const BatchDetail = () => {
                 </div>
             </div>
                 </>
-            ) : (
+            ) : rosterTab === 'thm' ? (
                 <div className="space-y-6">
-                    {/* THM Analytics Overview Panel */}
-                    {thmProgress && thmProgress.assignments && thmProgress.assignments.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Assigned Rooms</span>
-                                <span className="text-xl font-extrabold text-slate-800">{thmProgress.assignments.length} Rooms</span>
-                            </div>
-                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Total Roster</span>
-                                <span className="text-xl font-extrabold text-slate-800">{thmProgress.roster.length} Students</span>
-                            </div>
-                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Avg Completion Rate</span>
-                                <span className="text-xl font-extrabold text-emerald-600">
-                                    {(() => {
-                                        let completedSlots = 0;
-                                        let totalSlots = thmProgress.assignments.length * thmProgress.roster.length;
-                                        thmProgress.roster.forEach(row => {
-                                            row.progress.forEach(p => {
-                                                if (p.status === 'completed') completedSlots++;
-                                            });
-                                        });
-                                        return totalSlots > 0 ? `${Math.round((completedSlots / totalSlots) * 100)}%` : '0%';
-                                    })()}
-                                </span>
-                            </div>
-                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Top Performer</span>
-                                <span className="text-xl font-extrabold text-[#004AAD] truncate block" title={(() => {
-                                    let highestScore = -1;
-                                    let bestStudent = 'None';
-                                    thmProgress.roster.forEach(row => {
-                                        if (row.totalScore > highestScore) {
-                                            highestScore = row.totalScore;
-                                            bestStudent = row.name;
-                                        }
-                                    });
-                                    return highestScore > 0 ? `${bestStudent} (${highestScore} pts)` : 'None yet';
-                                })()}>
-                                    {(() => {
-                                        let highestScore = -1;
-                                        let bestStudent = 'None';
-                                        thmProgress.roster.forEach(row => {
-                                            if (row.totalScore > highestScore) {
-                                                highestScore = row.totalScore;
-                                                bestStudent = row.name;
-                                            }
-                                        });
-                                        return highestScore > 0 ? `${bestStudent} (${highestScore} pts)` : 'None yet';
-                                    })()}
-                                </span>
-                            </div>
-                        </div>
-                    )}
                     {/* Assignment creation form (trainer/admin only) */}
                     {!isReadOnly && (
                         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
@@ -1539,6 +1499,109 @@ const BatchDetail = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    )}
+
+                    {/* Assigned Rooms list with "Manage Room" option */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">Assigned TryHackMe Rooms</h3>
+                            <p className="text-xs text-slate-500 mt-0.5">Manage details and view analytics for individual assigned rooms.</p>
+                        </div>
+
+                        {loadingThm ? (
+                            <div className="flex justify-center items-center py-12">
+                                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                            </div>
+                        ) : !thmProgress || !thmProgress.assignments || thmProgress.assignments.length === 0 ? (
+                            <div className="p-8 text-center text-slate-400 font-medium border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                                No rooms assigned yet. Use the form above to assign a room.
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {thmProgress.assignments.map(asm => (
+                                    <div key={asm._id} className="border border-slate-200 hover:border-slate-350 bg-slate-50/30 rounded-2xl p-4 flex justify-between items-center hover:shadow-sm transition-all duration-200">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-extrabold px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded-md font-mono">ROOM #{asm.roomNumber}</span>
+                                                <span className="text-xs text-slate-450 font-semibold lowercase">({asm.roomCode})</span>
+                                            </div>
+                                            <h4 className="text-sm font-bold text-slate-850">{asm.title}</h4>
+                                            <p className="text-[10px] text-slate-450 flex items-center gap-1">
+                                                <Calendar size={10} /> Due: {asm.dueDate ? new Date(asm.dueDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'No due date'}
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-2 shrink-0">
+                                            <span className="text-xs font-extrabold text-[#004AAD] bg-blue-50/50 border border-blue-100 rounded px-2 py-0.5">{asm.maxMarks} Max Marks</span>
+                                            <a 
+                                                href={`/admin/batches/${batchId}/thm-rooms/${asm._id}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#004AAD] hover:bg-[#003580] text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 cursor-pointer"
+                                            >
+                                                <ExternalLink size={10} /> Manage Room
+                                            </a>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {/* THM Analytics Overview Panel */}
+                    {thmProgress && thmProgress.assignments && thmProgress.assignments.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-455 uppercase font-bold block">Assigned Rooms</span>
+                                <span className="text-xl font-extrabold text-slate-800">{thmProgress.assignments.length} Rooms</span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-455 uppercase font-bold block">Total Roster</span>
+                                <span className="text-xl font-extrabold text-slate-800">{thmProgress.roster.length} Students</span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-455 uppercase font-bold block">Avg Completion Rate</span>
+                                <span className="text-xl font-extrabold text-emerald-600">
+                                    {(() => {
+                                        let completedSlots = 0;
+                                        let totalSlots = thmProgress.assignments.length * thmProgress.roster.length;
+                                        thmProgress.roster.forEach(row => {
+                                            row.progress.forEach(p => {
+                                                if (p.status === 'completed') completedSlots++;
+                                            });
+                                        });
+                                        return totalSlots > 0 ? `${Math.round((completedSlots / totalSlots) * 100)}%` : '0%';
+                                    })()}
+                                </span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-455 uppercase font-bold block">Top Performer</span>
+                                <span className="text-xl font-extrabold text-[#004AAD] truncate block" title={(() => {
+                                    let highestScore = -1;
+                                    let bestStudent = 'None';
+                                    thmProgress.roster.forEach(row => {
+                                        if (row.totalScore > highestScore) {
+                                            highestScore = row.totalScore;
+                                            bestStudent = row.name;
+                                        }
+                                    });
+                                    return highestScore > 0 ? `${bestStudent} (${highestScore} pts)` : 'None yet';
+                                })()}>
+                                    {(() => {
+                                        let highestScore = -1;
+                                        let bestStudent = 'None';
+                                        thmProgress.roster.forEach(row => {
+                                            if (row.totalScore > highestScore) {
+                                                highestScore = row.totalScore;
+                                                bestStudent = row.name;
+                                            }
+                                        });
+                                        return highestScore > 0 ? `${bestStudent} (${highestScore} pts)` : 'None yet';
+                                    })()}
+                                </span>
+                            </div>
                         </div>
                     )}
 
