@@ -23,7 +23,8 @@ import {
     Trash2,
     Star,
     AlertTriangle,
-    CalendarCheck
+    CalendarCheck,
+    Trophy
 } from 'lucide-react';
 import axios from 'axios';
 import { AlertModal } from '../../components/Modals';
@@ -101,8 +102,14 @@ const StudentDashboard = () => {
     // External handles states
     const [leetcodeHandle, setLeetcodeHandle] = useState('');
     const [tryhackmeHandle, setTryhackmeHandle] = useState('');
+    const [hacktheboxHandle, setHacktheboxHandle] = useState('');
     const [kaggleHandle, setKaggleHandle] = useState('');
     const [handlesSaving, setHandlesSaving] = useState(false);
+
+    // Leaderboard states
+    const [leaderboardData, setLeaderboardData] = useState([]);
+    const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+    const [syncingLeaderboard, setSyncingLeaderboard] = useState(false);
 
     // Utility UI States
     const [resumeFile, setResumeFile] = useState(null);
@@ -138,6 +145,7 @@ const StudentDashboard = () => {
             setCapabilities(student.capabilities || '');
             setLeetcodeHandle(student.externalHandles?.leetcode || '');
             setTryhackmeHandle(student.externalHandles?.tryhackme || '');
+            setHacktheboxHandle(student.externalHandles?.hackthebox || '');
             setKaggleHandle(student.externalHandles?.kaggle || '');
             if (student.jobPreferences) {
                 setPrefRoles(student.jobPreferences.preferredRoles || []);
@@ -885,6 +893,7 @@ const StudentDashboard = () => {
         const res = await updateExternalHandles({
             leetcode: leetcodeHandle.trim(),
             tryhackme: tryhackmeHandle.trim(),
+            hackthebox: hacktheboxHandle.trim(),
             kaggle: kaggleHandle.trim()
         });
         setHandlesSaving(false);
@@ -895,6 +904,28 @@ const StudentDashboard = () => {
             setAlertState({ open: true, title: 'Update Failed', message: res.error || 'Failed to update platform handles.', type: 'error' });
         }
     };
+
+    const fetchStudentLeaderboard = async () => {
+        setLoadingLeaderboard(true);
+        try {
+            const res = await api.get('/student/leaderboard', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setLeaderboardData(res.data.data);
+            }
+        } catch (err) {
+            console.error('Error fetching leaderboard:', err.message);
+        } finally {
+            setLoadingLeaderboard(false);
+        }
+    };
+
+    useEffect(() => {
+        if (token && activeTab === 'leaderboard') {
+            fetchStudentLeaderboard();
+        }
+    }, [activeTab, token]);
 
     return (
         <div className="space-y-8">
@@ -1667,60 +1698,90 @@ const StudentDashboard = () => {
                                     </form>
                                 )}
 
-                                {profileSubTab === 'handles' && (
-                                    <form onSubmit={handleSaveHandles} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800">Platform Integration Handles</h3>
-                                            <p className="text-slate-500 text-sm">Link your external learning and coding profiles to sync scores and ranks.</p>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">TryHackMe Username</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Enter TryHackMe Username"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                    value={tryhackmeHandle}
-                                                    onChange={(e) => setTryhackmeHandle(e.target.value)}
-                                                />
+                                {profileSubTab === 'handles' && (() => {
+                                    const batchIntegration = student?.batchId;
+                                    const integrationType = batchIntegration?.integrationType || 'none';
+                                    return (
+                                        <form onSubmit={handleSaveHandles} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Platform Integration Handles</h3>
+                                                <p className="text-slate-500 text-sm">Link your external learning and coding profiles to sync scores and ranks.</p>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">LeetCode Username</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Enter LeetCode Username"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                    value={leetcodeHandle}
-                                                    onChange={(e) => setLeetcodeHandle(e.target.value)}
-                                                />
-                                            </div>
+                                            {integrationType === 'none' ? (
+                                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-center text-slate-500 text-sm font-semibold">
+                                                    Your current batch <strong>{batchIntegration?.batchName || 'N/A'}</strong> does not require any external learning profile integrations.
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    {integrationType === 'tryhackme' && (
+                                                        <>
+                                                            <div className="space-y-2">
+                                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">TryHackMe Username</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter TryHackMe Username"
+                                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                                    value={tryhackmeHandle}
+                                                                    onChange={(e) => setTryhackmeHandle(e.target.value)}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Hack The Box Username</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter Hack The Box Username"
+                                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                                    value={hacktheboxHandle}
+                                                                    onChange={(e) => setHacktheboxHandle(e.target.value)}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                    )}
 
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Kaggle Username</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Enter Kaggle Username"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                    value={kaggleHandle}
-                                                    onChange={(e) => setKaggleHandle(e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
+                                                    {integrationType === 'leetcode' && (
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">LeetCode Username</label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Enter LeetCode Username"
+                                                                className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                                value={leetcodeHandle}
+                                                                onChange={(e) => setLeetcodeHandle(e.target.value)}
+                                                            />
+                                                        </div>
+                                                    )}
 
-                                        <div className="pt-4 flex justify-end border-t border-slate-100">
-                                            <button
-                                                type="submit"
-                                                disabled={handlesSaving}
-                                                className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
-                                            >
-                                                {handlesSaving ? <Loader2 size={16} className="animate-spin" /> : null}
-                                                Save Handles
-                                            </button>
-                                        </div>
-                                    </form>
-                                )}
+                                                    {integrationType === 'kaggle' && (
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Kaggle Username</label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Enter Kaggle Username"
+                                                                className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                                value={kaggleHandle}
+                                                                onChange={(e) => setKaggleHandle(e.target.value)}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {integrationType !== 'none' && (
+                                                <div className="pt-4 flex justify-end border-t border-slate-100">
+                                                    <button
+                                                        type="submit"
+                                                        disabled={handlesSaving}
+                                                        className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
+                                                    >
+                                                        {handlesSaving ? <Loader2 size={16} className="animate-spin" /> : null}
+                                                        Save Handles
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </form>
+                                    );
+                                })()}
                             </div>
                         )}
 
@@ -2182,6 +2243,127 @@ const StudentDashboard = () => {
                                     </button>
                                 </div>
                             </form>
+                        )}
+
+                        {activeTab === 'leaderboard' && (
+                            <div className="space-y-8 font-sans">
+                                <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-800">Batch Standings Leaderboard</h3>
+                                            <p className="text-slate-500 text-sm">
+                                                Performance tracking for batch <strong>{student?.batchId?.batchName || student?.batchName}</strong>
+                                            </p>
+                                        </div>
+                                        {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' && (
+                                            <button
+                                                onClick={async () => {
+                                                    setSyncingLeaderboard(true);
+                                                    try {
+                                                        await fetchStudentLeaderboard();
+                                                    } finally {
+                                                        setSyncingLeaderboard(false);
+                                                    }
+                                                }}
+                                                disabled={syncingLeaderboard}
+                                                className="px-5 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl text-xs flex items-center gap-2 cursor-pointer transition shadow-sm active:scale-95 disabled:opacity-50"
+                                            >
+                                                {syncingLeaderboard ? <Loader2 size={14} className="animate-spin" /> : null}
+                                                Sync My Stats
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {loadingLeaderboard ? (
+                                        <div className="flex justify-center items-center py-12">
+                                            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                                        </div>
+                                    ) : leaderboardData.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                            <Trophy className="text-slate-400 mb-2.5" size={32} />
+                                            <p className="text-slate-700 font-semibold text-sm">No Leaderboard Data</p>
+                                            <p className="text-slate-400 text-xs mt-1">Standings are not generated for this batch yet.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                        <th className="pb-3 pr-4">Rank</th>
+                                                        <th className="pb-3 px-4">Student</th>
+                                                        <th className="pb-3 px-4">USN / Roll</th>
+                                                        <th className="pb-3 px-4">Department</th>
+                                                        {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
+                                                            <>
+                                                                <th className="pb-3 px-4">Points</th>
+                                                                <th className="pb-3 pl-4 text-right">Badges</th>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <th className="pb-3 px-4">Score</th>
+                                                                <th className="pb-3 pl-4 text-right">Percentage</th>
+                                                            </>
+                                                        )}
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-50 text-sm font-medium text-slate-700">
+                                                    {leaderboardData.map((row) => {
+                                                        const isSelf = row.isSelf;
+                                                        return (
+                                                            <tr 
+                                                                key={row.usn} 
+                                                                className={`transition duration-150 ${
+                                                                    isSelf 
+                                                                        ? 'bg-blue-50/55 hover:bg-blue-50 border-y border-blue-100/50 font-bold text-blue-900' 
+                                                                        : 'hover:bg-slate-50/60'
+                                                                }`}
+                                                            >
+                                                                <td className="py-4 pr-4 pl-2 font-semibold">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {row.rank === 1 && <span className="text-amber-500 text-base">🥇</span>}
+                                                                        {row.rank === 2 && <span className="text-slate-400 text-base">🥈</span>}
+                                                                        {row.rank === 3 && <span className="text-amber-700 text-base">🥉</span>}
+                                                                        <span>#{row.rank}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 px-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="truncate max-w-[180px] block">{row.name}</span>
+                                                                        {isSelf && (
+                                                                            <span className="bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0">You</span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 px-4 font-mono text-xs">{row.usn}</td>
+                                                                <td className="py-4 px-4 text-slate-500 uppercase text-xs">{row.department}</td>
+                                                                {row.integrationType && row.integrationType !== 'none' ? (
+                                                                    <>
+                                                                        <td className="py-4 px-4 font-bold text-slate-800">
+                                                                            {row.score} pts
+                                                                        </td>
+                                                                        <td className="py-4 pl-4 text-right font-semibold text-[#004AAD]">
+                                                                            🏆 {row.badges} Badges
+                                                                        </td>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <td className="py-4 px-4 font-semibold text-slate-700">
+                                                                            {row.score} / {row.totalMarks}
+                                                                        </td>
+                                                                        <td className="py-4 pl-4 text-right font-bold text-emerald-600">
+                                                                            {row.percentage}%
+                                                                        </td>
+                                                                    </>
+                                                                )}
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         )}
             </div>
 
