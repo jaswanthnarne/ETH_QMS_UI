@@ -61,7 +61,7 @@ const StudentDashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['dashboard', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement'].includes(tab)) {
+        if (tab && ['dashboard', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location.search]);
@@ -197,7 +197,7 @@ const StudentDashboard = () => {
             ? (actualAttempts.reduce((sum, a) => sum + a.percentage, 0) / examsTaken).toFixed(2) 
             : '0.00';
 
-        const attendanceRate = student.attendance ? student.attendance.percentage : 100;
+        const attendanceRate = student.attendance ? student.attendance.percentage : 0;
         const attendedSessions = student.attendance ? student.attendance.attended : 0;
         const totalSessions = student.attendance ? student.attendance.totalSessions : 0;
 
@@ -1037,7 +1037,7 @@ const StudentDashboard = () => {
                                         <div>
                                             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Attendance Rate</span>
                                             <span className="text-2xl font-semibold text-slate-800">
-                                                {student?.attendance ? `${student.attendance.percentage}%` : '100%'}
+                                                {student?.attendance ? `${student.attendance.percentage}%` : '0%'}
                                             </span>
                                         </div>
                                     </div>
@@ -1476,7 +1476,7 @@ const StudentDashboard = () => {
                                                 <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block mb-1">Class Attendance</span>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className="text-slate-800 font-semibold text-base">
-                                                        {student?.attendance ? `${student.attendance.percentage}%` : '100%'}
+                                                        {student?.attendance ? `${student.attendance.percentage}%` : '0%'}
                                                     </span>
                                                     <span className="text-slate-400 text-xs font-semibold">
                                                         ({student?.attendance?.attended || 0}/{student?.attendance?.totalSessions || 0} sessions)
