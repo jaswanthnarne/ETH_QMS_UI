@@ -89,6 +89,27 @@ const useStudentAuthStore = create(
                 }
             },
 
+            updateExternalHandles: async (handlesData) => {
+                const { token, student } = get();
+                set({ loading: true, error: null });
+                try {
+                    const res = await api.put('/student/profile/handles', handlesData, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.data.success) {
+                        set({
+                            student: { ...student, externalHandles: res.data.data },
+                            loading: false
+                        });
+                        return { success: true };
+                    }
+                } catch (error) {
+                    const errMsg = error.response?.data?.error || 'Failed to update external handles';
+                    set({ loading: false, error: errMsg });
+                    return { success: false, error: errMsg };
+                }
+            },
+
             uploadResume: async (file) => {
                 const { token, student } = get();
                 set({ loading: true, error: null });

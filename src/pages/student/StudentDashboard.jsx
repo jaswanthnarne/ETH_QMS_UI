@@ -37,7 +37,7 @@ const api = axios.create({
 const StudentDashboard = () => {
     const { 
         student, token, updateProfile, uploadResume, changePassword, refreshStudentProfile,
-        todos, getTodos, addTodo, updateTodo, deleteTodo 
+        todos, getTodos, addTodo, updateTodo, deleteTodo, updateExternalHandles
     } = useStudentAuthStore();
     const navigate = useNavigate();
     const location = useLocation();
@@ -98,6 +98,12 @@ const StudentDashboard = () => {
     const [showPw1, setShowPw1] = useState(false);
     const [showPw2, setShowPw2] = useState(false);
 
+    // External handles states
+    const [leetcodeHandle, setLeetcodeHandle] = useState('');
+    const [tryhackmeHandle, setTryhackmeHandle] = useState('');
+    const [kaggleHandle, setKaggleHandle] = useState('');
+    const [handlesSaving, setHandlesSaving] = useState(false);
+
     // Utility UI States
     const [resumeFile, setResumeFile] = useState(null);
     const [uploadingResume, setUploadingResume] = useState(false);
@@ -130,6 +136,9 @@ const StudentDashboard = () => {
             setPersonalBacklogs(student.backlogs !== undefined ? student.backlogs : '');
             setSkillsList(student.skills || []);
             setCapabilities(student.capabilities || '');
+            setLeetcodeHandle(student.externalHandles?.leetcode || '');
+            setTryhackmeHandle(student.externalHandles?.tryhackme || '');
+            setKaggleHandle(student.externalHandles?.kaggle || '');
             if (student.jobPreferences) {
                 setPrefRoles(student.jobPreferences.preferredRoles || []);
                 setPrefLocations(student.jobPreferences.preferredLocations || []);
@@ -870,8 +879,49 @@ const StudentDashboard = () => {
         };
     };
 
+    const handleSaveHandles = async (e) => {
+        e.preventDefault();
+        setHandlesSaving(true);
+        const res = await updateExternalHandles({
+            leetcode: leetcodeHandle.trim(),
+            tryhackme: tryhackmeHandle.trim(),
+            kaggle: kaggleHandle.trim()
+        });
+        setHandlesSaving(false);
+        if (res.success) {
+            setAlertState({ open: true, title: 'Success', message: 'Platform handles updated successfully.', type: 'success' });
+            refreshStudentProfile();
+        } else {
+            setAlertState({ open: true, title: 'Update Failed', message: res.error || 'Failed to update platform handles.', type: 'error' });
+        }
+    };
+
     return (
         <div className="space-y-8">
+            
+            {/* Platform Integration Handle Link Alert */}
+            {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' && !student.externalHandles?.[student.batchId.integrationType] && (
+                <div className="bg-amber-50 border border-amber-250 rounded-[1.5rem] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm border-amber-200">
+                    <div className="flex gap-3">
+                        <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={20} />
+                        <div>
+                            <h4 className="text-amber-900 font-bold text-sm">Action Required: Link your profile handle!</h4>
+                            <p className="text-amber-700 text-xs mt-1">
+                                Your batch **{student.batchId.batchName}** is integrated with **{student.batchId.integrationType === 'tryhackme' ? 'TryHackMe' : student.batchId.integrationType === 'leetcode' ? 'LeetCode' : 'Kaggle'}**. Please configure your profile handle to sync your stats.
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            setActiveTab('profile');
+                            setProfileSubTab('handles');
+                        }}
+                        className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-xl shadow-sm whitespace-nowrap active:scale-95 transition-all cursor-pointer"
+                    >
+                        Configure Now
+                    </button>
+                </div>
+            )}
             
             {/* Glassmorphic Profile Banner */}
             <div className="bg-gradient-to-r from-[#004AAD] to-[#003580] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
@@ -1253,6 +1303,17 @@ const StudentDashboard = () => {
                                         >
                                             Career Preferences
                                         </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProfileSubTab('handles')}
+                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                                profileSubTab === 'handles'
+                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            Platform Handles
+                                        </button>
                                     </div>
                                     <button
                                         type="button"
@@ -1601,6 +1662,61 @@ const StudentDashboard = () => {
                                             >
                                                 {profileSaving ? <Loader2 size={16} className="animate-spin" /> : null}
                                                 Save Career Preferences
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                {profileSubTab === 'handles' && (
+                                    <form onSubmit={handleSaveHandles} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-800">Platform Integration Handles</h3>
+                                            <p className="text-slate-500 text-sm">Link your external learning and coding profiles to sync scores and ranks.</p>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">TryHackMe Username</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter TryHackMe Username"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    value={tryhackmeHandle}
+                                                    onChange={(e) => setTryhackmeHandle(e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">LeetCode Username</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter LeetCode Username"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    value={leetcodeHandle}
+                                                    onChange={(e) => setLeetcodeHandle(e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Kaggle Username</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter Kaggle Username"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    value={kaggleHandle}
+                                                    onChange={(e) => setKaggleHandle(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-4 flex justify-end border-t border-slate-100">
+                                            <button
+                                                type="submit"
+                                                disabled={handlesSaving}
+                                                className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
+                                            >
+                                                {handlesSaving ? <Loader2 size={16} className="animate-spin" /> : null}
+                                                Save Handles
                                             </button>
                                         </div>
                                     </form>
