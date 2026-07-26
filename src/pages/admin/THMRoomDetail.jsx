@@ -8,8 +8,10 @@ import {
 import { AlertModal } from '../../components/Modals';
 import useAuthStore from '../../store/authStore';
 
-const THMRoomDetail = () => {
-    const { batchId, roomId } = useParams();
+const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) => {
+    const params = useParams();
+    const batchId = propBatchId || params.batchId;
+    const roomId = propRoomId || params.roomId;
     const navigate = useNavigate();
     const { token } = useAuthStore();
 
@@ -192,7 +194,14 @@ const THMRoomDetail = () => {
     const completionRate = totalStudents > 0 ? Math.round((completedCount / totalStudents) * 100) : 0;
 
     if (loading) {
-        return (
+        return isModal ? (
+            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="bg-white rounded-3xl p-10 flex flex-col items-center gap-3 shadow-2xl">
+                    <Loader2 size={36} className="animate-spin text-[#004AAD]" />
+                    <span className="text-sm font-bold text-slate-500">Loading assignment details...</span>
+                </div>
+            </div>
+        ) : (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
                 <div className="flex flex-col items-center gap-3">
                     <Loader2 size={36} className="animate-spin text-[#004AAD]" />
@@ -202,18 +211,26 @@ const THMRoomDetail = () => {
         );
     }
 
-    return (
-        <div className="min-h-screen bg-slate-50/50 p-6 md:p-10 font-sans">
+    const handleGoBack = () => {
+        if (isModal && onClose) {
+            onClose();
+        } else {
+            navigate(-1);
+        }
+    };
+
+    const content = (
+        <div className={isModal ? 'p-6 md:p-8 font-sans' : 'min-h-screen bg-slate-50/50 p-6 md:p-10 font-sans'}>
             <div className="max-w-7xl mx-auto space-y-8">
                 
                 {/* Header Navigation */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="space-y-1">
                         <button 
-                            onClick={() => window.close()} 
+                            onClick={handleGoBack} 
                             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer"
                         >
-                            <ArrowLeft size={14} /> Close & Return
+                            <ArrowLeft size={14} /> {isModal ? 'Close' : 'Close & Return'}
                         </button>
                         <h1 className="text-2xl font-extrabold text-slate-850 tracking-tight flex items-center gap-2">
                             Manage TryHackMe Room #{assignment?.roomNumber}
@@ -454,6 +471,18 @@ const THMRoomDetail = () => {
             />
         </div>
     );
+
+    if (isModal) {
+        return (
+            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto relative">
+                    {content}
+                </div>
+            </div>
+        );
+    }
+
+    return content;
 };
 
 export default THMRoomDetail;

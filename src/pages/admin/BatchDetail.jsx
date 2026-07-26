@@ -10,6 +10,7 @@ import ExcelJS from 'exceljs';
 import useAuthStore from '../../store/authStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 import { AlertModal } from '../../components/Modals';
+import THMRoomDetail from './THMRoomDetail';
 
 // ─── Student Modal ────────────────────────────────────────────────────────────
 const StudentModal = ({ student, isOpen, onClose, onSave }) => {
@@ -239,6 +240,7 @@ const BatchDetail = () => {
 
     // TryHackMe Assignments & Progress states
     const [rosterTab, setRosterTab] = useState('roster'); // 'roster', 'thm'
+    const [manageRoomId, setManageRoomId] = useState(null);
     const [thmProgress, setThmProgress] = useState(null);
     const [loadingThm, setLoadingThm] = useState(false);
     const [addingThmRoom, setAddingThmRoom] = useState(false);
@@ -1519,14 +1521,13 @@ const BatchDetail = () => {
                                         </div>
                                         <div className="flex flex-col items-end gap-2 shrink-0">
                                             <span className="text-xs font-extrabold text-[#004AAD] bg-blue-50/50 border border-blue-100 rounded px-2 py-0.5">{asm.maxMarks} Max Marks</span>
-                                            <a 
-                                                href={`/admin/batches/${batchId}/thm-rooms/${asm._id}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            <button 
+                                                type="button"
+                                                onClick={() => setManageRoomId(asm._id)}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#004AAD] hover:bg-[#003580] text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 cursor-pointer"
                                             >
                                                 <ExternalLink size={10} /> Manage Room
-                                            </a>
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -1581,6 +1582,18 @@ const BatchDetail = () => {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {manageRoomId && (
+                <THMRoomDetail
+                    propBatchId={batchId}
+                    propRoomId={manageRoomId}
+                    isModal={true}
+                    onClose={() => {
+                        setManageRoomId(null);
+                        fetchBatchTHMProgress();
+                    }}
+                />
             )}
         </div>
     );
