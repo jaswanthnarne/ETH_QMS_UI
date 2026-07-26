@@ -1605,6 +1605,43 @@ const BatchDetail = () => {
                         </div>
                     )}
 
+                    {/* Assigned Rooms Quick Management Grid list */}
+                    {thmProgress && thmProgress.assignments && thmProgress.assignments.length > 0 && (
+                        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-800">Assigned TryHackMe Rooms</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Click "Manage Room" next to any assignment to modify details, delete it, or inspect student progress in a new tab.</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {thmProgress.assignments.map(asm => (
+                                    <div key={asm._id} className="border border-slate-100 hover:border-slate-300 bg-slate-50/50 hover:bg-slate-50 rounded-xl p-4 flex flex-col justify-between gap-3 hover:shadow-sm transition-all duration-200">
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <span className="text-[10px] font-extrabold px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded-md font-mono">ROOM #{asm.roomNumber}</span>
+                                                <span className="text-[10px] font-bold text-[#004AAD]">{asm.maxMarks} Marks</span>
+                                            </div>
+                                            <h4 className="text-xs font-bold text-slate-850 line-clamp-1">{asm.title}</h4>
+                                            <span className="text-[9px] text-slate-400 block font-mono">Code: {asm.roomCode}</span>
+                                        </div>
+                                        <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
+                                            <span className="text-[9px] text-slate-450 flex items-center gap-1 font-semibold">
+                                                <Calendar size={10} /> Due: {asm.dueDate ? new Date(asm.dueDate).toLocaleDateString('en-IN') : 'No due date'}
+                                            </span>
+                                            <a 
+                                                href={`/admin/batches/${batchId}/thm-rooms/${asm._id}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#004AAD] hover:bg-[#003580] text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 cursor-pointer"
+                                            >
+                                                <ExternalLink size={10} /> Manage Room
+                                            </a>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Progress Roster Table */}
                     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
                         <div className="flex justify-between items-center border-b border-slate-100 pb-3">
