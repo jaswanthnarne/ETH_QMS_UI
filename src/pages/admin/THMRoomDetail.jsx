@@ -50,13 +50,28 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
         fetchRoomData();
     }, [batchId, roomId]);
 
+    const apiRequest = async (method, path, data = null, headers = {}) => {
+        try {
+            if (method === 'get') return await axios.get(`${baseURL}/admin${path}`, { headers });
+            if (method === 'put') return await axios.put(`${baseURL}/admin${path}`, data, { headers });
+            if (method === 'delete') return await axios.delete(`${baseURL}/admin${path}`, { headers });
+        } catch (err) {
+            if (err.response?.status === 404) {
+                if (method === 'get') return await axios.get(`${baseURL}/trainer${path}`, { headers });
+                if (method === 'put') return await axios.put(`${baseURL}/trainer${path}`, data, { headers });
+                if (method === 'delete') return await axios.delete(`${baseURL}/trainer${path}`, { headers });
+            }
+            throw err;
+        }
+    };
+
     const fetchRoomData = async () => {
         setLoading(true);
         try {
             const headers = { Authorization: `Bearer ${token}` };
             
-            // Fetch single room details & student statuses
-            const res = await axios.get(`${baseURL}/admin/batches/${batchId}/thm-rooms/${roomId}`, { headers });
+            // Fetch single room details & student statuses with route fallback
+            const res = await apiRequest('get', `/batches/${batchId}/thm-rooms/${roomId}`, null, headers);
             if (res.data.success) {
                 const data = res.data.data;
                 setAssignment(data.assignment);
@@ -78,9 +93,13 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
             }
 
             // Fetch batch details to display name
-            const batchRes = await axios.get(`${baseURL}/admin/batches/${batchId}`, { headers });
-            if (batchRes.data.success) {
-                setBatchName(batchRes.data.data.batchName);
+            try {
+                const batchRes = await apiRequest('get', `/batches/${batchId}`, null, headers);
+                if (batchRes.data.success) {
+                    setBatchName(batchRes.data.data.batchName);
+                }
+            } catch (e) {
+                console.log('Batch name fetch fallback', e);
             }
         } catch (err) {
             console.error('Error fetching room assignment data:', err);
@@ -108,7 +127,7 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
                 dueDate: roomDueDate ? new Date(roomDueDate) : null
             };
 
-            const res = await axios.put(`${baseURL}/admin/batches/${batchId}/thm-rooms/${roomId}`, payload, { headers });
+            const res = await apiRequest('put', `/batches/${batchId}/thm-rooms/${roomId}`, payload, headers);
             if (res.data.success) {
                 setAlertState({
                     isOpen: true,
@@ -135,7 +154,7 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
         setSyncing(true);
         try {
             const headers = { Authorization: `Bearer ${token}` };
-            await axios.get(`${baseURL}/admin/batches/${batchId}/thm-progress`, { headers });
+            await apiRequest('get', `/batches/${batchId}/thm-progress`, null, headers);
             await fetchRoomData();
             setAlertState({
                 isOpen: true,
@@ -161,10 +180,10 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
         setDeleting(true);
         try {
             const headers = { Authorization: `Bearer ${token}` };
-            const res = await axios.delete(`${baseURL}/admin/batches/${batchId}/thm-rooms/${roomId}`, { headers });
+            const res = await apiRequest('delete', `/batches/${batchId}/thm-rooms/${roomId}`, null, headers);
             if (res.data.success) {
                 alert('TryHackMe room assignment successfully deleted.');
-                window.close(); // Close tab as it opened in a new tab
+                if (onClose) onClose();
             }
         } catch (err) {
             console.error('Error deleting assignment:', err);
@@ -174,6 +193,7 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
                 message: err.response?.data?.error || 'Failed to delete room assignment.',
                 type: 'error'
             });
+        } finally {
             setDeleting(false);
         }
     };
