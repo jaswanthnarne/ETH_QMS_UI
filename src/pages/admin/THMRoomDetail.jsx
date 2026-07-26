@@ -3,13 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
     ArrowLeft, Save, Trash2, CheckCircle2, XCircle, Search, 
-    Calendar, Award, Hash, Bookmark, FileText, Loader2, Info
+    Calendar, Award, Hash, Bookmark, FileText, Loader2, Info, RefreshCw
 } from 'lucide-react';
 import { AlertModal } from '../../components/Modals';
+import useAuthStore from '../../store/authStore';
 
 const THMRoomDetail = () => {
     const { batchId, roomId } = useParams();
     const navigate = useNavigate();
+    const { token } = useAuthStore();
 
     // Data states
     const [assignment, setAssignment] = useState(null);
@@ -18,6 +20,7 @@ const THMRoomDetail = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [syncing, setSyncing] = useState(false);
 
     // Form states
     const [roomNo, setRoomNo] = useState('');
@@ -38,7 +41,6 @@ const THMRoomDetail = () => {
         type: 'info'
     });
 
-    const token = localStorage.getItem('token');
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
     useEffect(() => {
@@ -123,6 +125,31 @@ const THMRoomDetail = () => {
             });
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleSyncProgress = async () => {
+        setSyncing(true);
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.get(`${baseURL}/admin/batches/${batchId}/thm-progress`, { headers });
+            await fetchRoomData();
+            setAlertState({
+                isOpen: true,
+                title: 'Sync Complete',
+                message: 'Successfully synced all student completions from TryHackMe.',
+                type: 'success'
+            });
+        } catch (err) {
+            console.error('Error syncing TryHackMe progress:', err);
+            setAlertState({
+                isOpen: true,
+                title: 'Sync Failed',
+                message: err.response?.data?.error || 'Failed to sync progress.',
+                type: 'error'
+            });
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -341,6 +368,14 @@ const THMRoomDetail = () => {
                             </h3>
                             
                             <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <button
+                                    type="button"
+                                    onClick={handleSyncProgress}
+                                    disabled={syncing}
+                                    className="px-3 py-1.5 border border-slate-200 text-slate-650 hover:bg-slate-50 text-xs font-bold rounded-lg flex items-center gap-1.5 active:scale-95 transition disabled:opacity-50 cursor-pointer"
+                                >
+                                    <RefreshCw size={12} className={syncing ? "animate-spin text-[#004AAD]" : ""} /> Sync
+                                </button>
                                 {/* Search */}
                                 <div className="relative w-full sm:w-48">
                                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
