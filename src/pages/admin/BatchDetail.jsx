@@ -864,8 +864,40 @@ const BatchDetail = () => {
                 </div>
             </div>
 
-            {previewList.length > 0 ? (
-                /* Interactive Import Review/Preview Table Panel */
+            {batch?.integrationType === 'tryhackme' && (
+                <div className="flex border-b border-slate-200 gap-6 mb-4">
+                    <button
+                        type="button"
+                        onClick={() => setRosterTab('roster')}
+                        className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
+                            rosterTab === 'roster' 
+                                ? 'border-[#004AAD] text-[#004AAD]' 
+                                : 'border-transparent text-slate-400 hover:text-slate-650'
+                        }`}
+                    >
+                        Student Roster
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setRosterTab('thm');
+                            fetchBatchTHMProgress();
+                        }}
+                        className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
+                            rosterTab === 'thm' 
+                                ? 'border-[#004AAD] text-[#004AAD]' 
+                                : 'border-transparent text-slate-400 hover:text-slate-650'
+                        }`}
+                    >
+                        TryHackMe Assignments
+                    </button>
+                </div>
+            )}
+
+            {rosterTab === 'roster' ? (
+                <>
+                    {previewList.length > 0 ? (
+                        /* Interactive Import Review/Preview Table Panel */
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6 animate-in fade-in duration-200">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-100">
                         <div>
@@ -1378,10 +1410,9 @@ const BatchDetail = () => {
                     </table>
                 </div>
             </div>
-
-            {/* TryHackMe assignments layout block (only for TryHackMe integrated batches) */}
-            {batch?.integrationType === 'tryhackme' && (
-                <div className="space-y-6 mt-6">
+                </>
+            ) : (
+                <div className="space-y-6">
                     {/* Assignment creation form (trainer/admin only) */}
                     {!isReadOnly && (
                         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
