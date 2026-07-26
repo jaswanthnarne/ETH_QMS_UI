@@ -237,6 +237,107 @@ const BatchDetail = () => {
     // Export States & Functions
     const [exportingRoster, setExportingRoster] = useState(false);
 
+    // TryHackMe Assignments & Progress states
+    const [rosterTab, setRosterTab] = useState('roster'); // 'roster', 'thm'
+    const [thmProgress, setThmProgress] = useState(null);
+    const [loadingThm, setLoadingThm] = useState(false);
+    const [addingThmRoom, setAddingThmRoom] = useState(false);
+    
+    const [thmRoomNo, setThmRoomNo] = useState('');
+    const [thmRoomCode, setThmRoomCode] = useState('');
+    const [thmRoomTitle, setThmRoomTitle] = useState('');
+    const [thmRoomMarks, setThmRoomMarks] = useState('');
+    const [thmRoomDueDate, setThmRoomDueDate] = useState('');
+
+    const fetchBatchTHMProgress = async () => {
+        setLoadingThm(true);
+        try {
+            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.get(`${baseURL}/trainer/batches/${batchId}/thm-progress`, { headers });
+            if (res.data.success) {
+                setThmProgress(res.data.data);
+            }
+        } catch (err) {
+            console.error('Error fetching TryHackMe progress:', err);
+            setAlertState({
+                isOpen: true,
+                title: 'Sync Error',
+                message: err.response?.data?.error || 'Failed to sync TryHackMe room progress.',
+                type: 'error'
+            });
+        } finally {
+            setLoadingThm(false);
+        }
+    };
+
+    const handleAddTHMRoom = async (e) => {
+        e.preventDefault();
+        setAddingThmRoom(true);
+        try {
+            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const headers = { Authorization: `Bearer ${token}` };
+            const payload = {
+                roomNumber: parseInt(thmRoomNo),
+                roomCode: thmRoomCode.trim(),
+                title: thmRoomTitle.trim(),
+                maxMarks: parseInt(thmRoomMarks),
+                dueDate: thmRoomDueDate ? new Date(thmRoomDueDate) : undefined
+            };
+            const res = await axios.post(`${baseURL}/trainer/batches/${batchId}/thm-rooms`, payload, { headers });
+            if (res.data.success) {
+                setAlertState({
+                    isOpen: true,
+                    title: 'Room Assigned',
+                    message: 'Successfully assigned new TryHackMe room to batch.',
+                    type: 'success'
+                });
+                setThmRoomNo('');
+                setThmRoomCode('');
+                setThmRoomTitle('');
+                setThmRoomMarks('');
+                setThmRoomDueDate('');
+                fetchBatchTHMProgress();
+            }
+        } catch (err) {
+            console.error('Error adding THM room:', err);
+            setAlertState({
+                isOpen: true,
+                title: 'Error Assigning Room',
+                message: err.response?.data?.error || 'Failed to assign TryHackMe room.',
+                type: 'error'
+            });
+        } finally {
+            setAddingThmRoom(false);
+        }
+    };
+
+    const handleDeleteTHMRoom = async (roomId) => {
+        if (!window.confirm('Are you sure you want to delete this room assignment?')) return;
+        try {
+            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.delete(`${baseURL}/trainer/batches/${batchId}/thm-rooms/${roomId}`, { headers });
+            if (res.data.success) {
+                setAlertState({
+                    isOpen: true,
+                    title: 'Assignment Deleted',
+                    message: 'TryHackMe room assignment has been deleted.',
+                    type: 'success'
+                });
+                fetchBatchTHMProgress();
+            }
+        } catch (err) {
+            console.error('Error deleting THM room:', err);
+            setAlertState({
+                isOpen: true,
+                title: 'Delete Failed',
+                message: err.response?.data?.error || 'Failed to delete room assignment.',
+                type: 'error'
+            });
+        }
+    };
+
     const exportBatchRoster = async () => {
         if (!batch) return;
         setExportingRoster(true);
