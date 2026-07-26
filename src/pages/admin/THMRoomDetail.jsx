@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { 
     ArrowLeft, Save, Trash2, CheckCircle2, XCircle, Search, 
@@ -194,13 +195,14 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
     const completionRate = totalStudents > 0 ? Math.round((completedCount / totalStudents) * 100) : 0;
 
     if (loading) {
-        return isModal ? (
-            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        return isModal ? createPortal(
+            <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
                 <div className="bg-white rounded-3xl p-10 flex flex-col items-center gap-3 shadow-2xl">
                     <Loader2 size={36} className="animate-spin text-[#004AAD]" />
                     <span className="text-sm font-bold text-slate-500">Loading assignment details...</span>
                 </div>
-            </div>
+            </div>,
+            document.body
         ) : (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
                 <div className="flex flex-col items-center gap-3">
@@ -473,12 +475,13 @@ const THMRoomDetail = ({ propBatchId, propRoomId, isModal = false, onClose }) =>
     );
 
     if (isModal) {
-        return (
-            <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
+        return createPortal(
+            <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
                 <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto relative">
                     {content}
                 </div>
-            </div>
+            </div>,
+            document.body
         );
     }
 
