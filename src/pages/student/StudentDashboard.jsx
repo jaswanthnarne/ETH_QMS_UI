@@ -921,11 +921,33 @@ const StudentDashboard = () => {
         }
     };
 
+    const [thmRooms, setThmRooms] = useState([]);
+    const [loadingThmRooms, setLoadingThmRooms] = useState(false);
+
+    const fetchStudentThmRooms = async () => {
+        setLoadingThmRooms(true);
+        try {
+            const res = await api.get('/student/thm-rooms', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setThmRooms(res.data.data);
+            }
+        } catch (err) {
+            console.error('Error fetching assigned THM rooms:', err.message);
+        } finally {
+            setLoadingThmRooms(false);
+        }
+    };
+
     useEffect(() => {
         if (token && activeTab === 'leaderboard') {
             fetchStudentLeaderboard();
+            if (student?.batchId?.integrationType === 'tryhackme') {
+                fetchStudentThmRooms();
+            }
         }
-    }, [activeTab, token]);
+    }, [activeTab, token, student]);
 
     return (
         <div className="space-y-8">
@@ -2360,6 +2382,51 @@ const StudentDashboard = () => {
                                                     })}
                                                 </tbody>
                                             </table>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Student TryHackMe room assignments list */}
+                                    {student?.batchId?.integrationType === 'tryhackme' && (
+                                        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 sm:p-8 space-y-4 mt-6">
+                                            <div>
+                                                <h3 className="text-base font-bold text-slate-800">My Assigned TryHackMe Rooms</h3>
+                                                <p className="text-slate-500 text-xs mt-0.5">Solve the assigned rooms on TryHackMe, then click the "Sync Stats" button at the top of the dashboard to sync your completions here.</p>
+                                            </div>
+
+                                            {loadingThmRooms ? (
+                                                <div className="flex justify-center items-center py-6">
+                                                    <Loader2 className="animate-spin text-[#004AAD]" size={20} />
+                                                </div>
+                                            ) : thmRooms.length === 0 ? (
+                                                <p className="text-slate-400 text-xs py-4 text-center">No TryHackMe rooms assigned yet.</p>
+                                            ) : (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {thmRooms.map((room) => (
+                                                        <div key={room._id} className="border border-slate-100 rounded-2xl p-4 flex justify-between items-center hover:shadow-sm transition-all bg-slate-50/50">
+                                                            <div className="space-y-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-[10px] font-extrabold px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded-md font-mono">ROOM #{room.roomNumber}</span>
+                                                                    <span className="text-xs text-slate-400 font-semibold lowercase">({room.roomCode})</span>
+                                                                </div>
+                                                                <h4 className="text-xs font-bold text-slate-800">{room.title}</h4>
+                                                                <p className="text-[10px] text-slate-400">Due: {room.dueDate ? new Date(room.dueDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'No due date'}</p>
+                                                            </div>
+                                                            <div className="text-right space-y-1 shrink-0">
+                                                                {room.status === 'completed' ? (
+                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
+                                                                        ✅ Completed
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-bold rounded-full">
+                                                                        ❌ Pending
+                                                                    </span>
+                                                                )}
+                                                                <div className="text-[10px] font-extrabold text-slate-600">{room.maxMarks} Max Marks</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

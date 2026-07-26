@@ -546,6 +546,12 @@ const BatchDetail = () => {
         loadAll();
     }, [batchId, token]);
 
+    useEffect(() => {
+        if (batch?.integrationType === 'tryhackme') {
+            fetchBatchTHMProgress();
+        }
+    }, [batch]);
+
     useSocketUpdate(() => {
         fetchBatch();
         fetchStudents();
@@ -1271,6 +1277,178 @@ const BatchDetail = () => {
                     </table>
                 </div>
             </div>
+
+            {/* TryHackMe assignments layout block (only for TryHackMe integrated batches) */}
+            {batch?.integrationType === 'tryhackme' && (
+                <div className="space-y-6 mt-6">
+                    {/* Assignment creation form (trainer/admin only) */}
+                    {!isReadOnly && (
+                        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <Plus size={18} className="text-[#004AAD]" /> Assign TryHackMe Room
+                            </h3>
+                            <form onSubmit={handleAddTHMRoom} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room No</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        placeholder="e.g. 1"
+                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD] font-semibold"
+                                        value={thmRoomNo}
+                                        onChange={e => setThmRoomNo(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room Code (Slug)</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. blue"
+                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
+                                        value={thmRoomCode}
+                                        onChange={e => setThmRoomCode(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room Title</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="e.g. Blue"
+                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
+                                        value={thmRoomTitle}
+                                        onChange={e => setThmRoomTitle(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Max Marks</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        placeholder="e.g. 100"
+                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
+                                        value={thmRoomMarks}
+                                        onChange={e => setThmRoomMarks(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Due Date & Time (IST)</label>
+                                    <input
+                                        type="datetime-local"
+                                        required
+                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
+                                        value={thmRoomDueDate}
+                                        onChange={e => setThmRoomDueDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="md:col-span-5 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        disabled={addingThmRoom}
+                                        className="px-5 py-2.5 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                                    >
+                                        {addingThmRoom && <Loader2 size={12} className="animate-spin" />}
+                                        Assign Room
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Progress Roster Table */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+                        <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-800">Assigned TryHackMe Rooms & Progress</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Real-time room completions tracked directly from student TryHackMe profiles.</p>
+                            </div>
+                            <button
+                                onClick={fetchBatchTHMProgress}
+                                disabled={loadingThm}
+                                className="px-3.5 py-1.5 border border-slate-200 text-slate-650 hover:bg-slate-50 text-xs font-bold rounded-lg flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
+                            >
+                                <RefreshCw size={12} className={loadingThm ? "animate-spin" : ""} /> Sync All Progress
+                            </button>
+                        </div>
+
+                        {loadingThm ? (
+                            <div className="flex justify-center items-center py-12">
+                                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                            </div>
+                        ) : !thmProgress || !thmProgress.assignments || thmProgress.assignments.length === 0 ? (
+                            <div className="p-8 text-center text-slate-400 font-medium">
+                                No TryHackMe rooms assigned yet. Create one above to start tracking.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse font-sans text-slate-700">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                            <th className="px-4 py-3">Student Name</th>
+                                            <th className="px-4 py-3">USN</th>
+                                            <th className="px-4 py-3">THM Handle</th>
+                                            {thmProgress.assignments.map(asm => (
+                                                <th key={asm._id} className="px-4 py-3 text-center min-w-[120px]">
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[#004AAD] font-extrabold font-mono text-[9px] bg-blue-50 border border-blue-100 rounded px-1.5 mb-0.5">ROOM #{asm.roomNumber}</span>
+                                                        <span className="truncate max-w-[100px] block" title={asm.title}>{asm.title}</span>
+                                                        <span className="text-[9px] text-slate-400 font-medium lowercase">({asm.roomCode})</span>
+                                                        <div className="flex items-center gap-1.5 mt-1">
+                                                            <span className="text-[9px] text-slate-500 font-semibold">{asm.maxMarks}M</span>
+                                                            {!isReadOnly && (
+                                                                <button
+                                                                    onClick={() => handleDeleteTHMRoom(asm._id)}
+                                                                    className="p-0.5 hover:text-red-500 text-slate-350 cursor-pointer"
+                                                                    title="Delete Room Assignment"
+                                                                >
+                                                                    <Trash2 size={10} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                            ))}
+                                            <th className="px-4 py-3 text-right">Completed Rooms</th>
+                                            <th className="px-4 py-3 text-right">Total Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-medium">
+                                        {thmProgress.roster.map(row => (
+                                            <tr key={row.studentId} className="hover:bg-slate-50/50">
+                                                <td className="px-4 py-3.5 font-bold text-slate-800">{row.name}</td>
+                                                <td className="px-4 py-3.5 font-mono text-[10px] text-slate-500 uppercase">{row.usn}</td>
+                                                <td className="px-4 py-3.5">
+                                                    <span className="bg-slate-50 border border-slate-200 rounded px-2 py-0.5 font-mono text-[10px]">
+                                                        {row.tryhackmeHandle}
+                                                    </span>
+                                                </td>
+                                                {row.progress.map(p => (
+                                                    <td key={p.assignmentId} className="px-4 py-3.5 text-center">
+                                                        {p.status === 'completed' ? (
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-emerald-600 text-sm font-bold">✅ Completed</span>
+                                                                <span className="text-[9px] text-slate-400 font-bold mt-0.5">({p.obtainedMarks} Marks)</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="text-slate-400 text-sm">❌ Pending</span>
+                                                                <span className="text-[9px] text-slate-400 font-bold mt-0.5">(0 Marks)</span>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                ))}
+                                                <td className="px-4 py-3.5 text-right font-extrabold text-[#004AAD]">{row.roomsCompleted} Rooms</td>
+                                                <td className="px-4 py-3.5 text-right font-extrabold text-slate-800">{row.totalScore} pts</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <StudentModal 
                 isOpen={isStudentModalOpen}
