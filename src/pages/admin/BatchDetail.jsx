@@ -1413,6 +1413,60 @@ const BatchDetail = () => {
                 </>
             ) : (
                 <div className="space-y-6">
+                    {/* THM Analytics Overview Panel */}
+                    {thmProgress && thmProgress.assignments && thmProgress.assignments.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Assigned Rooms</span>
+                                <span className="text-xl font-extrabold text-slate-800">{thmProgress.assignments.length} Rooms</span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Total Roster</span>
+                                <span className="text-xl font-extrabold text-slate-800">{thmProgress.roster.length} Students</span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Avg Completion Rate</span>
+                                <span className="text-xl font-extrabold text-emerald-600">
+                                    {(() => {
+                                        let completedSlots = 0;
+                                        let totalSlots = thmProgress.assignments.length * thmProgress.roster.length;
+                                        thmProgress.roster.forEach(row => {
+                                            row.progress.forEach(p => {
+                                                if (p.status === 'completed') completedSlots++;
+                                            });
+                                        });
+                                        return totalSlots > 0 ? `${Math.round((completedSlots / totalSlots) * 100)}%` : '0%';
+                                    })()}
+                                </span>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                                <span className="text-[10px] text-slate-450 uppercase font-bold block">Top Performer</span>
+                                <span className="text-xl font-extrabold text-[#004AAD] truncate block" title={(() => {
+                                    let highestScore = -1;
+                                    let bestStudent = 'None';
+                                    thmProgress.roster.forEach(row => {
+                                        if (row.totalScore > highestScore) {
+                                            highestScore = row.totalScore;
+                                            bestStudent = row.name;
+                                        }
+                                    });
+                                    return highestScore > 0 ? `${bestStudent} (${highestScore} pts)` : 'None yet';
+                                })()}>
+                                    {(() => {
+                                        let highestScore = -1;
+                                        let bestStudent = 'None';
+                                        thmProgress.roster.forEach(row => {
+                                            if (row.totalScore > highestScore) {
+                                                highestScore = row.totalScore;
+                                                bestStudent = row.name;
+                                            }
+                                        });
+                                        return highestScore > 0 ? `${bestStudent} (${highestScore} pts)` : 'None yet';
+                                    })()}
+                                </span>
+                            </div>
+                        </div>
+                    )}
                     {/* Assignment creation form (trainer/admin only) */}
                     {!isReadOnly && (
                         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
