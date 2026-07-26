@@ -254,7 +254,7 @@ const BatchDetail = () => {
         try {
             const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const headers = { Authorization: `Bearer ${token}` };
-            const res = await axios.get(`${baseURL}/trainer/batches/${batchId}/thm-progress`, { headers });
+            const res = await axios.get(`${baseURL}/admin/batches/${batchId}/thm-progress`, { headers });
             if (res.data.success) {
                 setThmProgress(res.data.data);
             }
@@ -284,7 +284,7 @@ const BatchDetail = () => {
                 maxMarks: parseInt(thmRoomMarks),
                 dueDate: thmRoomDueDate ? new Date(thmRoomDueDate) : undefined
             };
-            const res = await axios.post(`${baseURL}/trainer/batches/${batchId}/thm-rooms`, payload, { headers });
+            const res = await axios.post(`${baseURL}/admin/batches/${batchId}/thm-rooms`, payload, { headers });
             if (res.data.success) {
                 setAlertState({
                     isOpen: true,
@@ -317,7 +317,7 @@ const BatchDetail = () => {
         try {
             const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
             const headers = { Authorization: `Bearer ${token}` };
-            const res = await axios.delete(`${baseURL}/trainer/batches/${batchId}/thm-rooms/${roomId}`, { headers });
+            const res = await axios.delete(`${baseURL}/admin/batches/${batchId}/thm-rooms/${roomId}`, { headers });
             if (res.data.success) {
                 setAlertState({
                     isOpen: true,
