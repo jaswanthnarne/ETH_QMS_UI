@@ -101,8 +101,6 @@ const StudentDashboard = () => {
 
     // External handles states
     const [leetcodeHandle, setLeetcodeHandle] = useState('');
-    const [tryhackmeHandle, setTryhackmeHandle] = useState('');
-    const [hacktheboxHandle, setHacktheboxHandle] = useState('');
     const [kaggleHandle, setKaggleHandle] = useState('');
     const [handlesSaving, setHandlesSaving] = useState(false);
 
@@ -110,7 +108,7 @@ const StudentDashboard = () => {
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
     const [syncingLeaderboard, setSyncingLeaderboard] = useState(false);
-    const [leaderboardSubTab, setLeaderboardSubTab] = useState('standings'); // 'standings', 'thm'
+
 
     // Utility UI States
     const [resumeFile, setResumeFile] = useState(null);
@@ -133,7 +131,6 @@ const StudentDashboard = () => {
         refreshStudentProfile();
         fetchActiveExams();
         fetchAttempts();
-        fetchStudentThmRooms();
     }, [token]);
 
     useEffect(() => {
@@ -146,8 +143,6 @@ const StudentDashboard = () => {
             setSkillsList(student.skills || []);
             setCapabilities(student.capabilities || '');
             setLeetcodeHandle(student.externalHandles?.leetcode || '');
-            setTryhackmeHandle(student.externalHandles?.tryhackme || '');
-            setHacktheboxHandle(student.externalHandles?.hackthebox || '');
             setKaggleHandle(student.externalHandles?.kaggle || '');
             if (student.jobPreferences) {
                 setPrefRoles(student.jobPreferences.preferredRoles || []);
@@ -894,8 +889,6 @@ const StudentDashboard = () => {
         setHandlesSaving(true);
         const res = await updateExternalHandles({
             leetcode: leetcodeHandle.trim(),
-            tryhackme: tryhackmeHandle.trim(),
-            hackthebox: hacktheboxHandle.trim(),
             kaggle: kaggleHandle.trim()
         });
         setHandlesSaving(false);
@@ -923,31 +916,9 @@ const StudentDashboard = () => {
         }
     };
 
-    const [thmRooms, setThmRooms] = useState([]);
-    const [loadingThmRooms, setLoadingThmRooms] = useState(false);
-
-    const fetchStudentThmRooms = async () => {
-        setLoadingThmRooms(true);
-        try {
-            const res = await api.get('/student/thm-rooms', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.data.success) {
-                setThmRooms(res.data.data);
-            }
-        } catch (err) {
-            console.error('Error fetching assigned THM rooms:', err.message);
-        } finally {
-            setLoadingThmRooms(false);
-        }
-    };
-
     useEffect(() => {
         if (token && activeTab === 'leaderboard') {
             fetchStudentLeaderboard();
-            if (student?.batchId?.integrationType === 'tryhackme') {
-                fetchStudentThmRooms();
-            }
         }
     }, [activeTab, token, student]);
 
@@ -962,7 +933,7 @@ const StudentDashboard = () => {
                         <div>
                             <h4 className="text-amber-900 font-bold text-sm">Action Required: Link your profile handle!</h4>
                             <p className="text-amber-700 text-xs mt-1">
-                                Your batch **{student.batchId.batchName}** is integrated with **{student.batchId.integrationType === 'tryhackme' ? 'TryHackMe' : student.batchId.integrationType === 'leetcode' ? 'LeetCode' : 'Kaggle'}**. Please configure your profile handle to sync your stats.
+                                Your batch **{student.batchId.batchName}** is integrated with **{student.batchId.integrationType === 'leetcode' ? 'LeetCode' : 'Kaggle'}**. Please configure your profile handle to sync your stats.
                             </p>
                         </div>
                     </div>
@@ -1738,30 +1709,7 @@ const StudentDashboard = () => {
                                                 </div>
                                             ) : (
                                                 <div className="space-y-4">
-                                                    {integrationType === 'tryhackme' && (
-                                                        <>
-                                                            <div className="space-y-2">
-                                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">TryHackMe Username</label>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Enter TryHackMe Username"
-                                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                                    value={tryhackmeHandle}
-                                                                    onChange={(e) => setTryhackmeHandle(e.target.value)}
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Hack The Box Username</label>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Enter Hack The Box Username"
-                                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                                    value={hacktheboxHandle}
-                                                                    onChange={(e) => setHacktheboxHandle(e.target.value)}
-                                                                />
-                                                            </div>
-                                                        </>
-                                                    )}
+
 
                                                     {integrationType === 'leetcode' && (
                                                         <div className="space-y-2">
@@ -2271,197 +2219,122 @@ const StudentDashboard = () => {
 
                         {activeTab === 'leaderboard' && (
                             <div className="space-y-6 font-sans">
-                                {student?.batchId?.integrationType === 'tryhackme' && (
-                                    <div className="flex border-b border-slate-200 gap-6">
-                                        <button
-                                            type="button"
-                                            onClick={() => setLeaderboardSubTab('standings')}
-                                            className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
-                                                leaderboardSubTab === 'standings' 
-                                                    ? 'border-[#004AAD] text-[#004AAD]' 
-                                                    : 'border-transparent text-slate-400 hover:text-slate-650'
-                                            }`}
-                                        >
-                                            Leaderboard Standings
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setLeaderboardSubTab('thm');
-                                                fetchStudentThmRooms();
-                                            }}
-                                            className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
-                                                leaderboardSubTab === 'thm' 
-                                                    ? 'border-[#004AAD] text-[#004AAD]' 
-                                                    : 'border-transparent text-slate-400 hover:text-slate-655'
-                                            }`}
-                                        >
-                                            TryHackMe Rooms ({thmRooms.length})
-                                        </button>
-                                    </div>
-                                )}
-
-                                {leaderboardSubTab === 'standings' ? (
-                                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-slate-800">Batch Standings Leaderboard</h3>
-                                                <p className="text-slate-500 text-sm">
-                                                    Performance tracking for batch <strong>{student?.batchId?.batchName || student?.batchName}</strong>
-                                                </p>
-                                            </div>
-                                            {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' && (
-                                                <button
-                                                    onClick={async () => {
-                                                        setSyncingLeaderboard(true);
-                                                        try {
-                                                            await fetchStudentLeaderboard();
-                                                        } finally {
-                                                            setSyncingLeaderboard(false);
-                                                        }
-                                                    }}
-                                                    disabled={syncingLeaderboard}
-                                                    className="px-5 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl text-xs flex items-center gap-2 cursor-pointer transition shadow-sm active:scale-95 disabled:opacity-50"
-                                                >
-                                                    {syncingLeaderboard ? <Loader2 size={14} className="animate-spin" /> : null}
-                                                    Sync My Stats
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        {loadingLeaderboard ? (
-                                            <div className="flex justify-center items-center py-12">
-                                                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
-                                            </div>
-                                        ) : leaderboardData.length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                                                <Trophy className="text-slate-400 mb-2.5" size={32} />
-                                                <p className="text-slate-700 font-semibold text-sm">No Leaderboard Data</p>
-                                                <p className="text-slate-400 text-xs mt-1">Standings are not generated for this batch yet.</p>
-                                            </div>
-                                        ) : (
-                                            <div className="overflow-x-auto">
-                                                <table className="w-full text-left border-collapse">
-                                                    <thead>
-                                                        <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                                            <th className="pb-3 pr-4">Rank</th>
-                                                            <th className="pb-3 px-4">Student</th>
-                                                            <th className="pb-3 px-4">USN / Roll</th>
-                                                            <th className="pb-3 px-4">Department</th>
-                                                            {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
-                                                                <>
-                                                                    <th className="pb-3 px-4">Platform Score</th>
-                                                                    <th className="pb-3 pl-4 text-right">Platform Badges</th>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <th className="pb-3 px-4">Quiz Marks</th>
-                                                                    <th className="pb-3 pl-4 text-right">Percentage</th>
-                                                                </>
-                                                            )}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-slate-50 text-slate-700 font-medium">
-                                                        {leaderboardData.map((row) => {
-                                                            const isSelf = row.studentId?.toString() === student?._id?.toString();
-                                                            return (
-                                                                <tr 
-                                                                    key={row.studentId} 
-                                                                    className={`transition-colors ${
-                                                                        isSelf 
-                                                                            ? 'bg-blue-50/50 hover:bg-blue-50' 
-                                                                            : 'hover:bg-slate-50/60'
-                                                                    }`}
-                                                                >
-                                                                    <td className="py-4 pr-4 pl-2 font-semibold">
-                                                                        <div className="flex items-center gap-2">
-                                                                            {row.rank === 1 && <span className="text-amber-500 text-base">🥇</span>}
-                                                                            {row.rank === 2 && <span className="text-slate-400 text-base">🥈</span>}
-                                                                            {row.rank === 3 && <span className="text-amber-700 text-base">🥉</span>}
-                                                                            <span>#{row.rank}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="py-4 px-4">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="truncate max-w-[180px] block">{row.name}</span>
-                                                                            {isSelf && (
-                                                                                <span className="bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0">You</span>
-                                                                            )}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="py-4 px-4 font-mono text-xs">{row.usn}</td>
-                                                                    <td className="py-4 px-4 text-slate-500 uppercase text-xs">{row.department}</td>
-                                                                    {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
-                                                                        <>
-                                                                            <td className="py-4 px-4 font-bold text-slate-800">
-                                                                                {row.score} pts
-                                                                            </td>
-                                                                            <td className="py-4 pl-4 text-right font-semibold text-[#004AAD]">
-                                                                                🏆 {row.badges} Badges
-                                                                            </td>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <td className="py-4 px-4 font-semibold text-slate-700">
-                                                                                {row.score} / {row.totalMarks}
-                                                                            </td>
-                                                                            <td className="py-4 pl-4 text-right font-bold text-emerald-600">
-                                                                                {row.percentage}%
-                                                                            </td>
-                                                                        </>
-                                                                    )}
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    /* Student TryHackMe room assignments list */
-                                    <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 sm:p-8 space-y-4">
+                                <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                         <div>
-                                            <h3 className="text-base font-bold text-slate-800">My Assigned TryHackMe Rooms</h3>
-                                            <p className="text-slate-500 text-xs mt-0.5">Solve the assigned rooms on TryHackMe, then click the "Sync Stats" button at the top of the dashboard to sync your completions here.</p>
+                                            <h3 className="text-lg font-semibold text-[#004AAD]">Batch Standings Leaderboard</h3>
+                                            <p className="text-slate-500 text-sm">
+                                                Performance tracking for batch <strong>{student?.batchId?.batchName || student?.batchName}</strong>
+                                            </p>
                                         </div>
-
-                                        {loadingThmRooms ? (
-                                            <div className="flex justify-center items-center py-6">
-                                                <Loader2 className="animate-spin text-[#004AAD]" size={20} />
-                                            </div>
-                                        ) : thmRooms.length === 0 ? (
-                                            <p className="text-slate-400 text-xs py-4 text-center">No TryHackMe rooms assigned yet.</p>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {thmRooms.map((room) => (
-                                                    <div key={room._id} className="border border-slate-100 rounded-2xl p-4 flex justify-between items-center hover:shadow-sm transition-all bg-slate-50/50">
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] font-extrabold px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded-md font-mono">ROOM #{room.roomNumber}</span>
-                                                                <span className="text-xs text-slate-400 font-semibold lowercase">({room.roomCode})</span>
-                                                            </div>
-                                                            <h4 className="text-xs font-bold text-slate-800">{room.title}</h4>
-                                                            <p className="text-[10px] text-slate-400">Due: {room.dueDate ? new Date(room.dueDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'No due date'}</p>
-                                                        </div>
-                                                        <div className="text-right space-y-1 shrink-0">
-                                                            {room.status === 'completed' ? (
-                                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
-                                                                    ✅ Completed
-                                                                </span>
-                                                            ) : (
-                                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-500 text-[10px] font-bold rounded-full">
-                                                                    ❌ Pending
-                                                                </span>
-                                                            )}
-                                                            <div className="text-[10px] font-extrabold text-slate-600">{room.maxMarks} Max Marks</div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                        {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' && (
+                                            <button
+                                                onClick={async () => {
+                                                    setSyncingLeaderboard(true);
+                                                    try {
+                                                        await fetchStudentLeaderboard();
+                                                    } finally {
+                                                        setSyncingLeaderboard(false);
+                                                    }
+                                                }}
+                                                disabled={syncingLeaderboard}
+                                                className="px-5 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl text-xs flex items-center gap-2 cursor-pointer transition shadow-sm active:scale-95 disabled:opacity-50"
+                                            >
+                                                {syncingLeaderboard ? <Loader2 size={14} className="animate-spin" /> : null}
+                                                Sync My Stats
+                                            </button>
                                         )}
                                     </div>
-                                )}
+
+                                    {loadingLeaderboard ? (
+                                        <div className="flex justify-center items-center py-12">
+                                            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                                        </div>
+                                    ) : leaderboardData.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                            <Trophy className="text-slate-400 mb-2.5" size={32} />
+                                            <p className="text-slate-700 font-semibold text-sm">No Leaderboard Data</p>
+                                            <p className="text-slate-400 text-xs mt-1">Standings are not generated for this batch yet.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                        <th className="pb-3 pr-4">Rank</th>
+                                                        <th className="pb-3 px-4">Student</th>
+                                                        <th className="pb-3 px-4">USN / Roll</th>
+                                                        <th className="pb-3 px-4">Department</th>
+                                                        {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
+                                                            <>
+                                                                <th className="pb-3 px-4">Platform Score</th>
+                                                                <th className="pb-3 pl-4 text-right">Platform Badges</th>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <th className="pb-3 px-4">Quiz Marks</th>
+                                                                <th className="pb-3 pl-4 text-right">Percentage</th>
+                                                            </>
+                                                        )}
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-50 text-slate-700 font-medium">
+                                                    {leaderboardData.map((row) => {
+                                                        const isSelf = row.studentId?.toString() === student?._id?.toString();
+                                                        return (
+                                                            <tr 
+                                                                key={row.studentId} 
+                                                                className={`transition-colors ${
+                                                                    isSelf 
+                                                                        ? 'bg-blue-50/50 hover:bg-blue-50' 
+                                                                        : 'hover:bg-slate-50/60'
+                                                                }`}
+                                                            >
+                                                                <td className="py-4 pr-4 pl-2 font-semibold">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {row.rank === 1 && <span className="text-amber-500 text-base">🥇</span>}
+                                                                        {row.rank === 2 && <span className="text-slate-400 text-base">🥈</span>}
+                                                                        {row.rank === 3 && <span className="text-amber-700 text-base">🥉</span>}
+                                                                        <span>#{row.rank}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 px-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="truncate max-w-[180px] block">{row.name}</span>
+                                                                        {isSelf && (
+                                                                            <span className="bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0">You</span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 px-4 font-mono text-xs">{row.usn}</td>
+                                                                <td className="py-4 px-4 text-[#004AAD] uppercase text-xs font-semibold">{row.department}</td>
+                                                                {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
+                                                                    <>
+                                                                        <td className="py-4 px-4 font-bold text-slate-800">
+                                                                            {row.score} pts
+                                                                        </td>
+                                                                        <td className="py-4 pl-4 text-right font-semibold text-[#004AAD]">
+                                                                            🏆 {row.badges} Badges
+                                                                        </td>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <td className="py-4 px-4 font-semibold text-slate-700">
+                                                                            {row.score} / {row.totalMarks}
+                                                                        </td>
+                                                                        <td className="py-4 pl-4 text-right font-bold text-emerald-600">
+                                                                            {row.percentage}%
+                                                                        </td>
+                                                                    </>
+                                                                )}
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
             </div>

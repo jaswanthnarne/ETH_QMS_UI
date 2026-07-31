@@ -279,28 +279,12 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                             >
                                 <option value="none">None</option>
                                 <option value="leetcode">LeetCode</option>
-                                <option value="tryhackme">TryHackMe</option>
                                 <option value="kaggle">Kaggle</option>
                             </select>
                         </div>
 
                         {formData.integrationType && formData.integrationType !== 'none' && (
                             <div className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                {formData.integrationType === 'tryhackme' && (
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">TryHackMe Private Room ID</label>
-                                        <input 
-                                            type="text"
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none"
-                                            placeholder="e.g. mits-cyber-sec-01"
-                                            value={formData.integrationConfig?.roomCode || ''}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                integrationConfig: { ...formData.integrationConfig, roomCode: e.target.value }
-                                            })}
-                                        />
-                                    </div>
-                                )}
 
                                 {formData.integrationType === 'kaggle' && (
                                     <div>

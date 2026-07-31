@@ -10,7 +10,6 @@ import ExcelJS from 'exceljs';
 import useAuthStore from '../../store/authStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 import { AlertModal } from '../../components/Modals';
-import THMRoomDetail from './THMRoomDetail';
 
 // ─── Student Modal ────────────────────────────────────────────────────────────
 const StudentModal = ({ student, isOpen, onClose, onSave }) => {
@@ -238,108 +237,6 @@ const BatchDetail = () => {
     // Export States & Functions
     const [exportingRoster, setExportingRoster] = useState(false);
 
-    // TryHackMe Assignments & Progress states
-    const [rosterTab, setRosterTab] = useState('roster'); // 'roster', 'thm'
-    const [manageRoomId, setManageRoomId] = useState(null);
-    const [thmProgress, setThmProgress] = useState(null);
-    const [loadingThm, setLoadingThm] = useState(false);
-    const [addingThmRoom, setAddingThmRoom] = useState(false);
-    
-    const [thmRoomNo, setThmRoomNo] = useState('');
-    const [thmRoomCode, setThmRoomCode] = useState('');
-    const [thmRoomTitle, setThmRoomTitle] = useState('');
-    const [thmRoomMarks, setThmRoomMarks] = useState('');
-    const [thmRoomDueDate, setThmRoomDueDate] = useState('');
-
-    const fetchBatchTHMProgress = async () => {
-        setLoadingThm(true);
-        try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const headers = { Authorization: `Bearer ${token}` };
-            const res = await axios.get(`${baseURL}/admin/batches/${batchId}/thm-progress`, { headers });
-            if (res.data.success) {
-                setThmProgress(res.data.data);
-            }
-        } catch (err) {
-            console.error('Error fetching TryHackMe progress:', err);
-            setAlertState({
-                isOpen: true,
-                title: 'Sync Error',
-                message: err.response?.data?.error || 'Failed to sync TryHackMe room progress.',
-                type: 'error'
-            });
-        } finally {
-            setLoadingThm(false);
-        }
-    };
-
-    const handleAddTHMRoom = async (e) => {
-        e.preventDefault();
-        setAddingThmRoom(true);
-        try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const headers = { Authorization: `Bearer ${token}` };
-            const payload = {
-                roomNumber: parseInt(thmRoomNo),
-                roomCode: thmRoomCode.trim(),
-                title: thmRoomTitle.trim(),
-                maxMarks: parseInt(thmRoomMarks),
-                dueDate: thmRoomDueDate ? new Date(thmRoomDueDate) : undefined
-            };
-            const res = await axios.post(`${baseURL}/admin/batches/${batchId}/thm-rooms`, payload, { headers });
-            if (res.data.success) {
-                setAlertState({
-                    isOpen: true,
-                    title: 'Room Assigned',
-                    message: 'Successfully assigned new TryHackMe room to batch.',
-                    type: 'success'
-                });
-                setThmRoomNo('');
-                setThmRoomCode('');
-                setThmRoomTitle('');
-                setThmRoomMarks('');
-                setThmRoomDueDate('');
-                fetchBatchTHMProgress();
-            }
-        } catch (err) {
-            console.error('Error adding THM room:', err);
-            setAlertState({
-                isOpen: true,
-                title: 'Error Assigning Room',
-                message: err.response?.data?.error || 'Failed to assign TryHackMe room.',
-                type: 'error'
-            });
-        } finally {
-            setAddingThmRoom(false);
-        }
-    };
-
-    const handleDeleteTHMRoom = async (roomId) => {
-        if (!window.confirm('Are you sure you want to delete this room assignment?')) return;
-        try {
-            const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            const headers = { Authorization: `Bearer ${token}` };
-            const res = await axios.delete(`${baseURL}/admin/batches/${batchId}/thm-rooms/${roomId}`, { headers });
-            if (res.data.success) {
-                setAlertState({
-                    isOpen: true,
-                    title: 'Assignment Deleted',
-                    message: 'TryHackMe room assignment has been deleted.',
-                    type: 'success'
-                });
-                fetchBatchTHMProgress();
-            }
-        } catch (err) {
-            console.error('Error deleting THM room:', err);
-            setAlertState({
-                isOpen: true,
-                title: 'Delete Failed',
-                message: err.response?.data?.error || 'Failed to delete room assignment.',
-                type: 'error'
-            });
-        }
-    };
-
     const exportBatchRoster = async () => {
         if (!batch) return;
         setExportingRoster(true);
@@ -372,9 +269,6 @@ const BatchDetail = () => {
             const excelHeaders = ['S.No', 'Student Name', 'USN', 'Department', 'Semester', 'Division', 'Email', 'Mobile', 'CGPA', 'Backlogs', 'Status'];
             if (batch.integrationType && batch.integrationType !== 'none') {
                 excelHeaders.push('Integration Handle', 'Platform Score');
-                if (batch.integrationType === 'tryhackme') {
-                    excelHeaders.push('Platform Badges');
-                }
             }
             const headerRow = sheet.addRow(excelHeaders);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
@@ -402,9 +296,6 @@ const BatchDetail = () => {
                         s.externalHandles?.[batch.integrationType] || '—',
                         s.externalScore || 0
                     );
-                    if (batch.integrationType === 'tryhackme') {
-                        rowData.push(s.externalBadges || 0);
-                    }
                 }
                 const row = sheet.addRow(rowData);
                 row.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -439,9 +330,6 @@ const BatchDetail = () => {
             if (batch.integrationType && batch.integrationType !== 'none') {
                 sheet.getColumn(12).width = 22;
                 sheet.getColumn(13).width = 16;
-                if (batch.integrationType === 'tryhackme') {
-                    sheet.getColumn(14).width = 16;
-                }
             }
 
             const buffer = await workbook.xlsx.writeBuffer();
@@ -649,11 +537,7 @@ const BatchDetail = () => {
         loadAll();
     }, [batchId, token]);
 
-    useEffect(() => {
-        if (batch?.integrationType === 'tryhackme') {
-            fetchBatchTHMProgress();
-        }
-    }, [batch]);
+
 
     useSocketUpdate(() => {
         fetchBatch();
@@ -866,38 +750,9 @@ const BatchDetail = () => {
                 </div>
             </div>
 
-            {batch?.integrationType === 'tryhackme' && (
-                <div className="flex border-b border-slate-200 gap-6 mb-4">
-                    <button
-                        type="button"
-                        onClick={() => setRosterTab('roster')}
-                        className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
-                            rosterTab === 'roster' 
-                                ? 'border-[#004AAD] text-[#004AAD]' 
-                                : 'border-transparent text-slate-400 hover:text-slate-655'
-                        }`}
-                    >
-                        Student Roster
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setRosterTab('thm');
-                            fetchBatchTHMProgress();
-                        }}
-                        className={`pb-3 font-bold text-sm border-b-2 px-1 transition-all cursor-pointer ${
-                            rosterTab === 'thm' 
-                                ? 'border-[#004AAD] text-[#004AAD]' 
-                                : 'border-transparent text-slate-400 hover:text-slate-655'
-                        }`}
-                    >
-                        TryHackMe Assignments
-                    </button>
-                </div>
-            )}
 
-            {rosterTab === 'roster' ? (
-                <>
+
+
                     {previewList.length > 0 ? (
                         /* Interactive Import Review/Preview Table Panel */
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6 animate-in fade-in duration-200">
@@ -1412,130 +1267,7 @@ const BatchDetail = () => {
                     </table>
                 </div>
             </div>
-                </>
-            ) : (
-                <div className="space-y-6">
-                    {/* Assignment creation form (trainer/admin only) */}
-                    {!isReadOnly && (
-                        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-                            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                                <Plus size={18} className="text-[#004AAD]" /> Assign TryHackMe Room
-                            </h3>
-                            <form onSubmit={handleAddTHMRoom} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                                <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room No</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        placeholder="e.g. 1"
-                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD] font-semibold"
-                                        value={thmRoomNo}
-                                        onChange={e => setThmRoomNo(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room Code (Slug)</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        placeholder="e.g. blue"
-                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
-                                        value={thmRoomCode}
-                                        onChange={e => setThmRoomCode(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Room Title</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        placeholder="e.g. Blue"
-                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
-                                        value={thmRoomTitle}
-                                        onChange={e => setThmRoomTitle(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Max Marks</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        placeholder="e.g. 100"
-                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
-                                        value={thmRoomMarks}
-                                        onChange={e => setThmRoomMarks(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Due Date & Time (IST)</label>
-                                    <input
-                                        type="datetime-local"
-                                        required
-                                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]"
-                                        value={thmRoomDueDate}
-                                        onChange={e => setThmRoomDueDate(e.target.value)}
-                                    />
-                                </div>
-                                <div className="md:col-span-5 flex justify-end">
-                                    <button
-                                        type="submit"
-                                        disabled={addingThmRoom}
-                                        className="px-5 py-2.5 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
-                                    >
-                                        {addingThmRoom && <Loader2 size={12} className="animate-spin" />}
-                                        Assign Room
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
 
-                    {/* Assigned Rooms list with "Manage Room" option */}
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-                        <div>
-                            <h3 className="text-sm font-bold text-slate-800">Assigned TryHackMe Rooms</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">Manage details and view analytics for individual assigned rooms.</p>
-                        </div>
-
-                        {loadingThm ? (
-                            <div className="flex justify-center items-center py-12">
-                                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
-                            </div>
-                        ) : !thmProgress || !thmProgress.assignments || thmProgress.assignments.length === 0 ? (
-                            <div className="p-8 text-center text-slate-400 font-medium border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-                                No rooms assigned yet. Use the form above to assign a room.
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {thmProgress.assignments.map(asm => (
-                                    <div key={asm._id} className="border border-slate-200 hover:border-slate-350 bg-slate-50/30 rounded-2xl p-4 flex justify-between items-center hover:shadow-sm transition-all duration-200">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-extrabold px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded-md font-mono">ROOM #{asm.roomNumber}</span>
-                                                <span className="text-xs text-slate-450 font-semibold lowercase">({asm.roomCode})</span>
-                                            </div>
-                                            <h4 className="text-sm font-bold text-slate-850">{asm.title}</h4>
-                                            <p className="text-[10px] text-slate-450 flex items-center gap-1">
-                                                <Calendar size={10} /> Due: {asm.dueDate ? new Date(asm.dueDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'No due date'}
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-col items-end gap-2 shrink-0">
-                                            <span className="text-xs font-extrabold text-[#004AAD] bg-blue-50/50 border border-blue-100 rounded px-2 py-0.5">{asm.maxMarks} Max Marks</span>
-                                            <button 
-                                                type="button"
-                                                onClick={() => setManageRoomId(asm._id)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#004AAD] hover:bg-[#003580] text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 cursor-pointer"
-                                            >
-                                                <ExternalLink size={10} /> Manage Room
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
 
             <StudentModal 
                 isOpen={isStudentModalOpen}
@@ -1584,17 +1316,7 @@ const BatchDetail = () => {
                 </div>
             )}
 
-            {manageRoomId && (
-                <THMRoomDetail
-                    propBatchId={batchId}
-                    propRoomId={manageRoomId}
-                    isModal={true}
-                    onClose={() => {
-                        setManageRoomId(null);
-                        fetchBatchTHMProgress();
-                    }}
-                />
-            )}
+
         </div>
     );
 };
