@@ -925,29 +925,7 @@ const StudentDashboard = () => {
     return (
         <div className="space-y-8">
             
-            {/* Platform Integration Handle Link Alert */}
-            {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' && !student.externalHandles?.[student.batchId.integrationType] && (
-                <div className="bg-amber-50 border border-amber-250 rounded-[1.5rem] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm border-amber-200">
-                    <div className="flex gap-3">
-                        <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={20} />
-                        <div>
-                            <h4 className="text-amber-900 font-bold text-sm">Action Required: Link your profile handle!</h4>
-                            <p className="text-amber-700 text-xs mt-1">
-                                Your batch **{student.batchId.batchName}** is integrated with **{student.batchId.integrationType === 'leetcode' ? 'LeetCode' : 'Kaggle'}**. Please configure your profile handle to sync your stats.
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => {
-                            setActiveTab('profile');
-                            setProfileSubTab('handles');
-                        }}
-                        className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-xl shadow-sm whitespace-nowrap active:scale-95 transition-all cursor-pointer"
-                    >
-                        Configure Now
-                    </button>
-                </div>
-            )}
+
             
             {/* Glassmorphic Profile Banner */}
             <div className="bg-gradient-to-r from-[#004AAD] to-[#003580] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
@@ -2217,126 +2195,7 @@ const StudentDashboard = () => {
                             </form>
                         )}
 
-                        {activeTab === 'leaderboard' && (
-                            <div className="space-y-6 font-sans">
-                                <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-[#004AAD]">Batch Standings Leaderboard</h3>
-                                            <p className="text-slate-500 text-sm">
-                                                Performance tracking for batch <strong>{student?.batchId?.batchName || student?.batchName}</strong>
-                                            </p>
-                                        </div>
-                                        {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' && (
-                                            <button
-                                                onClick={async () => {
-                                                    setSyncingLeaderboard(true);
-                                                    try {
-                                                        await fetchStudentLeaderboard();
-                                                    } finally {
-                                                        setSyncingLeaderboard(false);
-                                                    }
-                                                }}
-                                                disabled={syncingLeaderboard}
-                                                className="px-5 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl text-xs flex items-center gap-2 cursor-pointer transition shadow-sm active:scale-95 disabled:opacity-50"
-                                            >
-                                                {syncingLeaderboard ? <Loader2 size={14} className="animate-spin" /> : null}
-                                                Sync My Stats
-                                            </button>
-                                        )}
-                                    </div>
 
-                                    {loadingLeaderboard ? (
-                                        <div className="flex justify-center items-center py-12">
-                                            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
-                                        </div>
-                                    ) : leaderboardData.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                                            <Trophy className="text-slate-400 mb-2.5" size={32} />
-                                            <p className="text-slate-700 font-semibold text-sm">No Leaderboard Data</p>
-                                            <p className="text-slate-400 text-xs mt-1">Standings are not generated for this batch yet.</p>
-                                        </div>
-                                    ) : (
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-left border-collapse">
-                                                <thead>
-                                                    <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                                        <th className="pb-3 pr-4">Rank</th>
-                                                        <th className="pb-3 px-4">Student</th>
-                                                        <th className="pb-3 px-4">USN / Roll</th>
-                                                        <th className="pb-3 px-4">Department</th>
-                                                        {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
-                                                            <>
-                                                                <th className="pb-3 px-4">Platform Score</th>
-                                                                <th className="pb-3 pl-4 text-right">Platform Badges</th>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <th className="pb-3 px-4">Quiz Marks</th>
-                                                                <th className="pb-3 pl-4 text-right">Percentage</th>
-                                                            </>
-                                                        )}
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-50 text-slate-700 font-medium">
-                                                    {leaderboardData.map((row) => {
-                                                        const isSelf = row.studentId?.toString() === student?._id?.toString();
-                                                        return (
-                                                            <tr 
-                                                                key={row.studentId} 
-                                                                className={`transition-colors ${
-                                                                    isSelf 
-                                                                        ? 'bg-blue-50/50 hover:bg-blue-50' 
-                                                                        : 'hover:bg-slate-50/60'
-                                                                }`}
-                                                            >
-                                                                <td className="py-4 pr-4 pl-2 font-semibold">
-                                                                    <div className="flex items-center gap-2">
-                                                                        {row.rank === 1 && <span className="text-amber-500 text-base">🥇</span>}
-                                                                        {row.rank === 2 && <span className="text-slate-400 text-base">🥈</span>}
-                                                                        {row.rank === 3 && <span className="text-amber-700 text-base">🥉</span>}
-                                                                        <span>#{row.rank}</span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="py-4 px-4">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="truncate max-w-[180px] block">{row.name}</span>
-                                                                        {isSelf && (
-                                                                            <span className="bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase shrink-0">You</span>
-                                                                        )}
-                                                                    </div>
-                                                                </td>
-                                                                <td className="py-4 px-4 font-mono text-xs">{row.usn}</td>
-                                                                <td className="py-4 px-4 text-[#004AAD] uppercase text-xs font-semibold">{row.department}</td>
-                                                                {student?.batchId?.integrationType && student.batchId.integrationType !== 'none' ? (
-                                                                    <>
-                                                                        <td className="py-4 px-4 font-bold text-slate-800">
-                                                                            {row.score} pts
-                                                                        </td>
-                                                                        <td className="py-4 pl-4 text-right font-semibold text-[#004AAD]">
-                                                                            🏆 {row.badges} Badges
-                                                                        </td>
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <td className="py-4 px-4 font-semibold text-slate-700">
-                                                                            {row.score} / {row.totalMarks}
-                                                                        </td>
-                                                                        <td className="py-4 pl-4 text-right font-bold text-emerald-600">
-                                                                            {row.percentage}%
-                                                                        </td>
-                                                                    </>
-                                                                )}
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
             </div>
 
             {/* Add/Edit Todo Modal */}

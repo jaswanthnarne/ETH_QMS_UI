@@ -118,7 +118,6 @@ const MainLayout = ({ children }) => {
     const menuItems = isStudent ? [
         { label: 'Enter Exam', icon: FileText, path: '/student/dashboard?tab=enter-exam' },
         { label: 'Exam History', icon: Trophy, path: '/student/dashboard?tab=exam-history' },
-        { label: 'Batch Leaderboard', icon: Trophy, path: '/student/dashboard?tab=leaderboard' },
         { label: 'Profile', icon: User, path: '/student/dashboard?tab=profile' },
         { label: 'Placements', icon: Briefcase, path: '/student/dashboard?tab=placement' },
         { label: 'Attendance', icon: CalendarCheck, path: '/student/dashboard?tab=attendance' },
