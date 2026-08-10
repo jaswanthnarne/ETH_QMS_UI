@@ -99,10 +99,7 @@ const StudentDashboard = () => {
     const [showPw1, setShowPw1] = useState(false);
     const [showPw2, setShowPw2] = useState(false);
 
-    // External handles states
-    const [leetcodeHandle, setLeetcodeHandle] = useState('');
-    const [kaggleHandle, setKaggleHandle] = useState('');
-    const [handlesSaving, setHandlesSaving] = useState(false);
+
 
     // Leaderboard states
     const [leaderboardData, setLeaderboardData] = useState([]);
@@ -142,8 +139,6 @@ const StudentDashboard = () => {
             setPersonalBacklogs(student.backlogs !== undefined ? student.backlogs : '');
             setSkillsList(student.skills || []);
             setCapabilities(student.capabilities || '');
-            setLeetcodeHandle(student.externalHandles?.leetcode || '');
-            setKaggleHandle(student.externalHandles?.kaggle || '');
             if (student.jobPreferences) {
                 setPrefRoles(student.jobPreferences.preferredRoles || []);
                 setPrefLocations(student.jobPreferences.preferredLocations || []);
@@ -884,21 +879,7 @@ const StudentDashboard = () => {
         };
     };
 
-    const handleSaveHandles = async (e) => {
-        e.preventDefault();
-        setHandlesSaving(true);
-        const res = await updateExternalHandles({
-            leetcode: leetcodeHandle.trim(),
-            kaggle: kaggleHandle.trim()
-        });
-        setHandlesSaving(false);
-        if (res.success) {
-            setAlertState({ open: true, title: 'Success', message: 'Platform handles updated successfully.', type: 'success' });
-            refreshStudentProfile();
-        } else {
-            setAlertState({ open: true, title: 'Update Failed', message: res.error || 'Failed to update platform handles.', type: 'error' });
-        }
-    };
+
 
     const fetchStudentLeaderboard = async () => {
         setLoadingLeaderboard(true);
@@ -1307,17 +1288,7 @@ const StudentDashboard = () => {
                                         >
                                             Career Preferences
                                         </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setProfileSubTab('handles')}
-                                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                                profileSubTab === 'handles'
-                                                    ? 'bg-[#004AAD] text-white shadow-sm'
-                                                    : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
-                                            }`}
-                                        >
-                                            Platform Handles
-                                        </button>
+
                                     </div>
                                     <button
                                         type="button"
@@ -1671,67 +1642,6 @@ const StudentDashboard = () => {
                                     </form>
                                 )}
 
-                                {profileSubTab === 'handles' && (() => {
-                                    const batchIntegration = student?.batchId;
-                                    const integrationType = batchIntegration?.integrationType || 'none';
-                                    return (
-                                        <form onSubmit={handleSaveHandles} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-slate-800">Platform Integration Handles</h3>
-                                                <p className="text-slate-500 text-sm">Link your external learning and coding profiles to sync scores and ranks.</p>
-                                            </div>
-
-                                            {integrationType === 'none' ? (
-                                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-center text-slate-500 text-sm font-semibold">
-                                                    Your current batch <strong>{batchIntegration?.batchName || 'N/A'}</strong> does not require any external learning profile integrations.
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-4">
-
-
-                                                    {integrationType === 'leetcode' && (
-                                                        <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">LeetCode Username</label>
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Enter LeetCode Username"
-                                                                className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                                value={leetcodeHandle}
-                                                                onChange={(e) => setLeetcodeHandle(e.target.value)}
-                                                            />
-                                                        </div>
-                                                    )}
-
-                                                    {integrationType === 'kaggle' && (
-                                                        <div className="space-y-2">
-                                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Kaggle Username</label>
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Enter Kaggle Username"
-                                                                className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
-                                                                value={kaggleHandle}
-                                                                onChange={(e) => setKaggleHandle(e.target.value)}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {integrationType !== 'none' && (
-                                                <div className="pt-4 flex justify-end border-t border-slate-100">
-                                                    <button
-                                                        type="submit"
-                                                        disabled={handlesSaving}
-                                                        className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
-                                                    >
-                                                        {handlesSaving ? <Loader2 size={16} className="animate-spin" /> : null}
-                                                        Save Handles
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </form>
-                                    );
-                                })()}
                             </div>
                         )}
 

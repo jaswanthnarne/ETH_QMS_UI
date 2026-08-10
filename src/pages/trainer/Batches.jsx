@@ -38,9 +38,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                 department: batch.department || '',
                 program: batch.program || '',
                 startDate: batch.startDate ? new Date(batch.startDate).toISOString().split('T')[0] : '',
-                endDate: batch.endDate ? new Date(batch.endDate).toISOString().split('T')[0] : '',
-                integrationType: batch.integrationType || 'none',
-                integrationConfig: batch.integrationConfig || { roomCode: '', groupUrl: '', targetScore: '' }
+                endDate: batch.endDate ? new Date(batch.endDate).toISOString().split('T')[0] : ''
             });
         } else {
             setFormData({
@@ -51,9 +49,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                 department: '',
                 program: '',
                 startDate: '',
-                endDate: '',
-                integrationType: 'none',
-                integrationConfig: { roomCode: '', groupUrl: '', targetScore: '' }
+                endDate: ''
             });
         }
     }, [batch, isOpen, colleges, activeCollegeId]);
@@ -128,9 +124,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
             collegeId: formData.collegeId,
             courseId: formData.courseId,
             batchName: formData.batchName,
-            department: formData.department,
-            integrationType: formData.integrationType || 'none',
-            integrationConfig: formData.integrationConfig || undefined
+            department: formData.department
         };
         
         if (isAdmin) {
@@ -266,75 +260,6 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                             </div>
                         </div>
                     )}
-
-                    {/* Integration section (Trainer and Admin settings) */}
-                    <div className="space-y-4 border-t border-slate-100 pt-3">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Platform Integration (Optional)</h4>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Integration Type</label>
-                            <select 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
-                                value={formData.integrationType}
-                                onChange={(e) => setFormData({...formData, integrationType: e.target.value, integrationConfig: { roomCode: '', groupUrl: '', targetScore: '' }})}
-                            >
-                                <option value="none">None</option>
-                                <option value="leetcode">LeetCode</option>
-                                <option value="kaggle">Kaggle</option>
-                            </select>
-                        </div>
-
-                        {formData.integrationType && formData.integrationType !== 'none' && (
-                            <div className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-
-                                {formData.integrationType === 'kaggle' && (
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">Kaggle Competition Code</label>
-                                        <input 
-                                            type="text"
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none"
-                                            placeholder="e.g. house-prices-prediction"
-                                            value={formData.integrationConfig?.roomCode || ''}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                integrationConfig: { ...formData.integrationConfig, roomCode: e.target.value }
-                                            })}
-                                        />
-                                    </div>
-                                )}
-
-                                {formData.integrationType === 'leetcode' && (
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-600 mb-1">LeetCode Group/List URL</label>
-                                        <input 
-                                            type="text"
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none"
-                                            placeholder="e.g. https://leetcode.com/discuss/interview-question/..."
-                                            value={formData.integrationConfig?.groupUrl || ''}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                integrationConfig: { ...formData.integrationConfig, groupUrl: e.target.value }
-                                            })}
-                                        />
-                                    </div>
-                                )}
-
-                                <div>
-                                    <label className="block text-xs font-semibold text-slate-600 mb-1">Target Score / Criteria</label>
-                                    <input 
-                                        type="number"
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none"
-                                        placeholder="e.g. 100"
-                                        value={formData.integrationConfig?.targetScore || ''}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            integrationConfig: { ...formData.integrationConfig, targetScore: parseInt(e.target.value) || '' }
-                                        })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
                     <div className="pt-3 flex gap-3">
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50 active:scale-95 transition-all">Cancel</button>
                         <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2">{submitting && <Loader2 size={16} className="animate-spin" />}{batch ? 'Save Changes' : 'Create Batch'}</button>

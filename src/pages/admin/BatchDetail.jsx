@@ -267,9 +267,6 @@ const BatchDetail = () => {
  
             // 3. Headers
             const excelHeaders = ['S.No', 'Student Name', 'USN', 'Department', 'Semester', 'Division', 'Email', 'Mobile', 'CGPA', 'Backlogs', 'Status'];
-            if (batch.integrationType && batch.integrationType !== 'none') {
-                excelHeaders.push('Integration Handle', 'Platform Score');
-            }
             const headerRow = sheet.addRow(excelHeaders);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
             headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
@@ -291,12 +288,7 @@ const BatchDetail = () => {
                     s.backlogs !== undefined ? s.backlogs : '—',
                     s.status || 'active'
                 ];
-                if (batch.integrationType && batch.integrationType !== 'none') {
-                    rowData.push(
-                        s.externalHandles?.[batch.integrationType] || '—',
-                        s.externalScore || 0
-                    );
-                }
+
                 const row = sheet.addRow(rowData);
                 row.alignment = { vertical: 'middle', horizontal: 'center' };
                 row.getCell(2).alignment = { vertical: 'middle', horizontal: 'left' };
@@ -327,10 +319,7 @@ const BatchDetail = () => {
             sheet.getColumn(9).width = 10;
             sheet.getColumn(10).width = 10;
             sheet.getColumn(11).width = 12;
-            if (batch.integrationType && batch.integrationType !== 'none') {
-                sheet.getColumn(12).width = 22;
-                sheet.getColumn(13).width = 16;
-            }
+
 
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -1149,12 +1138,7 @@ const BatchDetail = () => {
                                 <th className="px-5 py-3">Division</th>
                                 <th className="px-5 py-3">CGPA</th>
                                 <th className="px-5 py-3">Backlogs</th>
-                                {batch?.integrationType && batch.integrationType !== 'none' && (
-                                    <>
-                                        <th className="px-5 py-3">Platform Handle</th>
-                                        <th className="px-5 py-3">External Stats</th>
-                                    </>
-                                )}
+
                                 <th className="px-5 py-3">Contact</th>
                                 <th className="px-5 py-3">Status</th>
                                 <th className="px-5 py-3 text-right">Actions</th>
@@ -1163,13 +1147,13 @@ const BatchDetail = () => {
                         <tbody className="divide-y divide-slate-100 text-sm">
                             {students.length === 0 ? (
                                 <tr>
-                                    <td colSpan={batch?.integrationType && batch.integrationType !== 'none' ? "12" : "10"} className="px-5 py-12 text-center text-slate-400 font-medium">
+                                    <td colSpan="10" className="px-5 py-12 text-center text-slate-400 font-medium">
                                         No students in this batch yet. Download the template or add manually.
                                     </td>
                                 </tr>
                             ) : filteredStudents.length === 0 ? (
                                 <tr>
-                                    <td colSpan={batch?.integrationType && batch.integrationType !== 'none' ? "12" : "10"} className="px-5 py-12 text-center text-slate-400 font-medium">
+                                    <td colSpan="10" className="px-5 py-12 text-center text-slate-400 font-medium">
                                         No students match the search query.
                                     </td>
                                 </tr>
@@ -1197,27 +1181,7 @@ const BatchDetail = () => {
                                         <td className="px-5 py-4 font-semibold text-slate-700">
                                             {s.backlogs !== undefined ? s.backlogs : '0'}
                                         </td>
-                                        {batch?.integrationType && batch.integrationType !== 'none' && (
-                                            <>
-                                                <td className="px-5 py-4">
-                                                    <span className="font-semibold text-slate-700 bg-slate-50 border border-slate-200/50 rounded-lg px-2.5 py-1 text-xs font-mono">
-                                                        {s.externalHandles?.[batch.integrationType] || '—'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-5 py-4">
-                                                    <div className="flex flex-col gap-0.5 text-xs">
-                                                        <span className="font-bold text-slate-800">
-                                                            {s.externalScore || 0} pts
-                                                        </span>
-                                                        {batch.integrationType === 'tryhackme' && (
-                                                            <span className="text-[10px] font-bold text-[#004AAD]">
-                                                                🏆 {s.externalBadges || 0} Badges
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </>
-                                        )}
+
                                         <td className="px-5 py-4 text-xs font-medium text-slate-500">
                                             <div className="font-mono">{s.mobile || 'No mobile'}</div>
                                             {s.email && <div className="text-[10px] text-slate-400 mt-0.5">{s.email}</div>}
