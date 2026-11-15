@@ -24,12 +24,14 @@ import {
     Star,
     AlertTriangle,
     CalendarCheck,
-    Trophy
+    Trophy,
+    Terminal
 } from 'lucide-react';
 import axios from 'axios';
 import { AlertModal } from '../../components/Modals';
 import StudentGamesTab from '../../components/student/StudentGamesTab';
 import StudentTypeSpeedTab from '../../components/student/StudentTypeSpeedTab';
+import StudentLockedInLabTab from '../../components/student/StudentLockedInLabTab';
 import useStudentAuthStore from '../../store/studentAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -400,6 +402,58 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                         SLOW HANDS BRO 🐌
                     </text>
                     <line x1="18" y1="114" x2="244" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'locked-in':
+            // Cartoon Dual-Window IDE Monitor, Bubbling Flask & "PROVE IT BRO, LOCK IN 🔒⚡" Speech Bubble
+            return (
+                <svg viewBox="0 0 270 135" className="w-60 lg:w-68 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="135" cy="118" rx="114" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Sarcastic Comic Speech Bubble */}
+                    <path
+                        d="M18 8 H204 A10 10 0 0 1 214 18 V36 A10 10 0 0 1 204 46 H104 L92 54 L95 46 H18 A10 10 0 0 1 8 36 V18 A10 10 0 0 1 18 8 Z"
+                        fill="#FEF3C7"
+                        stroke="#1E293B"
+                        strokeWidth="2.2"
+                        strokeLinejoin="round"
+                    />
+                    <text x="111" y="23" textAnchor="middle" fontSize="8" fontWeight="900" fill="#B45309" letterSpacing="0.3">
+                        RESUME SAYS “EXPERT IN DSA”?
+                    </text>
+                    <text x="111" y="37" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#92400E" letterSpacing="0.4">
+                        PROVE IT BRO, LOCK IN 🔒⚡
+                    </text>
+                    {/* Cartoon Dual-Window IDE Monitor */}
+                    <rect x="24" y="56" width="118" height="56" rx="10" fill="#1E293B" stroke="#0F172A" strokeWidth="2.2" />
+                    <rect x="30" y="62" width="106" height="42" rx="6" fill="#0F172A" stroke="#334155" strokeWidth="1.5" />
+                    <circle cx="37" cy="68" r="2.2" fill="#F43F5E" />
+                    <circle cx="44" cy="68" r="2.2" fill="#FACC15" />
+                    <circle cx="51" cy="68" r="2.2" fill="#34D399" />
+                    <rect x="36" y="75" width="38" height="4.5" rx="2" fill="#38BDF8" />
+                    <rect x="42" y="83" width="54" height="4.5" rx="2" fill="#A78BFA" />
+                    <rect x="42" y="91" width="44" height="4.5" rx="2" fill="#34D399" />
+                    <rect x="102" y="75" width="28" height="22" rx="5" fill="#10B981" stroke="#FFFFFF" strokeWidth="1.2" />
+                    <text x="116" y="89" textAnchor="middle" fontSize="8.5" fontWeight="900" fill="#FFFFFF">AC✓</text>
+                    {/* Bubbling Logic Lab Flask */}
+                    <path
+                        d="M172 58 H190 M176 58 V72 L160 106 A6 6 0 0 0 165 115 H197 A6 6 0 0 0 202 106 L186 72 V58"
+                        fill="#E0F2FE"
+                        stroke="#1E293B"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+                    <path d="M165 96 L197 96 L202 106 A5 5 0 0 1 197 113 H165 A5 5 0 0 1 160 106 Z" fill="#34D399" />
+                    <circle cx="178" cy="90" r="3" fill="#34D399" stroke="#1E293B" strokeWidth="1.3" />
+                    <circle cx="185" cy="82" r="2.5" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.3" />
+                    {/* Golden "LOCKED IN" Padlock on Right */}
+                    <path d="M226 72 v-10 a11 11 0 0 1 22 0 v10" stroke="#1E293B" strokeWidth="2.5" fill="none" />
+                    <rect x="218" y="70" width="38" height="40" rx="10" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="231" cy="86" r="2.2" fill="#1E293B" />
+                    <circle cx="243" cy="86" r="2.2" fill="#1E293B" />
+                    <path d="M232 95 Q237 99 242 95" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <line x1="18" y1="114" x2="256" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
             );
 
@@ -841,7 +895,7 @@ const StudentDashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['dashboard', 'meta-batch', 'games', 'type-speed', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
+        if (tab && ['dashboard', 'meta-batch', 'games', 'type-speed', 'locked-in', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
             setActiveTab(tab);
         } else if (!tab) {
             setActiveTab('dashboard');
@@ -1906,7 +1960,8 @@ const StudentDashboard = () => {
                                                 { label: 'Attendance Log', tab: 'attendance', icon: CalendarCheck },
                                                 { label: 'To-do List', tab: 'todo', icon: CheckCircle },
                                                 { label: 'Brain Games', tab: 'games', icon: Award },
-                                                { label: 'Type Speed', tab: 'type-speed', icon: Key }
+                                                { label: 'Type Speed', tab: 'type-speed', icon: Key },
+                                                { label: 'Locked In Lab', tab: 'locked-in', icon: Terminal }
                                             ].map((q) => (
                                                 <button
                                                     key={`${q.tab}-${q.sub || ''}`}
@@ -3935,6 +3990,10 @@ const StudentDashboard = () => {
 
             {activeTab === 'type-speed' && (
                 <StudentTypeSpeedTab />
+            )}
+
+            {activeTab === 'locked-in' && (
+                <StudentLockedInLabTab student={student} />
             )}
         </div>
     );

@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import { 
     LayoutDashboard, School, BookOpen, Users, User, FileText, BarChart3, 
     LogOut, Menu, X, Bell, ChevronDown, Search, Send, Globe, ArrowLeftRight, Trophy, ShieldCheck, Database, FileSpreadsheet,
-    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard
+    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard, Terminal
 } from 'lucide-react';
 import { SocketContext } from '../contexts/SocketContext';
 import useAuthStore from '../store/authStore';
@@ -126,6 +126,7 @@ const MainLayout = ({ children }) => {
         { label: 'To-do List', icon: CheckSquare, path: '/student/dashboard?tab=todo' },
         { label: 'Brain Games', icon: Gamepad2, path: '/student/dashboard?tab=games' },
         { label: 'Type Speed', icon: Keyboard, path: '/student/dashboard?tab=type-speed' },
+        { label: 'Locked In Lab', icon: Terminal, path: '/student/dashboard?tab=locked-in' },
         { label: 'Account Security', icon: Lock, path: '/student/dashboard?tab=security' }
     ] : user?.role === 'trainer' ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
