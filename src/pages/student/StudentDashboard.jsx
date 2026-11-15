@@ -28,12 +28,792 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { AlertModal } from '../../components/Modals';
+import StudentGamesTab from '../../components/student/StudentGamesTab';
+import StudentTypeSpeedTab from '../../components/student/StudentTypeSpeedTab';
 import useStudentAuthStore from '../../store/studentAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const api = axios.create({
     baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
 });
+
+const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
+    const key = activeTab === 'profile' ? `profile-${profileSubTab}` : activeTab;
+
+    switch (key) {
+        case 'dashboard':
+            // Cartoon Student Command Center with Analytics Board, Trophy & Rocket
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Analytics Board on Left */}
+                    <rect x="20" y="24" width="88" height="68" rx="10" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="20" y="24" width="88" height="16" rx="8" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="31" cy="32" r="2.5" fill="#F43F5E" />
+                    <circle cx="40" cy="32" r="2.5" fill="#FACC15" />
+                    <circle cx="49" cy="32" r="2.5" fill="#34D399" />
+                    {/* Rising Cartoon Bar Chart */}
+                    <rect x="32" y="68" width="12" height="14" rx="2" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="50" y="58" width="12" height="24" rx="2" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="68" y="48" width="12" height="34" rx="2" fill="#34D399" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="86" y="42" width="12" height="40" rx="2" fill="#FACC15" stroke="#1E293B" strokeWidth="1.6" />
+                    {/* Cheerful Cartoon Student on Right */}
+                    <path d="M118 114 C118 88, 176 88, 176 114 Z" fill="#F59E0B" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="147" cy="58" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M127 52 C130 34, 164 34, 167 52 C158 44, 136 44, 127 52 Z" fill="#1E293B" />
+                    <circle cx="140" cy="58" r="2.2" fill="#1E293B" />
+                    <circle cx="154" cy="58" r="2.2" fill="#1E293B" />
+                    <path d="M141 66 Q147 72 153 66" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Mini Cartoon Rocket on Far Right */}
+                    <g transform="rotate(15 198 54)">
+                        <path d="M198 22 C208 36, 208 60, 198 72 C188 60, 188 36, 198 22 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                        <path d="M198 22 C203 30, 203 36, 198 36 C193 36, 193 30, 198 22 Z" fill="#F43F5E" stroke="#1E293B" strokeWidth="1.8" />
+                        <circle cx="198" cy="48" r="5" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.6" />
+                        <path d="M193 72 Q198 84 203 72 Z" fill="#FACC15" stroke="#1E293B" strokeWidth="1.5" />
+                    </g>
+                    <line x1="16" y1="114" x2="214" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'meta-batch':
+            // Cartoon Classroom Cohort with Blackboard, Trainer & Student Group
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Classroom Chalkboard */}
+                    <rect x="20" y="20" width="110" height="66" rx="8" fill="#065F46" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="16" y="82" width="118" height="6" rx="3" fill="#D97706" stroke="#1E293B" strokeWidth="2" />
+                    <text x="75" y="44" textAnchor="middle" fontSize="10" fontWeight="900" fill="#FDE047">META BATCH</text>
+                    <line x1="36" y1="56" x2="84" y2="56" stroke="#A7F3D0" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="36" y1="68" x2="108" y2="68" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    {/* 3 Cartoon Batchmates */}
+                    {[
+                        { cx: 146, shirt: '#38BDF8' },
+                        { cx: 174, shirt: '#F59E0B' },
+                        { cx: 200, shirt: '#A78BFA' }
+                    ].map((m, idx) => (
+                        <g key={idx}>
+                            <path d={`M${m.cx - 18} 114 C${m.cx - 18} 92, ${m.cx + 18} 92, ${m.cx + 18} 114 Z`} fill={m.shirt} stroke="#1E293B" strokeWidth="2" />
+                            <circle cx={m.cx} cy="72" r="13" fill="#FDE68A" stroke="#1E293B" strokeWidth="2" />
+                            <path d={`M${m.cx - 13} 68 C${m.cx - 10} 56, ${m.cx + 10} 56, ${m.cx + 13} 68 Z`} fill="#1E293B" />
+                            <circle cx={m.cx - 4} cy="72" r="1.5" fill="#1E293B" />
+                            <circle cx={m.cx + 4} cy="72" r="1.5" fill="#1E293B" />
+                            <path d={`M${m.cx - 4} 77 Q${m.cx} 80 ${m.cx + 4} 77`} stroke="#1E293B" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+                        </g>
+                    ))}
+                    <line x1="14" y1="114" x2="218" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'enter-exam':
+            // Cartoon Student with Glasses & Headphones at Laptop Desk
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    {/* Soft backdrop cloud */}
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    <circle cx="115" cy="66" r="52" fill="#FFFFFF" fillOpacity="0.14" />
+                    {/* Stack of Books on Left */}
+                    <rect x="20" y="96" width="38" height="10" rx="3" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="23" y="99" width="32" height="4" fill="#FFFFFF" />
+                    <rect x="24" y="86" width="34" height="10" rx="3" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    {/* Cartoon Student Character */}
+                    {/* Shoulders / Hoodie */}
+                    <path d="M74 112 C74 88, 136 88, 136 112 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    <path d="M95 92 L105 104 L115 92" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" strokeLinejoin="round" />
+                    {/* Headphone Arc */}
+                    <path d="M81 56 C81 32, 129 32, 129 56" stroke="#1E293B" strokeWidth="4" fill="none" strokeLinecap="round" />
+                    <rect x="76" y="50" width="8" height="16" rx="4" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="126" y="50" width="8" height="16" rx="4" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    {/* Face */}
+                    <circle cx="105" cy="58" r="22" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Hair */}
+                    <path d="M83 52 C85 35, 125 35, 127 52 C120 44, 92 44, 83 52 Z" fill="#1E293B" />
+                    {/* Glasses */}
+                    <circle cx="97" cy="57" r="6" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="113" cy="57" r="6" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                    <line x1="103" y1="57" x2="107" y2="57" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="97" cy="57" r="2" fill="#1E293B" />
+                    <circle cx="113" cy="57" r="2" fill="#1E293B" />
+                    {/* Smile */}
+                    <path d="M99 67 Q105 72 111 67" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Cartoon Laptop in Front */}
+                    <rect x="116" y="76" width="58" height="36" rx="6" fill="#E2E8F0" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="145" cy="94" r="5" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.5" />
+                    <rect x="108" y="110" width="74" height="6" rx="3" fill="#94A3B8" stroke="#1E293B" strokeWidth="2" />
+                    {/* Coffee Mug */}
+                    <rect x="188" y="94" width="18" height="20" rx="4" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M206 98 h4 a4 4 0 0 1 0 8 h-4" stroke="#1E293B" strokeWidth="2" fill="none" />
+                    <path d="M194 88 Q192 83 196 80 M200 88 Q198 83 202 80" stroke="#FFFFFF" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                    {/* Speech Bubble */}
+                    <rect x="142" y="20" width="68" height="28" rx="10" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M154 48 L146 56 L162 48 Z" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <text x="176" y="38" textAnchor="middle" fontSize="10" fontWeight="900" fill="#B45309">READY! ★</text>
+                    {/* Desk Line */}
+                    <line x1="14" y1="116" x2="216" y2="116" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'exam-history':
+            // Cartoon Student Celebrating with Giant Golden Trophy & Medal
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Sparkle Stars */}
+                    <path d="M34 32 l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6-4.5-4 6-1z" fill="#FDE047" stroke="#1E293B" strokeWidth="1.5" />
+                    <path d="M196 28 l2.5 5 5 1-3.5 3.5 1 5-5-2.5-5 2.5 1-5-3.5-3.5 5-1z" fill="#FDE047" stroke="#1E293B" strokeWidth="1.5" />
+                    {/* Cheerful Cartoon Student */}
+                    <path d="M54 114 C54 88, 112 88, 112 114 Z" fill="#A78BFA" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Gold Medal Ribbon on Chest */}
+                    <path d="M75 90 L83 104 L91 90" stroke="#EF4444" strokeWidth="3" fill="none" />
+                    <circle cx="83" cy="106" r="5" fill="#FACC15" stroke="#1E293B" strokeWidth="1.6" />
+                    {/* Head */}
+                    <circle cx="83" cy="58" r="21" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M62 52 C65 34, 102 34, 104 52 C96 44, 70 44, 62 52 Z" fill="#1E293B" />
+                    <circle cx="76" cy="56" r="2.2" fill="#1E293B" />
+                    <circle cx="90" cy="56" r="2.2" fill="#1E293B" />
+                    <path d="M76 64 Q83 71 90 64 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    {/* Giant Cartoon Golden Trophy on Podium */}
+                    <rect x="128" y="92" width="60" height="24" rx="4" fill="#E0F2FE" stroke="#1E293B" strokeWidth="2.2" />
+                    <text x="158" y="108" textAnchor="middle" fontSize="11" fontWeight="900" fill="#0369A1">#1 PASS</text>
+                    <path d="M140 42 h36 v20 c0 11-8 20-18 20 s-18-9-18-20 V42 z" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M140 48 h-8 a6 6 0 0 0 0 12 h8 M176 48 h8 a6 6 0 0 1 0 12 h-8" stroke="#1E293B" strokeWidth="2.2" fill="none" />
+                    <rect x="153" y="82" width="10" height="10" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M158 50 l2.5 5 5.5.8-4 3.8 1 5.4-5-2.6-5 2.6 1-5.4-4-3.8 5.5-.8z" fill="#FFFFFF" />
+                    <line x1="20" y1="116" x2="210" y2="116" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'profile-personal':
+        case 'profile-academic':
+        case 'profile-skills':
+        case 'profile-resume':
+        case 'profile-preferences':
+            // Cartoon Student with Graduation Cap & Stylized ID Card
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Stylized Giant Cartoon ID Card */}
+                    <rect x="104" y="24" width="104" height="86" rx="14" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="104" y="24" width="104" height="20" rx="12" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="130" cy="66" r="13" fill="#FEF3C7" stroke="#1E293B" strokeWidth="1.8" />
+                    <circle cx="130" cy="63" r="4.5" fill="#F59E0B" />
+                    <path d="M121 75 c2-5 6-7 9-7 s7 2 9 7" fill="#F59E0B" />
+                    <rect x="150" y="54" width="44" height="7" rx="3.5" fill="#1E293B" />
+                    <rect x="150" y="66" width="34" height="6" rx="3" fill="#38BDF8" />
+                    <rect x="150" y="77" width="40" height="6" rx="3" fill="#94A3B8" />
+                    <rect x="118" y="92" width="76" height="10" rx="5" fill="#DCFCE7" stroke="#10B981" strokeWidth="1.5" />
+                    {/* Cartoon Student Waving on Left */}
+                    <path d="M36 114 C36 88, 94 88, 94 114 Z" fill="#34D399" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="65" cy="62" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Graduation Mortarboard Cap */}
+                    <polygon points="35,44 65,30 95,44 65,56" fill="#1E293B" stroke="#1E293B" strokeWidth="1.8" strokeLinejoin="round" />
+                    <line x1="88" y1="46" x2="88" y2="62" stroke="#FACC15" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="88" cy="63" r="3" fill="#FACC15" />
+                    {/* Eyes & Smile */}
+                    <circle cx="58" cy="62" r="2.2" fill="#1E293B" />
+                    <circle cx="72" cy="62" r="2.2" fill="#1E293B" />
+                    <path d="M59 70 Q65 75 71 70" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <line x1="20" y1="114" x2="214" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'placement':
+            // Cartoon Graduate with Briefcase, Tie & "HIRED" Offer Letter
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Character in Smart Blazer & Tie */}
+                    <path d="M40 114 C40 86, 100 86, 100 114 Z" fill="#1E293B" stroke="#1E293B" strokeWidth="2.2" />
+                    <polygon points="62,88 78,88 70,114" fill="#FFFFFF" />
+                    <polygon points="68,90 72,90 73,108 70,112 67,108" fill="#EF4444" />
+                    <circle cx="70" cy="56" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M50 50 C52 33, 88 33, 90 50 C82 42, 58 42, 50 50 Z" fill="#1E293B" />
+                    <circle cx="63" cy="56" r="2.2" fill="#1E293B" />
+                    <circle cx="77" cy="56" r="2.2" fill="#1E293B" />
+                    <path d="M64 64 Q70 69 76 64" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Cartoon Briefcase & Offer Envelope */}
+                    <rect x="116" y="64" width="66" height="48" rx="8" fill="#D97706" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M136 64 v-8 a6 6 0 0 1 6 -6 h14 a6 6 0 0 1 6 6 v8" stroke="#1E293B" strokeWidth="2.5" fill="none" />
+                    <rect x="116" y="82" width="66" height="6" fill="#B45309" stroke="#1E293B" strokeWidth="1.8" />
+                    <rect x="143" y="79" width="12" height="12" rx="3" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                    {/* Offer Badge */}
+                    <rect x="128" y="20" width="76" height="30" rx="10" fill="#DCFCE7" stroke="#1E293B" strokeWidth="2" />
+                    <text x="166" y="39" textAnchor="middle" fontSize="10" fontWeight="900" fill="#047857">HIRED! ★</text>
+                    <line x1="20" y1="114" x2="210" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'attendance':
+            // Cartoon Student Raising Hand Next to Classroom Calendar
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Flip Calendar */}
+                    <rect x="114" y="26" width="90" height="86" rx="12" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="114" y="26" width="90" height="22" rx="10" fill="#F43F5E" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="132" y="18" width="8" height="14" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="178" y="18" width="8" height="14" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="159" cy="76" r="20" fill="#DCFCE7" stroke="#10B981" strokeWidth="2.2" />
+                    <path d="M150 76 l6 6 13-13" stroke="#059669" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Cartoon Student Raising Hand */}
+                    <path d="M34 114 C34 88, 92 88, 92 114 Z" fill="#F59E0B" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Raised Hand */}
+                    <path d="M84 94 Q102 64 96 40" stroke="#FDE68A" strokeWidth="10" fill="none" strokeLinecap="round" />
+                    <path d="M84 94 Q102 64 96 40" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    <circle cx="63" cy="60" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M43 54 C46 36, 80 36, 83 54 C75 46, 51 46, 43 54 Z" fill="#1E293B" />
+                    <circle cx="56" cy="60" r="2.2" fill="#1E293B" />
+                    <circle cx="70" cy="60" r="2.2" fill="#1E293B" />
+                    <path d="M57 68 Q63 74 69 68" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <line x1="18" y1="114" x2="212" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'todo':
+            // Cartoon Clipboard, Giant Pencil & Twin-Bell Alarm Clock
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Clipboard */}
+                    <rect x="34" y="20" width="76" height="94" rx="10" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="42" y="30" width="60" height="76" rx="6" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    <rect x="56" y="14" width="32" height="12" rx="4" fill="#94A3B8" stroke="#1E293B" strokeWidth="2" />
+                    {/* Checkboxes */}
+                    <rect x="50" y="42" width="12" height="12" rx="3" fill="#DCFCE7" stroke="#10B981" strokeWidth="2" />
+                    <path d="M52 48 l3 3 5-5" stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <rect x="68" y="45" width="26" height="6" rx="3" fill="#1E293B" />
+                    <rect x="50" y="62" width="12" height="12" rx="3" fill="#DCFCE7" stroke="#10B981" strokeWidth="2" />
+                    <path d="M52 68 l3 3 5-5" stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <rect x="68" y="65" width="22" height="6" rx="3" fill="#1E293B" />
+                    <rect x="50" y="82" width="12" height="12" rx="3" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
+                    <rect x="68" y="85" width="24" height="6" rx="3" fill="#94A3B8" />
+                    {/* Twin-Bell Cartoon Alarm Clock */}
+                    <circle cx="164" cy="78" r="28" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="164" cy="78" r="22" fill="#E0F2FE" stroke="#38BDF8" strokeWidth="1.5" />
+                    <path d="M142 50 a10 10 0 0 1 14 -6 Z" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M186 50 a10 10 0 0 0 -14 -6 Z" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M164 66 v12 l9 6" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                    {/* Giant Cartoon Pencil */}
+                    <g transform="rotate(22 130 62)">
+                        <rect x="120" y="24" width="12" height="54" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="120" y="14" width="12" height="10" rx="2" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                        <polygon points="120,78 132,78 126,92" fill="#FDE68A" stroke="#1E293B" strokeWidth="2" />
+                        <polygon points="124,87 128,87 126,92" fill="#1E293B" />
+                    </g>
+                    <line x1="20" y1="114" x2="210" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'security':
+            // Cartoon Smiling Padlock Mascot, Shield & Golden Key
+            return (
+                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Shield Behind */}
+                    <path d="M74 20 L118 34 V68 C118 92 98 108 74 114 C50 108 30 92 30 68 V34 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    <path d="M74 30 L108 41 V66 C108 85 92 98 74 103 C56 98 40 85 40 66 V41 Z" fill="#E0F2FE" stroke="#1E293B" strokeWidth="1.8" />
+                    <path d="M62 66 l8 8 18-18" stroke="#0284C7" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    {/* Cute Smiling Cartoon Padlock Character */}
+                    <path d="M138 56 v-14 a16 16 0 0 1 32 0 v14" stroke="#E2E8F0" strokeWidth="7" fill="none" />
+                    <path d="M138 56 v-14 a16 16 0 0 1 32 0 v14" stroke="#1E293B" strokeWidth="2.2" fill="none" />
+                    <rect x="126" y="54" width="56" height="54" rx="14" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="144" cy="74" r="2.8" fill="#1E293B" />
+                    <circle cx="164" cy="74" r="2.8" fill="#1E293B" />
+                    <path d="M147 84 Q154 90 161 84" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    <line x1="20" y1="114" x2="210" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'games':
+            // Cartoon Student Player, Puzzle Cube & Gen-Z "My Brain Is Not Braining" Speech Bubble
+            return (
+                <svg viewBox="0 0 255 135" className="w-56 lg:w-64 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="126" cy="118" rx="102" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Golden Crown Above Student */}
+                    <polygon points="50,30 58,18 66,27 74,16 82,30" fill="#FACC15" stroke="#1E293B" strokeWidth="1.8" strokeLinejoin="round" />
+                    {/* Cartoon Student Player */}
+                    <path d="M36 114 C36 88, 96 88, 96 114 Z" fill="#34D399" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="66" cy="60" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M46 54 C49 36, 83 36, 86 54 C78 46, 54 46, 46 54 Z" fill="#1E293B" />
+                    <circle cx="59" cy="60" r="2.2" fill="#1E293B" />
+                    <circle cx="73" cy="60" r="2.2" fill="#1E293B" />
+                    <path d="M60 68 Q66 74 72 68" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Cartoon 2x2 Brain Cube on Right */}
+                    <rect x="138" y="54" width="54" height="54" rx="10" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="144" y="60" width="17" height="17" rx="3" fill="#F43F5E" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="167" y="60" width="17" height="17" rx="3" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="144" y="83" width="17" height="17" rx="3" fill="#FACC15" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="167" y="83" width="17" height="17" rx="3" fill="#A78BFA" stroke="#1E293B" strokeWidth="1.6" />
+                    {/* Gen-Z Speech Bubble: "MY BRAIN IS NOT BRAINING" */}
+                    <path
+                        d="M104 10 H238 A10 10 0 0 1 248 20 V36 A10 10 0 0 1 238 46 H118 L102 53 L107 46 H104 A10 10 0 0 1 94 36 V20 A10 10 0 0 1 104 10 Z"
+                        fill="#FEF3C7"
+                        stroke="#1E293B"
+                        strokeWidth="2.2"
+                        strokeLinejoin="round"
+                    />
+                    <text x="171" y="25" textAnchor="middle" fontSize="8.5" fontWeight="900" fill="#B45309" letterSpacing="0.4">
+                        MY BRAIN IS NOT
+                    </text>
+                    <text x="171" y="38" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#92400E" letterSpacing="0.5">
+                        BRAINING RN ★
+                    </text>
+                    <line x1="18" y1="114" x2="236" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'type-speed':
+            // Cartoon Sweating Student at Mechanical Keyboard & Sarcastic "Slow Hands" Speech Bubble
+            return (
+                <svg viewBox="0 0 260 135" className="w-56 lg:w-64 shrink-0 hidden md:block" aria-hidden="true">
+                    <ellipse cx="130" cy="118" rx="106" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Cartoon Student Typing */}
+                    <path d="M32 114 C32 88, 92 88, 92 114 Z" fill="#F97316" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="62" cy="60" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M42 54 C45 36, 79 36, 82 54 C74 46, 50 46, 42 54 Z" fill="#1E293B" />
+                    <circle cx="55" cy="60" r="2.2" fill="#1E293B" />
+                    <circle cx="69" cy="60" r="2.2" fill="#1E293B" />
+                    <path d="M56 69 Q62 66 68 69" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Cartoon Sweat Drop */}
+                    <path d="M86 44 C86 44, 90 50, 90 53 A4 4 0 1 1 82 53 C82 50, 86 44, 86 44 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.5" />
+                    {/* Cartoon Mechanical Keyboard on Desk */}
+                    <rect x="114" y="62" width="122" height="46" rx="10" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="122" y="70" width="22" height="12" rx="3" fill="#F43F5E" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="148" y="70" width="22" height="12" rx="3" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="174" y="70" width="22" height="12" rx="3" fill="#FACC15" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="200" y="70" width="28" height="12" rx="3" fill="#A78BFA" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="122" y="87" width="16" height="12" rx="3" fill="#CBD5E1" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="142" y="87" width="64" height="12" rx="3" fill="#34D399" stroke="#1E293B" strokeWidth="1.6" />
+                    <rect x="210" y="87" width="18" height="12" rx="3" fill="#FB923C" stroke="#1E293B" strokeWidth="1.6" />
+                    {/* Sarcastic Speech Bubble: "BRO TYPES WITH 2 FINGERS? SLOW HANDS" */}
+                    <path
+                        d="M106 10 H242 A10 10 0 0 1 252 20 V38 A10 10 0 0 1 242 48 H122 L104 55 L110 48 H106 A10 10 0 0 1 96 38 V20 A10 10 0 0 1 106 10 Z"
+                        fill="#FEF3C7"
+                        stroke="#1E293B"
+                        strokeWidth="2.2"
+                        strokeLinejoin="round"
+                    />
+                    <text x="174" y="25" textAnchor="middle" fontSize="8" fontWeight="900" fill="#B45309" letterSpacing="0.3">
+                        2-FINGER TYPING?
+                    </text>
+                    <text x="174" y="39" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#92400E" letterSpacing="0.5">
+                        SLOW HANDS BRO 🐌
+                    </text>
+                    <line x1="18" y1="114" x2="244" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        default:
+            return null;
+    }
+};
+
+const StudentTabSvg = ({ type, className = 'w-60 shrink-0 hidden sm:block' }) => {
+    switch (type) {
+        case 'dashboard':
+            // Cartoon Bullseye Target with Arrow, Megaphone & Lightning Badge (distinct from top banner)
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Bullseye Target on Stand */}
+                    <line x1="54" y1="82" x2="42" y2="106" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
+                    <line x1="78" y1="82" x2="90" y2="106" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
+                    <circle cx="66" cy="56" r="34" fill="#F43F5E" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="66" cy="56" r="24" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="66" cy="56" r="14" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="66" cy="56" r="6" fill="#FACC15" stroke="#1E293B" strokeWidth="1.8" />
+                    {/* Dart Arrow Hitting Bullseye */}
+                    <line x1="66" y1="56" x2="106" y2="26" stroke="#1E293B" strokeWidth="2.8" strokeLinecap="round" />
+                    <polygon points="102,29 112,20 109,32" fill="#F59E0B" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round" />
+                    {/* Cartoon Megaphone on Right */}
+                    <g transform="rotate(-12 168 62)">
+                        <polygon points="132,56 184,34 184,86 132,68" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                        <rect x="120" y="54" width="14" height="16" rx="4" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                        <path d="M138 69 L144 88 L154 86 L148 66" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                        <ellipse cx="184" cy="60" rx="6" ry="26" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                    </g>
+                    {/* Sound Action Lines */}
+                    <path d="M204 42 Q214 52 206 64" stroke="#F59E0B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                    <path d="M214 34 Q226 52 216 72" stroke="#38BDF8" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                    <line x1="16" y1="106" x2="224" y2="106" stroke="#1E293B" strokeWidth="2.2" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'meta-batch':
+            // Cartoon Open Curriculum Textbook, Academic Bookmark, Badge Folder & Compass (completely distinct from top banner)
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Tabbed Dossier Folder Behind */}
+                    <path d="M24 32 h38 l8 10 h56 a8 8 0 0 1 8 8 v46 a8 8 0 0 1 -8 8 H24 a8 8 0 0 1 -8 -8 V40 a8 8 0 0 1 8 -8 Z" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Cartoon Open Textbook in Front */}
+                    <path d="M36 46 Q66 38 92 48 L92 98 Q66 88 36 96 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    <path d="M92 48 Q118 38 148 46 L148 96 Q118 88 92 98 Z" fill="#E0F2FE" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    <line x1="92" y1="48" x2="92" y2="98" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Book Lines & Red Bookmark Ribbon */}
+                    <line x1="48" y1="60" x2="80" y2="58" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" />
+                    <line x1="48" y1="70" x2="76" y2="68" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" />
+                    <line x1="48" y1="80" x2="72" y2="78" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="104" y1="58" x2="136" y2="60" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="104" y1="68" x2="132" y2="70" stroke="#94A3B8" strokeWidth="2.2" strokeLinecap="round" />
+                    <polygon points="88,96 96,96 96,112 92,107 88,112" fill="#EF4444" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round" />
+                    {/* Cartoon Golden Award Seal & Ribbon on Right */}
+                    <path d="M180 68 L172 102 L184 95 L192 104 L196 68" fill="#EF4444" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <path d="M196 68 L204 102 L192 95 L184 104" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <circle cx="190" cy="52" r="24" fill="#34D399" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="190" cy="52" r="17" fill="#FEF3C7" stroke="#1E293B" strokeWidth="1.8" />
+                    <path d="M190 40 l3.5 7 7.5 1-5.5 5 1.5 7.5-7-3.8-7 3.8 1.5-7.5-5.5-5 7.5-1z" fill="#F59E0B" stroke="#1E293B" strokeWidth="1.4" />
+                    <line x1="14" y1="106" x2="226" y2="106" stroke="#1E293B" strokeWidth="2.2" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'trainer':
+            // Cartoon Teacher / Professor at Wooden Podium Lectern with Microphone, Glasses, Suit & Tie, Open Book & Idea Bulb
+            return (
+                <svg viewBox="0 0 240 125" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="114" rx="102" ry="7" fill="#E2E8F0" />
+                    {/* Glowing Cartoon Idea Bulb on Left */}
+                    <circle cx="44" cy="44" r="16" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="38" y="58" width="12" height="7" rx="2" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <line x1="44" y1="20" x2="44" y2="13" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="22" y1="30" x2="16" y2="25" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="66" y1="30" x2="72" y2="25" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+                    {/* Cartoon Teacher / Professor Behind Lectern */}
+                    {/* Blazer & Shoulders */}
+                    <path d="M84 96 C84 68, 156 68, 156 96 Z" fill="#1E293B" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    {/* White Shirt & Bowtie/Tie */}
+                    <polygon points="108,71 132,71 120,94" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.6" strokeLinejoin="round" />
+                    <polygon points="117,73 123,73 124,90 120,94 116,90" fill="#EF4444" />
+                    {/* Teacher Head */}
+                    <circle cx="120" cy="42" r="21" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    {/* Neat Professor Hair */}
+                    <path d="M99 37 C101 18, 139 18, 141 37 C133 28, 107 28, 99 37 Z" fill="#1E293B" />
+                    {/* Professor Glasses */}
+                    <rect x="105" y="37" width="12" height="9" rx="3" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="123" y="37" width="12" height="9" rx="3" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                    <line x1="117" y1="41" x2="123" y2="41" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="111" cy="41.5" r="2" fill="#1E293B" />
+                    <circle cx="129" cy="41.5" r="2" fill="#1E293B" />
+                    {/* Warm Smile */}
+                    <path d="M114 52 Q120 57 126 52" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Wooden Lectern / Podium in Front */}
+                    <polygon points="74,78 166,78 158,88 82,88" fill="#F59E0B" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    <rect x="84" y="88" width="72" height="22" rx="3" fill="#D97706" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="120" cy="99" r="7" fill="#FEF3C7" stroke="#1E293B" strokeWidth="1.8" />
+                    {/* Gooseneck Microphone on Podium */}
+                    <path d="M148 78 Q154 62 142 58" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    <ellipse cx="140" cy="57" rx="4" ry="3" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.8" />
+                    {/* Speech Bubble on Right */}
+                    <rect x="168" y="24" width="60" height="26" rx="9" fill="#DCFCE7" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M176 50 L168 58 L184 50 Z" fill="#DCFCE7" stroke="#1E293B" strokeWidth="1.8" strokeLinejoin="round" />
+                    <text x="198" y="41" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#047857">TRAINER ★</text>
+                    {/* Baseline */}
+                    <line x1="12" y1="110" x2="228" y2="110" stroke="#1E293B" strokeWidth="2.4" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'launcher':
+            // Cartoon Launchpad Console & Golden Key
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="108" rx="96" ry="8" fill="#E2E8F0" />
+                    {/* Cartoon Computer Monitor */}
+                    <rect x="24" y="16" width="110" height="72" rx="12" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="32" y="24" width="94" height="52" rx="6" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    <rect x="66" y="88" width="26" height="12" fill="#94A3B8" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="50" y="100" width="58" height="6" rx="3" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="44" y="38" width="70" height="24" rx="6" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="1.8" />
+                    <text x="79" y="54" textAnchor="middle" fontSize="10" fontWeight="900" fontFamily="monospace" fill="#B45309">KEY-2026</text>
+                    {/* Big Cartoon Golden Key */}
+                    <circle cx="164" cy="56" r="18" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="164" cy="56" r="6" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M182 52 h36 v8 h-6 v8 h-8 v-8 h-6 v6 h-8 v-6 h-8 Z" fill="#FACC15" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                </svg>
+            );
+
+        case 'enter-exam':
+            // Cartoon Student at Desk Taking Live Assessment
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* Books Stack */}
+                    <rect x="18" y="88" width="42" height="10" rx="3" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="22" y="78" width="36" height="10" rx="3" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                    {/* Cartoon Student */}
+                    <path d="M72 106 C72 82, 130 82, 130 106 Z" fill="#8B5CF6" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="101" cy="54" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M81 48 C84 30, 118 30, 121 48 C112 40, 88 40, 81 48 Z" fill="#1E293B" />
+                    <circle cx="94" cy="54" r="5.5" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    <circle cx="108" cy="54" r="5.5" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    <line x1="99.5" y1="54" x2="102.5" y2="54" stroke="#1E293B" strokeWidth="1.8" />
+                    <circle cx="94" cy="54" r="2" fill="#1E293B" />
+                    <circle cx="108" cy="54" r="2" fill="#1E293B" />
+                    <path d="M96 64 Q101 68 106 64" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Laptop & Clock */}
+                    <rect x="118" y="72" width="54" height="34" rx="5" fill="#E2E8F0" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="145" cy="89" r="5" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.5" />
+                    <circle cx="198" cy="48" r="22" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="198" cy="48" r="17" fill="#FFFFFF" stroke="#F59E0B" strokeWidth="1.5" />
+                    <path d="M198 38 v10 l7 5" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    <line x1="12" y1="106" x2="228" y2="106" stroke="#1E293B" strokeWidth="2.2" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'exam-history':
+            // Cartoon 1st-2nd-3rd Winner Podium, Trophy & Diploma Scroll
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* 3-Step Cartoon Podium */}
+                    <rect x="28" y="74" width="40" height="32" rx="4" fill="#BAE6FD" stroke="#1E293B" strokeWidth="2" />
+                    <text x="48" y="95" textAnchor="middle" fontSize="13" fontWeight="900" fill="#0369A1">2</text>
+                    <rect x="68" y="56" width="44" height="50" rx="4" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <text x="90" y="86" textAnchor="middle" fontSize="16" fontWeight="900" fill="#B45309">1</text>
+                    <rect x="112" y="80" width="40" height="26" rx="4" fill="#DDD6FE" stroke="#1E293B" strokeWidth="2" />
+                    <text x="132" y="98" textAnchor="middle" fontSize="12" fontWeight="900" fill="#6D28D9">3</text>
+                    {/* Trophy Cup on 1st Place */}
+                    <path d="M76 20 h28 v14 c0 8-6 14-14 14 s-14-6-14-14 V20 z" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M76 24 h-6 a5 5 0 0 0 0 10 h6 M104 24 h6 a5 5 0 0 1 0 10 h-6" stroke="#1E293B" strokeWidth="2" fill="none" />
+                    <rect x="86" y="48" width="8" height="8" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                    {/* Rolled Diploma Scroll with Red Ribbon */}
+                    <g transform="rotate(-12 190 66)">
+                        <rect x="160" y="56" width="60" height="20" rx="10" fill="#FEFCE8" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="184" y="55" width="12" height="22" rx="2" fill="#EF4444" stroke="#1E293B" strokeWidth="1.8" />
+                        <path d="M186 77 l-4 10 l8-4 l4 4 l-2-10" fill="#EF4444" stroke="#1E293B" strokeWidth="1.5" />
+                    </g>
+                    <line x1="16" y1="106" x2="224" y2="106" stroke="#1E293B" strokeWidth="2.2" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'profile-personal':
+            // Cartoon Polaroid Portrait Card, Mail Envelope & Star
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="96" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Polaroid Frame */}
+                    <g transform="rotate(-4 78 60)">
+                        <rect x="36" y="14" width="84" height="92" rx="10" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                        <rect x="44" y="22" width="68" height="60" rx="6" fill="#E0F2FE" stroke="#1E293B" strokeWidth="1.8" />
+                        <circle cx="78" cy="48" r="14" fill="#FDE68A" stroke="#1E293B" strokeWidth="2" />
+                        <path d="M64 44 C66 32, 90 32, 92 44 Z" fill="#1E293B" />
+                        <circle cx="73" cy="48" r="1.8" fill="#1E293B" />
+                        <circle cx="83" cy="48" r="1.8" fill="#1E293B" />
+                        <path d="M74 54 Q78 58 82 54" stroke="#1E293B" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                        <path d="M62 82 C62 66, 94 66, 94 82 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="54" y="90" width="48" height="6" rx="3" fill="#94A3B8" />
+                    </g>
+                    {/* Cartoon Mail Envelope & CGPA Badge */}
+                    <rect x="136" y="54" width="76" height="48" rx="8" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M138 56 L174 82 L210 56" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinejoin="round" />
+                    <rect x="144" y="18" width="64" height="26" rx="13" fill="#DCFCE7" stroke="#1E293B" strokeWidth="2" />
+                    <text x="176" y="35" textAnchor="middle" fontSize="10" fontWeight="900" fill="#047857">ID VERIFIED</text>
+                </svg>
+            );
+
+        case 'profile-academic':
+            // Cartoon University Campus Building, Trees & Graduation Cap
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Trees */}
+                    <circle cx="28" cy="84" r="14" fill="#34D399" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="25" y="94" width="6" height="12" fill="#B45309" stroke="#1E293B" strokeWidth="1.8" />
+                    {/* University Building */}
+                    <polygon points="48,46 104,18 160,46" fill="#F59E0B" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
+                    <circle cx="104" cy="35" r="7" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    <path d="M104 31 v4 l3 2" stroke="#1E293B" strokeWidth="1.5" fill="none" />
+                    <rect x="54" y="46" width="100" height="60" fill="#E0F2FE" stroke="#1E293B" strokeWidth="2.2" />
+                    {[66, 88, 110, 132].map((x) => (
+                        <rect key={x} x={x} y="54" width="10" height="44" rx="2" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    ))}
+                    <rect x="48" y="98" width="112" height="8" rx="3" fill="#94A3B8" stroke="#1E293B" strokeWidth="2" />
+                    {/* Graduation Cap on Right */}
+                    <polygon points="164,52 196,38 228,52 196,66" fill="#1E293B" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <path d="M178 59 v14 c0 5 8 9 18 9 s18-4 18-9 V59" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                    <line x1="220" y1="55" x2="220" y2="75" stroke="#FACC15" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="220" cy="76" r="3.5" fill="#FACC15" stroke="#1E293B" strokeWidth="1.5" />
+                </svg>
+            );
+
+        case 'profile-skills':
+            // Cartoon Rocket, Glowing Lightbulb & Coding Laptop
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Coding Laptop */}
+                    <rect x="26" y="42" width="86" height="54" rx="8" fill="#EDE9FE" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="34" y="50" width="70" height="38" rx="4" fill="#1E293B" />
+                    <text x="69" y="75" textAnchor="middle" fontSize="18" fontWeight="900" fill="#38BDF8">&lt;/&gt;</text>
+                    <rect x="16" y="96" width="106" height="8" rx="4" fill="#94A3B8" stroke="#1E293B" strokeWidth="2" />
+                    {/* Glowing Idea Lightbulb */}
+                    <circle cx="144" cy="40" r="16" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="138" y="54" width="12" height="8" rx="2" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <line x1="144" y1="16" x2="144" y2="10" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="122" y1="26" x2="117" y2="22" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="166" y1="26" x2="171" y2="22" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+                    {/* Cartoon Rocket */}
+                    <g transform="rotate(18 196 66)">
+                        <path d="M196 24 C210 42, 210 72, 196 88 C182 72, 182 42, 196 24 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                        <path d="M196 24 C203 34, 203 42, 196 42 C189 42, 189 34, 196 24 Z" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                        <circle cx="196" cy="56" r="7" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                        <path d="M185 72 L175 86 L188 82 Z M207 72 L217 86 L204 82 Z" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                        <path d="M190 88 Q196 104 202 88 Z" fill="#F59E0B" stroke="#1E293B" strokeWidth="1.8" />
+                    </g>
+                </svg>
+            );
+
+        case 'profile-resume':
+            // Cartoon CV Sheet, Red PDF Stamp & Magnifying Glass
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="96" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Resume Document */}
+                    <rect x="42" y="12" width="76" height="94" rx="8" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="64" cy="34" r="10" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.8" />
+                    <rect x="80" y="26" width="28" height="6" rx="3" fill="#1E293B" />
+                    <rect x="80" y="36" width="20" height="5" rx="2.5" fill="#38BDF8" />
+                    <rect x="54" y="54" width="52" height="5" rx="2.5" fill="#94A3B8" />
+                    <rect x="54" y="64" width="44" height="5" rx="2.5" fill="#CBD5E1" />
+                    <rect x="54" y="78" width="34" height="16" rx="4" fill="#EF4444" stroke="#1E293B" strokeWidth="1.8" />
+                    <text x="71" y="89" textAnchor="middle" fontSize="9" fontWeight="900" fill="#FFFFFF">PDF</text>
+                    {/* Cartoon Magnifying Glass Inspecting Resume */}
+                    <circle cx="156" cy="56" r="26" fill="#E0F2FE" fillOpacity="0.85" stroke="#1E293B" strokeWidth="2.5" />
+                    <circle cx="156" cy="56" r="20" fill="#FFFFFF" stroke="#38BDF8" strokeWidth="2" />
+                    <path d="M148 56 l6 6 12-12" stroke="#10B981" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="175" y1="75" x2="198" y2="98" stroke="#F59E0B" strokeWidth="9" strokeLinecap="round" />
+                    <line x1="175" y1="75" x2="198" y2="98" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'profile-preferences':
+            // Cartoon Globe, Directional Signpost & Paper Airplane
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="96" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Globe */}
+                    <circle cx="66" cy="64" r="34" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M42 50 Q60 42 68 56 T54 86 Z" fill="#34D399" stroke="#1E293B" strokeWidth="1.6" />
+                    <path d="M76 38 Q92 48 86 68 T72 78 Z" fill="#34D399" stroke="#1E293B" strokeWidth="1.6" />
+                    {/* Cartoon Signpost */}
+                    <rect x="154" y="20" width="8" height="86" rx="3" fill="#B45309" stroke="#1E293B" strokeWidth="2" />
+                    <polygon points="122,30 192,30 202,41 192,52 122,52" fill="#FACC15" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <text x="158" y="45" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#1E293B">DREAM ROLE</text>
+                    <polygon points="194,60 126,60 116,71 126,82 194,82" fill="#A7F3D0" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <text x="158" y="75" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#065F46">TOP CITIES</text>
+                    {/* Paper Airplane */}
+                    <polygon points="94,18 128,26 106,38 102,28" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" strokeLinejoin="round" />
+                </svg>
+            );
+
+        case 'placement':
+            // Cartoon Briefcase, Corporate Building & Golden Offer Star
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="98" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Office Tower */}
+                    <rect x="26" y="22" width="54" height="84" rx="6" fill="#BAE6FD" stroke="#1E293B" strokeWidth="2.2" />
+                    {[36, 56].map((x) =>
+                        [34, 52, 70].map((y) => (
+                            <rect key={`${x}-${y}`} x={x} y={y} width="12" height="12" rx="2" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.5" />
+                        ))
+                    )}
+                    {/* Cartoon Leather Briefcase */}
+                    <rect x="98" y="48" width="76" height="58" rx="10" fill="#D97706" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M122 48 v-8 a6 6 0 0 1 6 -6 h16 a6 6 0 0 1 6 6 v8" stroke="#1E293B" strokeWidth="2.5" fill="none" />
+                    <rect x="98" y="70" width="76" height="7" fill="#B45309" stroke="#1E293B" strokeWidth="1.8" />
+                    <rect x="130" y="67" width="12" height="13" rx="3" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                    {/* Offer Badge */}
+                    <circle cx="198" cy="48" r="22" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M198 32 l4.5 9 10 1.5-7.2 7 1.7 10-9-4.7-9 4.7 1.7-10-7.2-7 10-1.5z" fill="#FACC15" stroke="#1E293B" strokeWidth="1.6" />
+                </svg>
+            );
+
+        case 'attendance':
+            // Cartoon Flip-Calendar, Smiling Sun & Green Checkmark Stamp
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="96" ry="7" fill="#E2E8F0" />
+                    {/* Smiling Cartoon Sun */}
+                    <circle cx="44" cy="40" r="18" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="39" cy="38" r="1.8" fill="#1E293B" />
+                    <circle cx="49" cy="38" r="1.8" fill="#1E293B" />
+                    <path d="M40 44 Q44 48 48 44" stroke="#1E293B" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                    {/* Cartoon Calendar */}
+                    <rect x="78" y="20" width="96" height="86" rx="12" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="78" y="20" width="96" height="22" rx="10" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="98" y="12" width="8" height="14" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="146" y="12" width="8" height="14" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    {[96, 116, 136, 156].map((cx) => (
+                        <circle key={`c1-${cx}`} cx={cx} cy="58" r="5.5" fill="#34D399" stroke="#1E293B" strokeWidth="1.5" />
+                    ))}
+                    {[96, 116, 136, 156].map((cx, i) => (
+                        <circle key={`c2-${cx}`} cx={cx} cy="78" r="5.5" fill={i === 3 ? '#FACC15' : '#34D399'} stroke="#1E293B" strokeWidth="1.5" />
+                    ))}
+                    {/* Big Green Checkmark Badge */}
+                    <circle cx="192" cy="78" r="22" fill="#DCFCE7" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M182 78 l7 7 14-14" stroke="#059669" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            );
+
+        case 'todo':
+            // Cartoon Notepad, Sticky Notes & Giant Pencil
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="96" ry="7" fill="#E2E8F0" />
+                    {/* Pinned Sticky Note */}
+                    <g transform="rotate(-6 48 62)">
+                        <rect x="20" y="34" width="56" height="56" rx="6" fill="#FEF08A" stroke="#1E293B" strokeWidth="2" />
+                        <circle cx="48" cy="42" r="4" fill="#EF4444" stroke="#1E293B" strokeWidth="1.5" />
+                        <rect x="30" y="54" width="36" height="5" rx="2.5" fill="#B45309" />
+                        <rect x="30" y="66" width="26" height="5" rx="2.5" fill="#D97706" />
+                    </g>
+                    {/* Cartoon Task Clipboard */}
+                    <rect x="92" y="14" width="78" height="92" rx="10" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="100" y="24" width="62" height="74" rx="6" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                    <rect x="116" y="8" width="30" height="12" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    {[38, 56, 74].map((y, idx) => (
+                        <g key={y}>
+                            <rect x="108" y={y} width="12" height="12" rx="3" fill={idx < 2 ? '#DCFCE7' : '#FEF3C7'} stroke="#1E293B" strokeWidth="1.8" />
+                            {idx < 2 && <path d={`M110 ${y + 6} l3 3 5-5`} stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />}
+                            <rect x="126" y={y + 3} width="28" height="6" rx="3" fill="#1E293B" />
+                        </g>
+                    ))}
+                    {/* Cartoon Pencil */}
+                    <g transform="rotate(20 198 62)">
+                        <rect x="190" y="24" width="14" height="58" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="190" y="14" width="14" height="10" rx="2" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                        <polygon points="190,82 204,82 197,98" fill="#FDE68A" stroke="#1E293B" strokeWidth="2" />
+                        <polygon points="194,91 200,91 197,98" fill="#1E293B" />
+                    </g>
+                </svg>
+            );
+
+        case 'security':
+            // Cartoon Safe Vault Door, Smiling Padlock & Shield
+            return (
+                <svg viewBox="0 0 240 120" className={className} aria-hidden="true">
+                    <ellipse cx="120" cy="110" rx="96" ry="7" fill="#E2E8F0" />
+                    {/* Cartoon Vault Safe */}
+                    <rect x="26" y="18" width="84" height="84" rx="14" fill="#94A3B8" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="34" y="26" width="68" height="68" rx="10" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
+                    <circle cx="68" cy="60" r="18" fill="#E2E8F0" stroke="#1E293B" strokeWidth="2.2" />
+                    <line x1="68" y1="42" x2="68" y2="78" stroke="#1E293B" strokeWidth="2.5" />
+                    <line x1="50" y1="60" x2="86" y2="60" stroke="#1E293B" strokeWidth="2.5" />
+                    <circle cx="68" cy="60" r="6" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                    {/* Cartoon Smiling Padlock */}
+                    <path d="M148 52 v-12 a14 14 0 0 1 28 0 v12" stroke="#94A3B8" strokeWidth="6" fill="none" />
+                    <path d="M148 52 v-12 a14 14 0 0 1 28 0 v12" stroke="#1E293B" strokeWidth="2.2" fill="none" />
+                    <rect x="136" y="50" width="52" height="50" rx="12" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="153" cy="68" r="2.5" fill="#1E293B" />
+                    <circle cx="171" cy="68" r="2.5" fill="#1E293B" />
+                    <path d="M156 78 Q162 84 168 78" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+                </svg>
+            );
+
+        default:
+            return null;
+    }
+};
 
 const StudentDashboard = () => {
     const { 
@@ -61,13 +841,23 @@ const StudentDashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['dashboard', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
+        if (tab && ['dashboard', 'meta-batch', 'games', 'type-speed', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
             setActiveTab(tab);
+        } else if (!tab) {
+            setActiveTab('dashboard');
         }
     }, [location.search]);
 
+    const switchTab = (tabName, subTab = null) => {
+        setActiveTab(tabName);
+        if (subTab) {
+            setProfileSubTab(subTab);
+        }
+        navigate(`/student/dashboard?tab=${tabName}`);
+    };
+
     useEffect(() => {
-        if (token && activeTab === 'todo') {
+        if (token && (activeTab === 'todo' || activeTab === 'dashboard')) {
             getTodos();
         }
     }, [activeTab, token]);
@@ -75,8 +865,10 @@ const StudentDashboard = () => {
     // Local Data states
     const [activeExams, setActiveExams] = useState([]);
     const [attempts, setAttempts] = useState([]);
+    const [placementJobs, setPlacementJobs] = useState([]);
     const [loadingExams, setLoadingExams] = useState(false);
     const [loadingAttempts, setLoadingAttempts] = useState(false);
+    const [loadingPlacementJobs, setLoadingPlacementJobs] = useState(false);
 
     // Profile Edit State
     const [personalName, setPersonalName] = useState('');
@@ -128,7 +920,25 @@ const StudentDashboard = () => {
         refreshStudentProfile();
         fetchActiveExams();
         fetchAttempts();
+        fetchPlacementJobs();
+        getTodos();
     }, [token]);
+
+    const fetchPlacementJobs = async () => {
+        setLoadingPlacementJobs(true);
+        try {
+            const res = await api.get('/placement/student/jobs', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setPlacementJobs(res.data.data || []);
+            }
+        } catch (err) {
+            console.error('Error fetching placement jobs:', err.message);
+        } finally {
+            setLoadingPlacementJobs(false);
+        }
+    };
 
     useEffect(() => {
         if (student) {
@@ -910,53 +1720,909 @@ const StudentDashboard = () => {
             
             {/* Glassmorphic Profile Banner */}
             <div className="bg-gradient-to-r from-[#5899B5] to-[#3D7690] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:2.5rem_2.5rem]" />
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div className="space-y-3">
                         <span className="bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider inline-block">
-                            Student Dashboard
+                            {activeTab === 'meta-batch' ? 'Meta Batch' : 'Student Portal'}
                         </span>
                         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
                             Welcome, {student?.name || 'Candidate'}
                         </h1>
                         <p className="text-blue-100/90 text-sm sm:text-base max-w-xl font-medium">
-                            Keep track of your batch assessments, view evaluation certificates, and configure your career placement profile.
+                            Keep track of your assessments, view evaluation certificates, and manage your academic & career placement profile.
                         </p>
-                        <div className="pt-2 flex flex-wrap gap-3">
-                            <button
-                                type="button"
-                                onClick={handleExportProfile}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-sm font-semibold transition-all duration-200 shadow-md cursor-pointer border border-emerald-500/20 active:scale-95"
-                            >
-                                <Download size={15} /> Export Profile
-                            </button>
-                        </div>
                     </div>
                     
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-5 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                        <div>
-                            <span className="text-blue-200/80 text-[10px] font-semibold uppercase tracking-wider block">USN / ID</span>
-                            <span className="font-semibold font-mono text-base">{student?.usn || 'N/A'}</span>
-                        </div>
-                        <div>
-                            <span className="text-blue-200/80 text-[10px] font-semibold uppercase tracking-wider block">Department</span>
-                            <span className="font-semibold text-base uppercase">{student?.department || 'N/A'}</span>
-                        </div>
-                        <div className="mt-2">
-                            <span className="text-blue-200/80 text-[10px] font-semibold uppercase tracking-wider block">College</span>
-                            <span className="font-semibold text-base max-w-[150px] truncate block" title={student?.collegeName}>{student?.collegeName || 'N/A'}</span>
-                        </div>
-                        <div className="mt-2">
-                            <span className="text-blue-200/80 text-[10px] font-semibold uppercase tracking-wider block">Batch</span>
-                            <span className="font-semibold text-base block max-w-[150px] truncate" title={student?.batchName}>{student?.batchName || 'N/A'}</span>
-                        </div>
+                    <div className="flex items-center justify-end w-full md:w-auto shrink-0">
+                        <StudentBannerSvg activeTab={activeTab} profileSubTab={profileSubTab} />
                     </div>
                 </div>
             </div>
 
             {/* Tab Panels */}
             <div className="space-y-8">
-                        {(activeTab === 'dashboard' || activeTab === 'enter-exam') && (
+                        {activeTab === 'dashboard' && (() => {
+                            const passedAttemptsCount = actualAttempts.filter(a => a.result === 'pass').length;
+                            const avgScorePct = actualAttempts.length > 0
+                                ? (actualAttempts.reduce((sum, a) => sum + a.percentage, 0) / actualAttempts.length).toFixed(1)
+                                : '0.0';
+                            const bestScorePct = actualAttempts.length > 0
+                                ? Math.max(...actualAttempts.map(a => a.percentage || 0)).toFixed(1)
+                                : '0.0';
+                            const attendancePct = student?.attendance?.percentage ?? 0;
+                            const attendedSessionsCount = student?.attendance?.attended ?? 0;
+                            const totalSessionsCount = student?.attendance?.totalSessions ?? 0;
+
+                            // Profile & Placement readiness calculation
+                            const profileChecks = [
+                                Boolean(student?.name && student?.email && student?.mobile),
+                                student?.cgpa !== undefined && student?.cgpa !== null && student?.cgpa !== '',
+                                Array.isArray(student?.skills) && student.skills.length > 0,
+                                Boolean(student?.resumeUrl),
+                                Array.isArray(student?.jobPreferences?.preferredRoles) && student.jobPreferences.preferredRoles.length > 0
+                            ];
+                            const profileCompletionPct = Math.round((profileChecks.filter(Boolean).length / profileChecks.length) * 100);
+
+                            const recentAttempts = actualAttempts.slice(0, 4);
+                            const recentAttendance = Array.isArray(student?.attendance?.history)
+                                ? [...student.attendance.history]
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                    .slice(0, 4)
+                                : [];
+                            const pendingTodos = (Array.isArray(todos) ? todos : [])
+                                .filter(t => t.status !== 'completed' && t.status !== 'deleted')
+                                .slice(0, 4);
+                            const eligibleDrivesCount = placementJobs.filter(j => j.eligibility?.eligible).length;
+                            const appliedDrivesCount = placementJobs.filter(j => j.isApplied).length;
+
+                            return (
+                                <div className="space-y-8">
+                                    {/* Row 1: 4 Interactive KPI Summary Cards */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+                                        <div
+                                            onClick={() => switchTab('exam-history')}
+                                            className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center justify-between gap-4 hover:shadow-md hover:border-[#5899B5]/30 transition-all duration-300 cursor-pointer group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-4 bg-blue-50 text-[#5899B5] rounded-2xl group-hover:scale-105 transition-transform">
+                                                    <BookOpen size={24} />
+                                                </div>
+                                                <div>
+                                                    <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Exams Taken</span>
+                                                    <span className="text-2xl font-semibold text-slate-800">{actualAttempts.length}</span>
+                                                    <span className="text-xs font-semibold text-emerald-600 block mt-0.5">
+                                                        {passedAttemptsCount} Passed • {activeExams.filter(e => !e.isCompleted).length} Live
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <ArrowRight size={16} className="text-slate-300 group-hover:text-[#5899B5] transition-colors shrink-0" />
+                                        </div>
+
+                                        <div
+                                            onClick={() => switchTab('exam-history')}
+                                            className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center justify-between gap-4 hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 cursor-pointer group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-105 transition-transform">
+                                                    <Award size={24} />
+                                                </div>
+                                                <div>
+                                                    <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Average Score</span>
+                                                    <span className="text-2xl font-semibold text-slate-800">{avgScorePct}%</span>
+                                                    <span className="text-xs font-semibold text-slate-500 block mt-0.5">
+                                                        Best Score: {bestScorePct}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <ArrowRight size={16} className="text-slate-300 group-hover:text-emerald-600 transition-colors shrink-0" />
+                                        </div>
+
+                                        <div
+                                            onClick={() => switchTab('attendance')}
+                                            className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center justify-between gap-4 hover:shadow-md hover:border-amber-500/30 transition-all duration-300 cursor-pointer group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-105 transition-transform">
+                                                    <CalendarCheck size={24} />
+                                                </div>
+                                                <div>
+                                                    <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Attendance Rate</span>
+                                                    <span className="text-2xl font-semibold text-slate-800">{attendancePct}%</span>
+                                                    <span className="text-xs font-semibold text-slate-500 block mt-0.5">
+                                                        {attendedSessionsCount} / {totalSessionsCount} Sessions
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <ArrowRight size={16} className="text-slate-300 group-hover:text-amber-600 transition-colors shrink-0" />
+                                        </div>
+
+                                        <div
+                                            onClick={() => switchTab('profile', 'personal')}
+                                            className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center justify-between gap-4 hover:shadow-md hover:border-purple-500/30 transition-all duration-300 cursor-pointer group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl group-hover:scale-105 transition-transform">
+                                                    <Briefcase size={24} />
+                                                </div>
+                                                <div>
+                                                    <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Profile Readiness</span>
+                                                    <span className="text-2xl font-semibold text-slate-800">{profileCompletionPct}%</span>
+                                                    <span className="text-xs font-semibold text-purple-600 block mt-0.5">
+                                                        CGPA: {student?.cgpa || 'N/A'} • {eligibleDrivesCount} Eligible Drives
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <ArrowRight size={16} className="text-slate-300 group-hover:text-purple-600 transition-colors shrink-0" />
+                                        </div>
+                                    </div>
+
+                                    {/* Row 2: Student Command Center & Direct Exam Key Launcher */}
+                                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                                            <div className="flex items-center gap-5">
+                                                <StudentTabSvg type="dashboard" className="w-52 shrink-0 hidden md:block" />
+                                                <div className="space-y-2">
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-[#5899B5] uppercase tracking-wider">
+                                                        Student Command Hub
+                                                    </span>
+                                                    <h3 className="text-lg sm:text-xl font-semibold text-slate-800">
+                                                        Quick Actions & Direct Exam Key Launcher
+                                                    </h3>
+                                                    <p className="text-slate-500 text-xs sm:text-sm max-w-xl">
+                                                        Enter a session key from your trainer to launch a live assessment immediately, or jump straight to your academic and placement modules.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <form onSubmit={handleLaunchKeyExam} className="flex gap-3 w-full xl:w-auto max-w-md shrink-0">
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Enter Exam Key"
+                                                    className="px-5 py-3 border border-slate-200 rounded-2xl outline-none font-semibold font-mono focus:border-[#5899B5] uppercase w-full xl:w-44 text-sm"
+                                                    value={examLauncherKey}
+                                                    onChange={(e) => setExamLauncherKey(e.target.value)}
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={!examLauncherKey.trim()}
+                                                    className="px-6 py-3 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer transition active:scale-[0.97] text-sm whitespace-nowrap disabled:opacity-50"
+                                                >
+                                                    Launch <ArrowRight size={16} />
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        {/* Quick Navigation Pills */}
+                                        <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2.5">
+                                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-2">Quick Jump:</span>
+                                            {[
+                                                { label: 'Meta Batch', tab: 'meta-batch', icon: BookOpen },
+                                                { label: 'Enter Exam', tab: 'enter-exam', icon: FileText },
+                                                { label: 'Exam History', tab: 'exam-history', icon: Trophy },
+                                                { label: 'Update Profile', tab: 'profile', sub: 'personal', icon: User },
+                                                { label: 'Upload Resume', tab: 'profile', sub: 'resume', icon: Upload },
+                                                { label: 'Campus Drives', tab: 'placement', icon: Briefcase },
+                                                { label: 'Attendance Log', tab: 'attendance', icon: CalendarCheck },
+                                                { label: 'To-do List', tab: 'todo', icon: CheckCircle },
+                                                { label: 'Brain Games', tab: 'games', icon: Award },
+                                                { label: 'Type Speed', tab: 'type-speed', icon: Key }
+                                            ].map((q) => (
+                                                <button
+                                                    key={`${q.tab}-${q.sub || ''}`}
+                                                    type="button"
+                                                    onClick={() => switchTab(q.tab, q.sub)}
+                                                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#5899B5] border border-slate-200/70 hover:border-blue-200 text-xs font-semibold transition cursor-pointer"
+                                                >
+                                                    <q.icon size={14} />
+                                                    {q.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Row 3: 2-Column Comprehensive Student Overview Grid */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                                        {/* Left Column (7 cols): Active Assessments, Recent Exam Results, Placement Drives */}
+                                        <div className="lg:col-span-7 space-y-8">
+                                            {/* Active Assessments Card */}
+                                            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-5">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-slate-800">Active Assessments</h3>
+                                                        <p className="text-slate-500 text-xs sm:text-sm">Live exams currently available for you to take.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTab('enter-exam')}
+                                                        className="text-xs font-semibold text-[#5899B5] hover:text-[#3D7690] flex items-center gap-1 cursor-pointer shrink-0"
+                                                    >
+                                                        View All ({activeExams.length}) <ArrowRight size={14} />
+                                                    </button>
+                                                </div>
+
+                                                {loadingExams ? (
+                                                    <div className="flex justify-center items-center py-8">
+                                                        <Loader2 className="animate-spin text-[#5899B5]" size={26} />
+                                                    </div>
+                                                ) : activeExams.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                        <AlertCircle className="text-slate-400 mb-2" size={28} />
+                                                        <p className="text-slate-700 font-semibold text-sm">No Live Assessments Right Now</p>
+                                                        <p className="text-slate-400 text-xs max-w-xs mt-1">When your instructor starts a batch assessment, it will appear here immediately.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        {activeExams.slice(0, 4).map((item, idx) => (
+                                                            <div key={idx} className="border border-slate-100 rounded-2xl p-4 hover:shadow-md hover:border-[#5899B5]/20 transition-all duration-300 bg-white flex flex-col justify-between group">
+                                                                <div>
+                                                                    <div className="flex justify-between items-start gap-2">
+                                                                        <span className="text-[10px] font-semibold text-[#5899B5] uppercase bg-blue-50 px-2.5 py-1 rounded-full tracking-wider truncate max-w-[140px]">
+                                                                            {item.exam.courseName || 'Course'}
+                                                                        </span>
+                                                                        {item.isCompleted ? (
+                                                                            <span className="bg-emerald-50 text-emerald-600 text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full">Completed</span>
+                                                                        ) : !item.isStarted ? (
+                                                                            <span className="bg-amber-50 text-amber-600 text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full">Waiting</span>
+                                                                        ) : (
+                                                                            <span className="bg-blue-500 text-white text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full animate-pulse">Active</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <h4 className="text-sm font-semibold text-slate-800 mt-2.5 group-hover:text-[#5899B5] transition-colors leading-snug">
+                                                                        {item.exam.title}
+                                                                    </h4>
+                                                                    <div className="flex items-center gap-4 mt-3 text-xs font-semibold text-slate-500">
+                                                                        <span className="flex items-center gap-1"><Clock size={13} className="text-slate-400" /> {item.exam.duration}m</span>
+                                                                        <span className="flex items-center gap-1"><Award size={13} className="text-slate-400" /> {item.exam.totalMarks} Marks</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="mt-4 pt-2.5 border-t border-slate-50">
+                                                                    {item.isCompleted ? (
+                                                                        <button
+                                                                            onClick={() => navigate(`/exam/${item.sessionKey}`)}
+                                                                            className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition"
+                                                                        >
+                                                                            Review Results
+                                                                        </button>
+                                                                    ) : !item.isStarted ? (
+                                                                        <div className="w-full py-2 bg-slate-50 text-slate-400 font-semibold rounded-xl text-xs flex items-center justify-center border border-slate-100">
+                                                                            Waiting for Instructor
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button
+                                                                            onClick={() => navigate(`/exam/${item.sessionKey}`)}
+                                                                            className="w-full py-2 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm"
+                                                                        >
+                                                                            Launch Test <ArrowRight size={13} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Recent Assessment Results Card */}
+                                            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-5">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-slate-800">Recent Assessment Results</h3>
+                                                        <p className="text-slate-500 text-xs sm:text-sm">Your latest completed exams, scores, and certificates.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTab('exam-history')}
+                                                        className="text-xs font-semibold text-[#5899B5] hover:text-[#3D7690] flex items-center gap-1 cursor-pointer shrink-0"
+                                                    >
+                                                        Full History <ArrowRight size={14} />
+                                                    </button>
+                                                </div>
+
+                                                {loadingAttempts ? (
+                                                    <div className="flex justify-center items-center py-8">
+                                                        <Loader2 className="animate-spin text-[#5899B5]" size={26} />
+                                                    </div>
+                                                ) : recentAttempts.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                        <Trophy className="text-slate-400 mb-2" size={28} />
+                                                        <p className="text-slate-700 font-semibold text-sm">No Exam Results Yet</p>
+                                                        <p className="text-slate-400 text-xs mt-1">Your completed exam scores and certificates will appear here.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-3">
+                                                        {recentAttempts.map((attempt) => {
+                                                            const exam = attempt.examId;
+                                                            const dateStr = attempt.completedAt
+                                                                ? new Date(attempt.completedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                                                : new Date(attempt.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                                                            const pct = Number(attempt.percentage || 0);
+
+                                                            return (
+                                                                <div key={attempt._id} className="p-4 rounded-2xl border border-slate-100 hover:border-slate-200 bg-slate-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition">
+                                                                    <div className="space-y-1 flex-1 min-w-0">
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <p className="font-semibold text-slate-800 text-sm truncate">{exam?.title || 'Assessment'}</p>
+                                                                            {attempt.result === 'pass' ? (
+                                                                                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-emerald-100">Pass</span>
+                                                                            ) : (
+                                                                                <span className="bg-rose-50 text-rose-700 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-rose-100">Fail</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-xs text-slate-400 font-medium">
+                                                                            {exam?.courseId?.name || 'Course Assessment'} • {dateStr}
+                                                                        </p>
+                                                                        <div className="w-full max-w-xs bg-slate-200/70 h-1.5 rounded-full overflow-hidden mt-1.5">
+                                                                            <div
+                                                                                className={`h-full rounded-full ${attempt.result === 'pass' ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                                                                                style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                                                                        <div className="text-left sm:text-right">
+                                                                            <p className="text-sm font-semibold text-slate-800">
+                                                                                {attempt.totalScore} / {exam?.totalMarks || 0}
+                                                                            </p>
+                                                                            <p className="text-xs font-semibold text-slate-500">{pct.toFixed(1)}%</p>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            {exam?.settings?.allowReview !== false && (
+                                                                                <button
+                                                                                    onClick={() => navigate(`/exam/${attempt.sessionId}`)}
+                                                                                    className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
+                                                                                >
+                                                                                    Review
+                                                                                </button>
+                                                                            )}
+                                                                            {attempt.result === 'pass' && (exam?.settings?.enableCertificate || attempt.certificateId) && (
+                                                                                <button
+                                                                                    onClick={() => handleDownloadCertificate(attempt._id)}
+                                                                                    className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 text-xs font-semibold rounded-xl transition flex items-center gap-1 cursor-pointer"
+                                                                                    title="Download Certificate"
+                                                                                >
+                                                                                    <Download size={12} /> Cert
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Campus Placement Drives Snapshot */}
+                                            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-5">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-slate-800">Campus Placement Opportunities</h3>
+                                                        <p className="text-slate-500 text-xs sm:text-sm">
+                                                            {eligibleDrivesCount} eligible drives • {appliedDrivesCount} applications submitted
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTab('placement')}
+                                                        className="text-xs font-semibold text-[#5899B5] hover:text-[#3D7690] flex items-center gap-1 cursor-pointer shrink-0"
+                                                    >
+                                                        Explore Drives <ArrowRight size={14} />
+                                                    </button>
+                                                </div>
+
+                                                {loadingPlacementJobs ? (
+                                                    <div className="flex justify-center items-center py-8">
+                                                        <Loader2 className="animate-spin text-[#5899B5]" size={26} />
+                                                    </div>
+                                                ) : placementJobs.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                        <Briefcase className="text-slate-400 mb-2" size={28} />
+                                                        <p className="text-slate-700 font-semibold text-sm">No Active Placement Drives</p>
+                                                        <p className="text-slate-400 text-xs max-w-xs mt-1">Keep your CGPA, skills, and resume updated to qualify when new drives open.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        {placementJobs.slice(0, 4).map((job) => {
+                                                            const isEligible = job.eligibility?.eligible;
+                                                            return (
+                                                                <div
+                                                                    key={job._id}
+                                                                    onClick={() => switchTab('placement')}
+                                                                    className="border border-slate-100 rounded-2xl p-4 hover:shadow-md hover:border-[#5899B5]/20 transition cursor-pointer bg-white flex flex-col justify-between gap-3"
+                                                                >
+                                                                    <div>
+                                                                        <div className="flex items-center justify-between gap-2">
+                                                                            <span className="text-[10px] font-semibold text-[#5899B5] uppercase bg-blue-50 px-2.5 py-0.5 rounded-full truncate">
+                                                                                {job.company}
+                                                                            </span>
+                                                                            {job.isApplied ? (
+                                                                                <span className="bg-blue-50 text-blue-700 border border-blue-100 text-[10px] font-semibold px-2 py-0.5 rounded-full">Applied</span>
+                                                                            ) : isEligible ? (
+                                                                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-semibold px-2 py-0.5 rounded-full">Eligible</span>
+                                                                            ) : (
+                                                                                <span className="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-semibold px-2 py-0.5 rounded-full">Check Criteria</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <h4 className="text-sm font-semibold text-slate-800 mt-2 leading-snug">{job.title}</h4>
+                                                                    </div>
+                                                                    <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-500 pt-2 border-t border-slate-50">
+                                                                        {job.location && <span className="flex items-center gap-1"><MapPin size={12} /> {job.location}</span>}
+                                                                        {job.salaryPackage && <span className="flex items-center gap-1"><DollarSign size={12} /> {job.salaryPackage}</span>}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Right Column (5 cols): Attendance Feed & Pending Tasks */}
+                                        <div className="lg:col-span-5 space-y-8">
+                                            {/* Recent Class Attendance Feed */}
+                                            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-5">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-slate-800">Recent Class Attendance</h3>
+                                                        <p className="text-slate-500 text-xs sm:text-sm">Latest recorded training sessions.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTab('attendance')}
+                                                        className="text-xs font-semibold text-[#5899B5] hover:text-[#3D7690] flex items-center gap-1 cursor-pointer shrink-0"
+                                                    >
+                                                        Full Log <ArrowRight size={14} />
+                                                    </button>
+                                                </div>
+
+                                                {recentAttendance.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                        <CalendarCheck className="text-slate-400 mb-2" size={26} />
+                                                        <p className="text-slate-700 font-semibold text-xs">No Attendance Sessions Recorded</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-2.5">
+                                                        {recentAttendance.map((sess) => {
+                                                            const dateStr = new Date(sess.date).toLocaleDateString('en-IN', {
+                                                                day: 'numeric',
+                                                                month: 'short'
+                                                            });
+                                                            const badgeClass = sess.status === 'present'
+                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                                : sess.status === 'absent'
+                                                                    ? 'bg-rose-50 text-rose-700 border-rose-100'
+                                                                    : 'bg-amber-50 text-amber-700 border-amber-100';
+
+                                                            return (
+                                                                <div key={sess._id} className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/40 flex items-center justify-between gap-3">
+                                                                    <div className="min-w-0">
+                                                                        <p className="text-xs font-semibold text-slate-800 truncate">
+                                                                            {sess.topic || sess.module || 'Training Session'}
+                                                                        </p>
+                                                                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                                                            {dateStr} • {sess.module} (Hr {sess.period}) • {sess.trainerName}
+                                                                        </p>
+                                                                    </div>
+                                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase border shrink-0 ${badgeClass}`}>
+                                                                        {sess.status}
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Pending Tasks & Deadlines (To-do List) */}
+                                            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-5">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-slate-800">Pending Tasks & Deadlines</h3>
+                                                        <p className="text-slate-500 text-xs sm:text-sm">Stay on top of your study action items.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTab('todo')}
+                                                        className="text-xs font-semibold text-[#5899B5] hover:text-[#3D7690] flex items-center gap-1 cursor-pointer shrink-0"
+                                                    >
+                                                        Manage Tasks <ArrowRight size={14} />
+                                                    </button>
+                                                </div>
+
+                                                {pendingTodos.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                        <CheckCircle className="text-emerald-500 mb-2" size={26} />
+                                                        <p className="text-slate-700 font-semibold text-xs">All Caught Up!</p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                switchTab('todo');
+                                                                openAddTodoModal();
+                                                            }}
+                                                            className="mt-2 text-xs font-semibold text-amber-600 hover:underline cursor-pointer"
+                                                        >
+                                                            + Add a new task
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-2.5">
+                                                        {pendingTodos.map((todo) => {
+                                                            const dueStr = todo.dueDate
+                                                                ? new Date(todo.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                                                                : null;
+                                                            return (
+                                                                <div key={todo._id} className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/40 flex items-start justify-between gap-3">
+                                                                    <div className="flex items-start gap-3 min-w-0">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleToggleComplete(todo)}
+                                                                            className="mt-0.5 w-4 h-4 rounded border border-slate-300 hover:border-amber-500 flex items-center justify-center shrink-0 cursor-pointer"
+                                                                            title="Mark as completed"
+                                                                        />
+                                                                        <div className="min-w-0">
+                                                                            <p className="text-xs font-semibold text-slate-800 truncate">{todo.title}</p>
+                                                                            <div className="flex items-center gap-2 mt-1">
+                                                                                {dueStr && (
+                                                                                    <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                                                                        Due {dueStr}
+                                                                                    </span>
+                                                                                )}
+                                                                                {todo.isPriority && (
+                                                                                    <span className="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">
+                                                                                        Priority
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    {todo.isStarred && <Star size={14} className="text-amber-500 shrink-0" fill="currentColor" />}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {activeTab === 'meta-batch' && (() => {
+                            const batchObj = typeof student?.batchId === 'object' && student?.batchId !== null ? student.batchId : {};
+                            const courseObj = typeof batchObj?.courseId === 'object' && batchObj?.courseId !== null ? batchObj.courseId : {};
+                            const trainerObj = typeof batchObj?.trainerId === 'object' && batchObj?.trainerId !== null ? batchObj.trainerId : {};
+                            const collegeObj = typeof student?.collegeId === 'object' && student?.collegeId !== null ? student.collegeId : {};
+
+                            const batchName = batchObj.batchName || student?.batchName || 'Assigned Batch';
+                            const batchStatus = batchObj.status || 'active';
+                            const batchProgram = batchObj.program || courseObj.program || 'Standard Track';
+                            const batchDepartment = batchObj.department || student?.department || 'N/A';
+                            const batchStrength = student?.batchStrength || batchObj.studentCount || 0;
+                            const batchStartDate = batchObj.startDate
+                                ? new Date(batchObj.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : batchObj.createdAt
+                                    ? new Date(batchObj.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                    : 'Ongoing';
+                            const batchEndDate = batchObj.endDate
+                                ? new Date(batchObj.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : 'Active Cohort';
+
+                            const collegeName = collegeObj.name || student?.collegeName || 'N/A';
+                            const collegeCode = collegeObj.code || student?.collegeCode || 'N/A';
+                            const collegeAddress = collegeObj.address || '';
+
+                            const courseName = courseObj.name || student?.courseName || 'Assigned Curriculum';
+                            const courseCode = courseObj.code || student?.courseCode || 'N/A';
+                            const courseDuration = courseObj.duration || 'Full Semester Track';
+                            const courseModulesCount = courseObj.modulesCount || 5;
+                            const courseDescription = courseObj.description || 'Comprehensive technical and aptitude training curriculum tailored for your batch cohort.';
+
+                            const trainerFullName = trainerObj.firstName
+                                ? `${trainerObj.firstName} ${trainerObj.lastName || ''}`.trim()
+                                : (student?.trainerName || (Array.isArray(student?.attendance?.history) && student.attendance.history[0]?.trainerName) || 'Assigned Faculty');
+                            const trainerEmail = trainerObj.email || 'Managed via Batch Coordinator';
+                            const trainerPhone = trainerObj.phone || 'Available in Class Sessions';
+
+                            const attendanceHistory = Array.isArray(student?.attendance?.history) ? student.attendance.history : [];
+                            const totalSessions = student?.attendance?.totalSessions ?? attendanceHistory.length;
+                            const attendedSessions = student?.attendance?.attended ?? 0;
+                            const attendancePct = student?.attendance?.percentage ?? 0;
+
+                            // Group sessions by module for curriculum breakdown
+                            const moduleMap = {};
+                            attendanceHistory.forEach((sess) => {
+                                const modName = sess.module || 'Module 1';
+                                if (!moduleMap[modName]) {
+                                    moduleMap[modName] = {
+                                        module: modName,
+                                        sessionsCount: 0,
+                                        attendedCount: 0,
+                                        topics: [],
+                                        trainerName: sess.trainerName || trainerFullName,
+                                        lastDate: sess.date
+                                    };
+                                }
+                                moduleMap[modName].sessionsCount += 1;
+                                if (sess.status === 'present' || sess.status === 'late') {
+                                    moduleMap[modName].attendedCount += 1;
+                                }
+                                if (sess.topic && !moduleMap[modName].topics.includes(sess.topic)) {
+                                    moduleMap[modName].topics.push(sess.topic);
+                                }
+                            });
+                            const moduleSummaries = Object.values(moduleMap);
+
+                            return (
+                                <div className="space-y-8 font-sans">
+                                    {/* Batch Header Card */}
+                                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                                        <div className="space-y-3 max-w-2xl">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-blue-50 text-[#5899B5] border border-blue-100">
+                                                    {batchProgram}
+                                                </span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
+                                                    batchStatus === 'active'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                        : batchStatus === 'completed'
+                                                            ? 'bg-slate-100 text-slate-700 border-slate-200'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-100'
+                                                }`}>
+                                                    {batchStatus} Batch
+                                                </span>
+                                                <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-100">
+                                                    Dept: {batchDepartment}
+                                                </span>
+                                            </div>
+                                            <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">
+                                                {batchName}
+                                            </h2>
+                                            <p className="text-slate-500 text-sm leading-relaxed">
+                                                Complete batch metadata, enrolled institution & student identity, assigned course curriculum, faculty details, and module-wise session progress.
+                                            </p>
+                                        </div>
+                                        <StudentTabSvg type="meta-batch" className="w-60 shrink-0 hidden sm:block" />
+                                    </div>
+
+                                    {/* 4 Batch KPI Cards */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+                                        <div className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center gap-4">
+                                            <div className="p-4 bg-blue-50 text-[#5899B5] rounded-2xl">
+                                                <User size={24} />
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">USN / Roll ID</span>
+                                                <span className="text-xl font-semibold font-mono text-slate-800">{student?.usn || 'N/A'}</span>
+                                                <span className="text-xs font-semibold text-slate-500 block mt-0.5">
+                                                    {batchStrength > 0 ? `${batchStrength} Students in Batch` : `Sem ${student?.semester || 'N/A'} Cohort`}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center gap-4">
+                                            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
+                                                <BookOpen size={24} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Course Track</span>
+                                                <span className="text-lg font-semibold text-slate-800 truncate block" title={courseName}>{courseName}</span>
+                                                <span className="text-xs font-semibold text-emerald-600 block mt-0.5">
+                                                    Code: {courseCode} • {courseModulesCount} Modules
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center gap-4">
+                                            <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl">
+                                                <CalendarCheck size={24} />
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Batch Sessions</span>
+                                                <span className="text-2xl font-semibold text-slate-800">{totalSessions}</span>
+                                                <span className="text-xs font-semibold text-amber-600 block mt-0.5">
+                                                    {attendedSessions} Attended ({attendancePct}%)
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center gap-4">
+                                            <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl">
+                                                <Award size={24} />
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Batch Assessments</span>
+                                                <span className="text-2xl font-semibold text-slate-800">{actualAttempts.length}</span>
+                                                <span className="text-xs font-semibold text-purple-600 block mt-0.5">
+                                                    {activeExams.length} Active / Assigned
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 2-Column Detailed Batch Metadata Grid */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                                        {/* Left Card: Batch, College & Student Enrollment Metadata */}
+                                        <div className="lg:col-span-6 bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div>
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-blue-50 text-[#5899B5] border border-blue-100 uppercase tracking-wider mb-1.5">
+                                                        Institution & Cohort
+                                                    </span>
+                                                    <h3 className="text-lg font-semibold text-slate-800">Batch & Institutional Metadata</h3>
+                                                    <p className="text-slate-500 text-xs sm:text-sm">Official enrollment, college, and cohort details for your account.</p>
+                                                </div>
+                                                <StudentTabSvg type="profile-academic" className="w-48 shrink-0 hidden sm:block" />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Batch Name</span>
+                                                    <span className="text-slate-800 font-semibold text-sm mt-1 block">{batchName}</span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">USN / Roll Number</span>
+                                                    <span className="text-slate-800 font-semibold font-mono text-sm mt-1 block">{student?.usn || 'N/A'}</span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 sm:col-span-2">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">College / Institution</span>
+                                                    <span className="text-slate-800 font-semibold text-sm mt-1 block">{collegeName}</span>
+                                                    <span className="text-slate-500 text-xs font-medium mt-0.5 block">
+                                                        Institution Code: <span className="font-mono font-semibold text-slate-700">{collegeCode}</span>
+                                                        {collegeAddress ? ` • ${collegeAddress}` : ''}
+                                                    </span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Department / Branch</span>
+                                                    <span className="text-slate-800 font-semibold text-sm mt-1 block uppercase">{batchDepartment}</span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Semester & Division</span>
+                                                    <span className="text-slate-800 font-semibold text-sm mt-1 block">
+                                                        {student?.semester ? `Semester ${student.semester}` : 'N/A'}
+                                                        {student?.division ? ` • Div ${student.division}` : ''}
+                                                    </span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Batch Start Date</span>
+                                                    <span className="text-slate-800 font-semibold text-sm mt-1 block">{batchStartDate}</span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Batch End / Status</span>
+                                                    <span className="text-slate-800 font-semibold text-sm mt-1 block capitalize">{batchEndDate}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Right Card: Assigned Course & Faculty Details */}
+                                        <div className="lg:col-span-6 bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div>
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wider mb-1.5">
+                                                        Faculty & Curriculum
+                                                    </span>
+                                                    <h3 className="text-lg font-semibold text-slate-800">Assigned Course & Trainer Details</h3>
+                                                    <p className="text-slate-500 text-xs sm:text-sm">Curriculum specifications and faculty mentor assigned to your batch.</p>
+                                                </div>
+                                                <StudentTabSvg type="trainer" className="w-52 shrink-0 hidden sm:block" />
+                                            </div>
+
+                                            <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-2">
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5899B5] bg-white px-2.5 py-1 rounded-full border border-blue-100">
+                                                        Course Code: {courseCode}
+                                                    </span>
+                                                    <span className="text-xs font-semibold text-slate-600">
+                                                        {courseDuration} • {courseModulesCount} Modules
+                                                    </span>
+                                                </div>
+                                                <h4 className="text-base font-semibold text-slate-800 pt-1">{courseName}</h4>
+                                                <p className="text-xs text-slate-600 leading-relaxed">{courseDescription}</p>
+                                                {courseObj.syllabusUrl && (
+                                                    <div className="pt-2">
+                                                        <a
+                                                            href={courseObj.syllabusUrl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5899B5] hover:underline"
+                                                        >
+                                                            <Download size={13} /> View / Download Course Syllabus
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 sm:col-span-2 flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Assigned Batch Trainer / Faculty</span>
+                                                        <span className="text-slate-800 font-semibold text-base mt-1 block">{trainerFullName}</span>
+                                                    </div>
+                                                    <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100 shrink-0">
+                                                        Lead Instructor
+                                                    </span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Faculty Email</span>
+                                                    <span className="text-slate-700 font-semibold text-xs mt-1 block truncate" title={trainerEmail}>{trainerEmail}</span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
+                                                    <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider block">Faculty Contact</span>
+                                                    <span className="text-slate-700 font-semibold text-xs mt-1 block">{trainerPhone}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Batch Modules & Topics Covered Breakdown */}
+                                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Batch Modules & Curriculum Progress</h3>
+                                                <p className="text-slate-500 text-xs sm:text-sm">Breakdown of training modules, hours conducted, and topics covered in your batch.</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => switchTab('attendance')}
+                                                className="text-xs font-semibold text-[#5899B5] hover:text-[#3D7690] flex items-center gap-1 cursor-pointer shrink-0"
+                                            >
+                                                View Full Attendance Log <ArrowRight size={14} />
+                                            </button>
+                                        </div>
+
+                                        {moduleSummaries.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                <BookOpen className="text-slate-400 mb-2.5" size={32} />
+                                                <p className="text-slate-700 font-semibold text-sm">No Batch Modules Logged Yet</p>
+                                                <p className="text-slate-400 text-xs max-w-xs mt-1">Once your trainer logs batch sessions and topics, module-wise progress will appear here.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                {moduleSummaries.map((mod, idx) => {
+                                                    const modPct = mod.sessionsCount > 0
+                                                        ? Math.round((mod.attendedCount / mod.sessionsCount) * 100)
+                                                        : 0;
+                                                    return (
+                                                        <div key={idx} className="p-5 rounded-2xl border border-slate-100 bg-slate-50/40 space-y-3">
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#5899B5] border border-blue-100">
+                                                                    {mod.module}
+                                                                </span>
+                                                                <span className="text-xs font-semibold text-slate-600">
+                                                                    {mod.sessionsCount} {mod.sessionsCount === 1 ? 'Session' : 'Sessions'} • {modPct}% Attended
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">Instructor</span>
+                                                                <span className="text-sm font-semibold text-slate-800">{mod.trainerName}</span>
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">Topics Covered</span>
+                                                                {mod.topics.length > 0 ? (
+                                                                    <div className="flex flex-wrap gap-1.5">
+                                                                        {mod.topics.map((t, i) => (
+                                                                            <span key={i} className="px-2.5 py-1 bg-white border border-slate-200/80 rounded-lg text-xs font-medium text-slate-700">
+                                                                                {t}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className="text-xs text-slate-400 italic">General module sessions</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {activeTab === 'enter-exam' && (
                             <div className="space-y-8">
                                 
                                 {/* Dashboard Widgets */}
@@ -999,9 +2665,12 @@ const StudentDashboard = () => {
                                 
                                 {/* Quick Exam Launcher */}
                                 <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                                    <div className="space-y-1">
-                                        <h3 className="text-lg font-semibold text-slate-800">Direct Assessment Launcher</h3>
-                                        <p className="text-slate-500 text-xs sm:text-sm">Have a custom exam key from your trainer? Launch it directly here.</p>
+                                    <div className="flex items-center gap-5">
+                                        <StudentTabSvg type="launcher" className="w-44 shrink-0 hidden lg:block" />
+                                        <div className="space-y-1">
+                                            <h3 className="text-lg font-semibold text-slate-800">Direct Assessment Launcher</h3>
+                                            <p className="text-slate-500 text-xs sm:text-sm">Have a custom exam key from your trainer? Launch it directly here.</p>
+                                        </div>
                                     </div>
                                     <form onSubmit={handleLaunchKeyExam} className="flex gap-3 w-full md:w-auto max-w-md">
                                         <input
@@ -1024,9 +2693,12 @@ const StudentDashboard = () => {
 
                                 {/* Active Assessments */}
                                 <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-800">Active Batch Assessments</h3>
-                                        <p className="text-slate-500 text-sm">Tests currently active and available to take for your batch.</p>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-800">Active Batch Assessments</h3>
+                                            <p className="text-slate-500 text-sm">Tests currently active and available to take for your batch.</p>
+                                        </div>
+                                        <StudentTabSvg type="enter-exam" />
                                     </div>
 
                                     {loadingExams ? (
@@ -1107,9 +2779,12 @@ const StudentDashboard = () => {
 
                                 {/* Historical Attempts */}
                                 <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-800">Assessment History</h3>
-                                        <p className="text-slate-500 text-sm">Your performance track record and evaluations.</p>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-800">Assessment History</h3>
+                                            <p className="text-slate-500 text-sm">Your performance track record and evaluations.</p>
+                                        </div>
+                                        <StudentTabSvg type="exam-history" />
                                     </div>
 
                                     {loadingAttempts ? (
@@ -1301,9 +2976,12 @@ const StudentDashboard = () => {
 
                                 {profileSubTab === 'personal' && (
                                     <form onSubmit={handleSavePersonal} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800">Personal Details</h3>
-                                            <p className="text-slate-500 text-sm">Update your name, contact email, and mobile number.</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Personal Details</h3>
+                                                <p className="text-slate-500 text-sm">Update your name, contact email, and mobile number.</p>
+                                            </div>
+                                            <StudentTabSvg type="profile-personal" />
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1384,9 +3062,12 @@ const StudentDashboard = () => {
                                 {profileSubTab === 'academic' && (
                                     /* Institutional Context Card */
                                     <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800">Academic & Institutional Profile</h3>
-                                            <p className="text-slate-500 text-sm">Your course, batch, trainer details, and class attendance rate.</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Academic & Institutional Profile</h3>
+                                                <p className="text-slate-500 text-sm">Your course, batch, trainer details, and class attendance rate.</p>
+                                            </div>
+                                            <StudentTabSvg type="profile-academic" />
                                         </div>
                                         
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1433,9 +3114,12 @@ const StudentDashboard = () => {
 
                                 {profileSubTab === 'skills' && (
                                     <form onSubmit={handleSaveSkills} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800">Skills & Capabilities</h3>
-                                            <p className="text-slate-500 text-sm">Add your professional technical skills and capabilities summary statement.</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Skills & Capabilities</h3>
+                                                <p className="text-slate-500 text-sm">Add your professional technical skills and capabilities summary statement.</p>
+                                            </div>
+                                            <StudentTabSvg type="profile-skills" />
                                         </div>
 
                                         {/* Skills Tags */}
@@ -1494,9 +3178,12 @@ const StudentDashboard = () => {
 
                                 {profileSubTab === 'resume' && (
                                     <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800">Resume PDF</h3>
-                                            <p className="text-slate-500 text-sm">Upload your professional resume PDF to share with corporate placement partners.</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Resume PDF</h3>
+                                                <p className="text-slate-500 text-sm">Upload your professional resume PDF to share with corporate placement partners.</p>
+                                            </div>
+                                            <StudentTabSvg type="profile-resume" />
                                         </div>
 
                                         {student?.resumeUrl ? (
@@ -1559,9 +3246,12 @@ const StudentDashboard = () => {
 
                                 {profileSubTab === 'preferences' && (
                                     <form onSubmit={handleSavePreferences} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-8">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800">Career & Placement Preferences</h3>
-                                            <p className="text-slate-500 text-sm">Configure your preferred job arrangements, salary expectations, roles, and locations.</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">Career & Placement Preferences</h3>
+                                                <p className="text-slate-500 text-sm">Configure your preferred job arrangements, salary expectations, roles, and locations.</p>
+                                            </div>
+                                            <StudentTabSvg type="profile-preferences" />
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1686,9 +3376,12 @@ const StudentDashboard = () => {
 
                                 {/* Sessions List */}
                                 <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-800">Class Attendance Log</h3>
-                                        <p className="text-slate-500 text-sm">Chronological feed of all recorded classes and your presence status.</p>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-800">Class Attendance Log</h3>
+                                            <p className="text-slate-500 text-sm">Chronological feed of all recorded classes and your presence status.</p>
+                                        </div>
+                                        <StudentTabSvg type="attendance" />
                                     </div>
 
                                     {!student?.attendance?.history || student.attendance.history.length === 0 ? (
@@ -1831,11 +3524,14 @@ const StudentDashboard = () => {
                                 {/* Right Tasks List */}
                                 <div className="md:col-span-9 space-y-6">
                                     <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-slate-800 capitalize">
-                                                {activeFilter === 'all' ? 'All Tasks' : `${activeFilter} Tasks`}
-                                            </h3>
-                                            <p className="text-slate-500 text-sm">Manage, filter, and track your tasks and deadlines.</p>
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800 capitalize">
+                                                    {activeFilter === 'all' ? 'All Tasks' : `${activeFilter} Tasks`}
+                                                </h3>
+                                                <p className="text-slate-500 text-sm">Manage, filter, and track your tasks and deadlines.</p>
+                                            </div>
+                                            <StudentTabSvg type="todo" />
                                         </div>
 
                                         {loadingExams && todos.length === 0 ? (
@@ -2031,10 +3727,13 @@ const StudentDashboard = () => {
                         )}
 
                         {activeTab === 'security' && (
-                            <form onSubmit={handleUpdatePassword} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6 max-w-xl">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-slate-800">Account Security</h3>
-                                    <p className="text-slate-500 text-sm">Update your access password below. Current password verification is required.</p>
+                            <form onSubmit={handleUpdatePassword} className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6 max-w-2xl">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-slate-800">Account Security</h3>
+                                        <p className="text-slate-500 text-sm">Update your access password below. Current password verification is required.</p>
+                                    </div>
+                                    <StudentTabSvg type="security" />
                                 </div>
 
                                 <div className="space-y-2">
@@ -2229,6 +3928,14 @@ const StudentDashboard = () => {
             {activeTab === 'placement' && (
                 <StudentPlacementTab token={token} student={student} setAlertState={setAlertState} />
             )}
+
+            {activeTab === 'games' && (
+                <StudentGamesTab student={student} />
+            )}
+
+            {activeTab === 'type-speed' && (
+                <StudentTypeSpeedTab />
+            )}
         </div>
     );
 };
@@ -2335,14 +4042,17 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
 
     return (
         <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-50 text-[#5899B5] rounded-2xl">
-                    <Briefcase size={22} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-3 bg-blue-50 text-[#5899B5] rounded-2xl">
+                        <Briefcase size={22} />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-slate-800">Job Placements & Campus Drives</h3>
+                        <p className="text-slate-500 text-xs sm:text-sm">Opportunities targeted to your batch. Check your eligibility rules and apply.</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-slate-800">Job Placements & Campus Drives</h3>
-                    <p className="text-slate-500 text-xs sm:text-sm">Opportunities targeted to your batch. Check your eligibility rules and apply.</p>
-                </div>
+                <StudentTabSvg type="placement" />
             </div>
 
             {jobs.length === 0 ? (

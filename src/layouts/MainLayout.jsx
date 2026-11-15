@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import { 
     LayoutDashboard, School, BookOpen, Users, User, FileText, BarChart3, 
     LogOut, Menu, X, Bell, ChevronDown, Search, Send, Globe, ArrowLeftRight, Trophy, ShieldCheck, Database, FileSpreadsheet,
-    CalendarCheck, Briefcase, Lock, CheckSquare
+    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard
 } from 'lucide-react';
 import { SocketContext } from '../contexts/SocketContext';
 import useAuthStore from '../store/authStore';
@@ -116,12 +116,16 @@ const MainLayout = ({ children }) => {
     const isRegionalOrAsstRM = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
     const menuItems = isStudent ? [
+        { label: 'Dashboard', icon: LayoutDashboard, path: '/student/dashboard?tab=dashboard' },
+        { label: 'Meta Batch', icon: Users, path: '/student/dashboard?tab=meta-batch' },
         { label: 'Enter Exam', icon: FileText, path: '/student/dashboard?tab=enter-exam' },
         { label: 'Exam History', icon: Trophy, path: '/student/dashboard?tab=exam-history' },
         { label: 'Profile', icon: User, path: '/student/dashboard?tab=profile' },
         { label: 'Placements', icon: Briefcase, path: '/student/dashboard?tab=placement' },
         { label: 'Attendance', icon: CalendarCheck, path: '/student/dashboard?tab=attendance' },
         { label: 'To-do List', icon: CheckSquare, path: '/student/dashboard?tab=todo' },
+        { label: 'Brain Games', icon: Gamepad2, path: '/student/dashboard?tab=games' },
+        { label: 'Type Speed', icon: Keyboard, path: '/student/dashboard?tab=type-speed' },
         { label: 'Account Security', icon: Lock, path: '/student/dashboard?tab=security' }
     ] : user?.role === 'trainer' ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -269,7 +273,7 @@ const MainLayout = ({ children }) => {
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
                     {menuItems.map((item) => {
                         const isActive = isStudent 
-                            ? (location.pathname + location.search) === item.path || (item.path === '/student/dashboard?tab=enter-exam' && !location.search)
+                            ? (location.pathname + location.search) === item.path || (item.path === '/student/dashboard?tab=dashboard' && !location.search)
                             : location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
                         return (
                             <NavLink
