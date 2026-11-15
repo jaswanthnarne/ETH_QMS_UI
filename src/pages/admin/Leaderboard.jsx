@@ -137,7 +137,7 @@ const Leaderboard = () => {
                     <button
                         onClick={handleExport}
                         title={getExportTooltip()}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#5899B5] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7690] transition-colors shadow-sm"
                     >
                         <Download size={14} /> Export Results
                     </button>
@@ -149,7 +149,7 @@ const Leaderboard = () => {
                 <div className="relative">
                     <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <select
-                        className="pl-8 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD] focus:ring-2 focus:ring-blue-50 appearance-none cursor-pointer transition-all"
+                        className="pl-8 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-blue-50 appearance-none cursor-pointer transition-all"
                         value={selectedExam}
                         onChange={e => setSelectedExam(e.target.value)}
                     >
@@ -162,7 +162,7 @@ const Leaderboard = () => {
                 <div className="relative">
                     <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <select
-                        className="pl-8 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD] focus:ring-2 focus:ring-blue-50 appearance-none cursor-pointer transition-all"
+                        className="pl-8 pr-8 py-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-blue-50 appearance-none cursor-pointer transition-all"
                         value={limit}
                         onChange={e => setLimit(Number(e.target.value))}
                     >
@@ -236,7 +236,7 @@ const Leaderboard = () => {
                                 <div className="relative w-72">
                                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                     <input 
-                                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD]" 
+                                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5]" 
                                         placeholder="Search students..." 
                                         value={searchTerm} 
                                         onChange={(e) => setSearchTerm(e.target.value)} 
@@ -309,7 +309,7 @@ const Leaderboard = () => {
             {data.length > 0 && (
                 <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
-                        <TrendingUp size={15} className="text-[#004AAD]" />
+                        <TrendingUp size={15} className="text-[#5899B5]" />
                         <span className="text-slate-500">Avg Score:</span>
                         <span className="font-semibold text-slate-800">
                             {(data.reduce((s, d) => s + d.percentage, 0) / data.length).toFixed(1)}%

@@ -155,7 +155,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                         <select 
                             required
                             disabled={!!activeCollegeId}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none disabled:opacity-60"
                             value={formData.collegeId}
                             onChange={(e) => setFormData({...formData, collegeId: e.target.value, courseId: '', trainerId: ''})}
                         >
@@ -169,7 +169,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                         <label className="block text-sm font-medium text-slate-700 mb-1">Course Name (Optional)</label>
                         <select 
                             disabled={loadingCourses}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60"
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none disabled:opacity-60"
                             value={formData.courseId}
                             onChange={(e) => setFormData({...formData, courseId: e.target.value, trainerId: ''})}
                         >
@@ -184,7 +184,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                             <label className="block text-sm font-medium text-slate-700 mb-1">Trainer (Optional)</label>
                             <select 
                                 disabled={loadingTrainers}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none disabled:opacity-60"
                                 value={formData.trainerId}
                                 onChange={(e) => setFormData({...formData, trainerId: e.target.value})}
                             >
@@ -200,7 +200,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                             <label className="block text-sm font-medium text-slate-700 mb-1">Batch Name *</label>
                             <input 
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                 value={formData.batchName}
                                 onChange={(e) => setFormData({...formData, batchName: e.target.value})}
                                 placeholder="e.g. Batch 1"
@@ -210,7 +210,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                             <label className="block text-sm font-medium text-slate-700 mb-1">Department *</label>
                             <input 
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                 value={formData.department}
                                 onChange={(e) => setFormData({...formData, department: e.target.value})}
                                 placeholder="e.g. CSE"
@@ -226,7 +226,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Program</label>
                                 <select 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                     value={formData.program}
                                     onChange={(e) => setFormData({...formData, program: e.target.value})}
                                 >
@@ -243,7 +243,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
                                     <input 
                                         type="date"
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         value={formData.startDate}
                                         onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                                     />
@@ -252,7 +252,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                                     <label className="block text-sm font-medium text-slate-700 mb-1">End Date</label>
                                     <input 
                                         type="date"
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         value={formData.endDate}
                                         onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                                     />
@@ -262,7 +262,7 @@ const BatchModal = ({ batch, isOpen, onClose, onSave, colleges, activeCollegeId 
                     )}
                     <div className="pt-3 flex gap-3">
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50 active:scale-95 transition-all">Cancel</button>
-                        <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2">{submitting && <Loader2 size={16} className="animate-spin" />}{batch ? 'Save Changes' : 'Create Batch'}</button>
+                        <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#5899B5] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7690] disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2">{submitting && <Loader2 size={16} className="animate-spin" />}{batch ? 'Save Changes' : 'Create Batch'}</button>
                     </div>
                 </form>
             </div>
@@ -303,7 +303,7 @@ const Batches = () => {
             // --- SHEET 1: Overview ---
             const overviewSheet = workbook.addWorksheet('Rosters Overview');
             overviewSheet.addRow([`Trainer Batches Roster Overview`]);
-            overviewSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            overviewSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             overviewSheet.mergeCells(1, 1, 1, 6);
             overviewSheet.getRow(1).height = 28;
 
@@ -317,7 +317,7 @@ const Batches = () => {
             const headersOverview = ['S.No', 'Batch Name', 'College', 'Course', 'Department', 'Roster Size'];
             const headerRowOverview = overviewSheet.addRow(headersOverview);
             headerRowOverview.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRowOverview.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRowOverview.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRowOverview.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRowOverview.height = 28;
 
@@ -373,7 +373,7 @@ const Batches = () => {
 
                 // 1. Title Row
                 sheet.addRow([`Student Roster — ${b.batchName || 'Batch'}`]);
-                sheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+                sheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
                 sheet.mergeCells(1, 1, 1, 9);
                 sheet.getRow(1).height = 28;
 
@@ -393,7 +393,7 @@ const Batches = () => {
                 const excelHeaders = ['S.No', 'Student Name', 'USN', 'Department', 'Semester', 'Division', 'Email', 'Mobile', 'Status'];
                 const headerRow = sheet.addRow(excelHeaders);
                 headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-                headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+                headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
                 headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
                 headerRow.height = 28;
 
@@ -660,7 +660,7 @@ const Batches = () => {
                     {isAdmin && !isReadOnly && (
                         <button 
                             onClick={() => { setSelectedBatch(null); setIsModalOpen(true); }} 
-                            className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] shadow-sm active:scale-95 transition-all shrink-0"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] shadow-sm active:scale-95 transition-all shrink-0"
                         >
                             <Plus size={16} /> Add Batch Template
                         </button>
@@ -677,14 +677,14 @@ const Batches = () => {
                             placeholder="Search batches..." 
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 
-                            className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:border-[#004AAD] outline-none max-w-sm flex-1 sm:flex-initial" 
+                            className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:border-[#5899B5] outline-none max-w-sm flex-1 sm:flex-initial" 
                         />
                         
                         {isAdmin && (
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                                 {activeCollegeId ? (
-                                    <div className="flex items-center gap-2 bg-blue-50 text-[#004AAD] border border-blue-100 rounded-lg px-3.5 py-2 text-xs font-bold shadow-sm max-w-[240px] truncate">
-                                        <School size={14} className="text-[#004AAD] shrink-0" />
+                                    <div className="flex items-center gap-2 bg-blue-50 text-[#5899B5] border border-blue-100 rounded-lg px-3.5 py-2 text-xs font-bold shadow-sm max-w-[240px] truncate">
+                                        <School size={14} className="text-[#5899B5] shrink-0" />
                                         <span className="truncate">
                                             {colleges.find(c => c._id === activeCollegeId)?.name || 'Loading College...'}
                                         </span>
@@ -697,7 +697,7 @@ const Batches = () => {
                                                 setFilterCollegeId(e.target.value);
                                                 setFilterTrainerId('');
                                             }}
-                                            className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 outline-none focus:border-[#004AAD] text-slate-600 font-semibold cursor-pointer min-w-[160px]"
+                                            className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 outline-none focus:border-[#5899B5] text-slate-600 font-semibold cursor-pointer min-w-[160px]"
                                         >
                                             <option value="">All Colleges</option>
                                             {colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -708,7 +708,7 @@ const Batches = () => {
                                 <select
                                     value={filterTrainerId}
                                     onChange={(e) => setFilterTrainerId(e.target.value)}
-                                    className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 outline-none focus:border-[#004AAD] text-slate-600 font-semibold cursor-pointer min-w-[160px]"
+                                    className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 outline-none focus:border-[#5899B5] text-slate-600 font-semibold cursor-pointer min-w-[160px]"
                                 >
                                     <option value="">All Trainers</option>
                                     {trainersList.map(t => (
@@ -723,7 +723,7 @@ const Batches = () => {
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 outline-none focus:border-[#004AAD] text-slate-600 font-semibold cursor-pointer min-w-[160px]"
+                            className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2 outline-none focus:border-[#5899B5] text-slate-600 font-semibold cursor-pointer min-w-[160px]"
                         >
                             <option value="">Sort by: Default</option>
                             <option value="name_asc">Name (A-Z)</option>
@@ -737,7 +737,7 @@ const Batches = () => {
                 </div>
 
                 {loading ? (
-                    <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-[#004AAD]" size={32} /></div>
+                    <div className="p-12 flex justify-center"><Loader2 className="animate-spin text-[#5899B5]" size={32} /></div>
                 ) : sortedBatches.length === 0 ? (
                     <div className="p-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
                         <AlertCircle className="text-slate-300" size={32} />
@@ -764,7 +764,7 @@ const Batches = () => {
                                             <td className="p-4">
                                                 <div className="flex flex-col">
                                                     {(isAdmin || user?.role === 'trainer') ? (
-                                                        <Link to={getBatchDetailLink(b)} className="font-semibold text-[#004AAD] hover:underline cursor-pointer">
+                                                        <Link to={getBatchDetailLink(b)} className="font-semibold text-[#5899B5] hover:underline cursor-pointer">
                                                             {b.batchName}
                                                         </Link>
                                                     ) : (
@@ -772,7 +772,7 @@ const Batches = () => {
                                                     )}
                                                     {b.program && (
                                                         <div className="flex items-center gap-1.5 mt-1">
-                                                            <span className="text-[10px] bg-blue-50 text-[#004AAD] px-2 py-0.5 rounded-full font-bold border border-blue-100/50">{b.program}</span>
+                                                            <span className="text-[10px] bg-blue-50 text-[#5899B5] px-2 py-0.5 rounded-full font-bold border border-blue-100/50">{b.program}</span>
                                                             {b.startDate && (
                                                                 <span className="text-[10px] text-slate-400 font-medium">
                                                                     {new Date(b.startDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})} - {b.endDate ? new Date(b.endDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : 'TBD'}
@@ -798,12 +798,12 @@ const Batches = () => {
                                             {(user?.role === 'trainer' || isAdmin) && (
                                                 <td className="p-4 text-center">
                                                     <div className="flex items-center justify-center gap-2">
-                                                        <Link to={getBatchDetailLink(b)} className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors" title="View Student Roster">
+                                                        <Link to={getBatchDetailLink(b)} className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors" title="View Student Roster">
                                                             <Users size={15} />
                                                         </Link>
                                                         {isAdmin && !isReadOnly && (
                                                             <>
-                                                                <button onClick={() => { setSelectedBatch(b); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors"><Edit2 size={15} /></button>
+                                                                <button onClick={() => { setSelectedBatch(b); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors"><Edit2 size={15} /></button>
                                                                 <button onClick={() => handleDelete(b._id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={15} /></button>
                                                             </>
                                                         )}
@@ -822,7 +822,7 @@ const Batches = () => {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             {(isAdmin || user?.role === 'trainer') ? (
-                                                <Link to={getBatchDetailLink(b)} className="font-bold text-[#004AAD] hover:underline cursor-pointer block">
+                                                <Link to={getBatchDetailLink(b)} className="font-bold text-[#5899B5] hover:underline cursor-pointer block">
                                                     {b.batchName}
                                                 </Link>
                                             ) : (
@@ -831,18 +831,18 @@ const Batches = () => {
                                             <div className="flex flex-wrap gap-1.5 mt-1">
                                                 <span className="inline-block text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">DEPT: {b.department}</span>
                                                 {b.program && (
-                                                    <span className="inline-block text-[10px] bg-blue-50 text-[#004AAD] px-2 py-0.5 rounded-full font-bold border border-blue-100/50">{b.program}</span>
+                                                    <span className="inline-block text-[10px] bg-blue-50 text-[#5899B5] px-2 py-0.5 rounded-full font-bold border border-blue-100/50">{b.program}</span>
                                                 )}
                                             </div>
                                         </div>
                                         {(user?.role === 'trainer' || isAdmin) && (
                                             <div className="flex items-center gap-1">
-                                                <Link to={getBatchDetailLink(b)} className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg" title="View Student Roster">
+                                                <Link to={getBatchDetailLink(b)} className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg" title="View Student Roster">
                                                     <Users size={15} />
                                                 </Link>
                                                 {isAdmin && !isReadOnly && (
                                                     <>
-                                                        <button onClick={() => { setSelectedBatch(b); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg"><Edit2 size={15} /></button>
+                                                        <button onClick={() => { setSelectedBatch(b); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg"><Edit2 size={15} /></button>
                                                         <button onClick={() => handleDelete(b._id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={15} /></button>
                                                     </>
                                                 )}

@@ -59,7 +59,7 @@ const CollegeContextWrapper = () => {
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center bg-slate-50">
-                <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={36} />
             </div>
         );
     }

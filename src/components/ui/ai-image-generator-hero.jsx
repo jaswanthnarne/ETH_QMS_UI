@@ -51,8 +51,8 @@ export function ImageCarouselHero({
   return (
     <div className="relative w-full min-h-screen bg-slate-50 overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#004AAD]/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#004AAD]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#5899B5]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#5899B5]/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8">
@@ -111,7 +111,7 @@ export function ImageCarouselHero({
             onClick={onCtaClick}
             className={cn(
               'inline-flex items-center gap-2 px-8 py-3 rounded-full',
-              'bg-[#004AAD] text-white font-medium',
+              'bg-[#5899B5] text-white font-medium',
               'hover:shadow-lg hover:scale-105 transition-all duration-300',
               'active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2',
             )}

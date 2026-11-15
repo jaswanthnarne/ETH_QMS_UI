@@ -69,7 +69,7 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
             {/* Header */}
             <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 bg-[#004AAD] text-white rounded-md flex items-center justify-center text-xs font-bold">{index + 1}</span>
+                    <span className="w-7 h-7 bg-[#5899B5] text-white rounded-md flex items-center justify-center text-xs font-bold">{index + 1}</span>
                     <span className="text-sm font-medium text-slate-500">Question {index + 1} of {total}</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -83,7 +83,7 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Question Type</label>
-                        <select value={q.type} onChange={(e) => handleTypeChange(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#004AAD] outline-none appearance-none cursor-pointer" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
+                        <select value={q.type} onChange={(e) => handleTypeChange(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#5899B5] outline-none appearance-none cursor-pointer" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
                             {QUESTION_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                         </select>
                         <p className="text-xs text-slate-400 mt-1">{typeInfo?.description}</p>
@@ -91,7 +91,7 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
                     {enableSections && (
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-slate-700 mb-1">Section</label>
-                            <select value={q.sectionIndex || 0} onChange={(e) => onChange(q.id, 'sectionIndex', parseInt(e.target.value) || 0)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#004AAD] outline-none appearance-none cursor-pointer" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
+                            <select value={q.sectionIndex || 0} onChange={(e) => onChange(q.id, 'sectionIndex', parseInt(e.target.value) || 0)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#5899B5] outline-none appearance-none cursor-pointer" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
                                 {sections && sections.length > 0 ? (
                                     sections.map((s, sIdx) => <option key={sIdx} value={sIdx}>{s.name}</option>)
                                 ) : (
@@ -103,14 +103,14 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
                     )}
                     <div className="w-32">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Marks</label>
-                        <input type="number" min="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center focus:bg-white focus:border-[#004AAD] outline-none" value={q.marks} onChange={(e) => onChange(q.id, 'marks', parseInt(e.target.value) || 1)} />
+                        <input type="number" min="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center focus:bg-white focus:border-[#5899B5] outline-none" value={q.marks} onChange={(e) => onChange(q.id, 'marks', parseInt(e.target.value) || 1)} />
                     </div>
                 </div>
 
                 {/* Question Text */}
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Question Text</label>
-                    <textarea className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none resize-none min-h-[70px]" placeholder="Enter your question here..." value={q.text} onChange={(e) => onChange(q.id, 'text', e.target.value)} />
+                    <textarea className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none resize-none min-h-[70px]" placeholder="Enter your question here..." value={q.text} onChange={(e) => onChange(q.id, 'text', e.target.value)} />
                 </div>
 
                 {/* Options for MCQ types */}
@@ -118,18 +118,18 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
                             <label className="text-sm font-medium text-slate-700">{q.type === 'multiple_correct' ? 'Options (select all correct)' : 'Options (select correct answer)'}</label>
-                            {q.options.length < 6 && <button onClick={() => onChange(q.id, 'options', [...q.options, ''])} className="text-xs text-[#004AAD] font-semibold hover:underline">+ Add Option</button>}
+                            {q.options.length < 6 && <button onClick={() => onChange(q.id, 'options', [...q.options, ''])} className="text-xs text-[#5899B5] font-semibold hover:underline">+ Add Option</button>}
                         </div>
                         {q.options.map((opt, i) => (
                             <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${q.type === 'single_correct' ? (q.correctAnswer === opt && opt !== '' ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-slate-300')
                                     : (q.correctAnswers?.includes(opt) && opt !== '' ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-slate-300')
                                 }`}>
                                 {q.type === 'single_correct' ? (
-                                    <button type="button" onClick={() => opt.trim() && onChange(q.id, 'correctAnswer', opt)} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${q.correctAnswer === opt && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#004AAD]'}`}>
+                                    <button type="button" onClick={() => opt.trim() && onChange(q.id, 'correctAnswer', opt)} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${q.correctAnswer === opt && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#5899B5]'}`}>
                                         {q.correctAnswer === opt && opt !== '' && <CheckCircle2 size={12} />}
                                     </button>
                                 ) : (
-                                    <button type="button" onClick={() => opt.trim() && toggleMultipleCorrect(opt)} className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-colors ${q.correctAnswers?.includes(opt) && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#004AAD]'}`}>
+                                    <button type="button" onClick={() => opt.trim() && toggleMultipleCorrect(opt)} className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-colors ${q.correctAnswers?.includes(opt) && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#5899B5]'}`}>
                                         {q.correctAnswers?.includes(opt) && opt !== '' && <CheckCircle2 size={12} />}
                                     </button>
                                 )}
@@ -156,7 +156,7 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
                 {q.type === 'fill_blank' && (
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Correct Answer</label>
-                        <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" placeholder="Type the exact correct answer..." value={q.correctAnswer} onChange={(e) => onChange(q.id, 'correctAnswer', e.target.value)} />
+                        <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" placeholder="Type the exact correct answer..." value={q.correctAnswer} onChange={(e) => onChange(q.id, 'correctAnswer', e.target.value)} />
                         <p className="text-xs text-slate-400 mt-1">Student's answer will be matched against this (case-insensitive)</p>
                     </div>
                 )}
@@ -165,7 +165,7 @@ const QuestionEditor = ({ question, index, onChange, onRemove, total, sections, 
                 {q.type === 'numeric' && (
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Correct Numeric Answer</label>
-                        <input type="number" step="any" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" placeholder="Enter the correct number..." value={q.correctAnswer} onChange={(e) => onChange(q.id, 'correctAnswer', e.target.value)} />
+                        <input type="number" step="any" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" placeholder="Enter the correct number..." value={q.correctAnswer} onChange={(e) => onChange(q.id, 'correctAnswer', e.target.value)} />
                         <p className="text-xs text-slate-400 mt-1">Only numeric values will be accepted from students</p>
                     </div>
                 )}
@@ -600,7 +600,7 @@ const CreateExam = () => {
             <div className="flex justify-between items-center">
                 <div><h1 className="text-2xl font-bold text-slate-900">{isEditing ? 'Edit Exam' : 'Create New Exam'}</h1><p className="text-sm text-slate-500 mt-1">Step {step} of 3 — {step === 1 ? 'Basic Details' : step === 2 ? 'Questions' : 'Settings & Publish'}</p></div>
                 <div className="flex items-center gap-1">
-                    {[1, 2, 3].map(s => <div key={s} className={`w-8 h-1.5 rounded-full transition-colors ${step >= s ? 'bg-[#004AAD]' : 'bg-slate-200'}`} />)}
+                    {[1, 2, 3].map(s => <div key={s} className={`w-8 h-1.5 rounded-full transition-colors ${step >= s ? 'bg-[#5899B5]' : 'bg-slate-200'}`} />)}
                 </div>
             </div>
 
@@ -608,27 +608,27 @@ const CreateExam = () => {
             {step === 1 && (
                 <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
                     <h3 className="text-lg font-bold text-slate-900">Exam Details</h3>
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Exam Title *</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#004AAD] outline-none" placeholder="e.g. Python Programming — Final Assessment 2026" value={examData.title} onChange={(e) => setExamData({ ...examData, title: e.target.value })} /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Exam Title *</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#5899B5] outline-none" placeholder="e.g. Python Programming — Final Assessment 2026" value={examData.title} onChange={(e) => setExamData({ ...examData, title: e.target.value })} /></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">College *</label><select disabled={!!effectiveCollegeId || user?.role === 'college_admin'} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60" value={examData.collegeId} onChange={(e) => setExamData({ ...examData, collegeId: e.target.value, courseId: '' })}><option value="">Select college</option>{colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Course *</label><select disabled={!examData.collegeId || loadingCourses} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60" value={examData.courseId} onChange={(e) => setExamData({ ...examData, courseId: e.target.value })}><option value="">{loadingCourses ? 'Loading courses...' : 'Select course'}</option>{courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">College *</label><select disabled={!!effectiveCollegeId || user?.role === 'college_admin'} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none disabled:opacity-60" value={examData.collegeId} onChange={(e) => setExamData({ ...examData, collegeId: e.target.value, courseId: '' })}><option value="">Select college</option>{colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Course *</label><select disabled={!examData.collegeId || loadingCourses} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none disabled:opacity-60" value={examData.courseId} onChange={(e) => setExamData({ ...examData, courseId: e.target.value })}><option value="">{loadingCourses ? 'Loading courses...' : 'Select course'}</option>{courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Department</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" placeholder="e.g. CS" value={examData.department} onChange={(e) => setExamData({ ...examData, department: e.target.value })} /></div>
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Duration (minutes)</label><div className="relative"><Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input type="number" className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={examData.duration} onChange={(e) => setExamData({ ...examData, duration: e.target.value })} /></div></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Department</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" placeholder="e.g. CS" value={examData.department} onChange={(e) => setExamData({ ...examData, department: e.target.value })} /></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Duration (minutes)</label><div className="relative"><Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input type="number" className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={examData.duration} onChange={(e) => setExamData({ ...examData, duration: e.target.value })} /></div></div>
                         <div><label className="block text-sm font-medium text-slate-700 mb-1">Total Marks</label><div className="relative"><Target size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input type="number" readOnly className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white outline-none cursor-not-allowed text-slate-500" value={questions.reduce((acc, q) => acc + (parseInt(q.marks) || 0), 0)} /></div><p className="text-xs text-slate-400 mt-1">Calculated automatically</p></div>
                     </div>
 
                     {/* Target Batches Multi-Select */}
                     <div className="pt-4 border-t border-slate-100">
                         <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                            <Users size={14} className="text-[#004AAD]" /> Target Batches *
+                            <Users size={14} className="text-[#5899B5]" /> Target Batches *
                         </label>
                         <p className="text-xs text-slate-400 mb-3">Select batches that this exam targets. Each batch will receive a unique access key.</p>
                         {!examData.collegeId ? (
                             <p className="text-xs text-slate-400 italic">Select a college first to load batches.</p>
                         ) : loadingBatches ? (
-                            <div className="flex items-center gap-2 py-4"><Loader2 size={16} className="animate-spin text-[#004AAD]" /><span className="text-xs text-slate-400">Loading batches...</span></div>
+                            <div className="flex items-center gap-2 py-4"><Loader2 size={16} className="animate-spin text-[#5899B5]" /><span className="text-xs text-slate-400">Loading batches...</span></div>
                         ) : (() => {
                             const filteredBatches = examData.courseId ? availableBatches.filter(b => {
                                 const bCourseId = (b.courseId && typeof b.courseId === 'object') ? b.courseId._id : b.courseId;
@@ -647,12 +647,12 @@ const CreateExam = () => {
                                         return (
                                             <label key={batchId}
                                                 className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                                                    isChecked ? 'bg-blue-50 border-[#004AAD]/30' : 'bg-white border-slate-200 hover:border-slate-300'
+                                                    isChecked ? 'bg-blue-50 border-[#5899B5]/30' : 'bg-white border-slate-200 hover:border-slate-300'
                                                 }`}
                                             >
                                                 <input type="checkbox" checked={isChecked}
                                                     onChange={() => setSelectedBatches(prev => isChecked ? prev.filter(id => id !== batchId) : [...prev, batchId])}
-                                                    className="w-4 h-4 rounded accent-[#004AAD]" />
+                                                    className="w-4 h-4 rounded accent-[#5899B5]" />
                                                 <div className="min-w-0">
                                                     <p className="text-sm font-medium text-slate-800 truncate">{batch.batchName}</p>
                                                     <p className="text-[10px] text-slate-400 truncate">{batch.department} · {batch.courseId?.name || ''}</p>
@@ -665,17 +665,17 @@ const CreateExam = () => {
                         })()}
                     </div>
 
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Instructions</label><textarea className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none min-h-[100px]" placeholder="Enter exam instructions for students..." value={examData.instructions} onChange={(e) => setExamData({ ...examData, instructions: e.target.value })} /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Instructions</label><textarea className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none min-h-[100px]" placeholder="Enter exam instructions for students..." value={examData.instructions} onChange={(e) => setExamData({ ...examData, instructions: e.target.value })} /></div>
                     
                     <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2"><Clock size={14} className="text-[#004AAD]" /> Scheduled Start *</label>
-                            <input type="datetime-local" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#004AAD] outline-none" value={examData.scheduledDate} onChange={(e) => setExamData({ ...examData, scheduledDate: e.target.value })} />
+                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2"><Clock size={14} className="text-[#5899B5]" /> Scheduled Start *</label>
+                            <input type="datetime-local" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#5899B5] outline-none" value={examData.scheduledDate} onChange={(e) => setExamData({ ...examData, scheduledDate: e.target.value })} />
                             <p className="text-[10px] text-slate-400 mt-1">When students can first begin entering the access key.</p>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2"><AlertCircle size={14} className="text-amber-500" /> Expiry Date & Time (Optional)</label>
-                            <input type="datetime-local" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#004AAD] outline-none" value={examData.expiryDate} onChange={(e) => setExamData({ ...examData, expiryDate: e.target.value })} />
+                            <input type="datetime-local" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold focus:bg-white focus:border-[#5899B5] outline-none" value={examData.expiryDate} onChange={(e) => setExamData({ ...examData, expiryDate: e.target.value })} />
                             <p className="text-[10px] text-slate-400 mt-1">Leave blank for manual session termination by trainer.</p>
                         </div>
                     </div>
@@ -706,7 +706,7 @@ const CreateExam = () => {
                             >
                                 <Database size={16} /> Import from Bank
                             </button>
-                            <button onClick={() => addQuestion('single_correct')} className="flex items-center gap-2 px-4 py-2 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580]"><Plus size={16} /> Add Question</button>
+                            <button onClick={() => addQuestion('single_correct')} className="flex items-center gap-2 px-4 py-2 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690]"><Plus size={16} /> Add Question</button>
                         </div>
                     </div>
 
@@ -728,7 +728,7 @@ const CreateExam = () => {
                         <p className="text-sm text-slate-500 mb-3">Add a question of specific type:</p>
                         <div className="flex flex-wrap justify-center gap-2">
                             {QUESTION_TYPES.map(t => (
-                                <button key={t.id} onClick={() => addQuestion(t.id)} className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-white hover:border-[#004AAD] hover:text-[#004AAD] transition-colors">{t.label}</button>
+                                <button key={t.id} onClick={() => addQuestion(t.id)} className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-white hover:border-[#5899B5] hover:text-[#5899B5] transition-colors">{t.label}</button>
                             ))}
                         </div>
                     </div>
@@ -741,7 +741,7 @@ const CreateExam = () => {
                     <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5">
                         <h3 className="text-lg font-bold text-slate-900">Exam Preferences</h3>
                         <div className="flex flex-wrap gap-6 items-end">
-                            <div className="w-48"><label className="block text-sm font-medium text-slate-700 mb-1">Passing Percentage (%)</label><input type="number" min="1" max="100" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:bg-white focus:border-[#004AAD] outline-none" value={examData.passingPercentage} onChange={(e) => setExamData({ ...examData, passingPercentage: e.target.value })} /></div>
+                            <div className="w-48"><label className="block text-sm font-medium text-slate-700 mb-1">Passing Percentage (%)</label><input type="number" min="1" max="100" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold focus:bg-white focus:border-[#5899B5] outline-none" value={examData.passingPercentage} onChange={(e) => setExamData({ ...examData, passingPercentage: e.target.value })} /></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {[
@@ -755,8 +755,8 @@ const CreateExam = () => {
                                 { key: 'enableNegativeMarking', label: 'Enable Negative Marking', desc: 'Deduct configured points for incorrect objective answers' },
                                 { key: 'allowSkip', label: 'Allow Skip Question', desc: 'Let students skip questions during the assessment' },
                             ].map(s => (
-                                <label key={s.key} className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${examData.settings[s.key] ? 'bg-blue-50 border-[#004AAD]/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
-                                    <input type="checkbox" checked={examData.settings[s.key] || false} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [s.key]: e.target.checked } })} className="w-4 h-4 rounded accent-[#004AAD]" />
+                                <label key={s.key} className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${examData.settings[s.key] ? 'bg-blue-50 border-[#5899B5]/20' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
+                                    <input type="checkbox" checked={examData.settings[s.key] || false} onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, [s.key]: e.target.checked } })} className="w-4 h-4 rounded accent-[#5899B5]" />
                                     <div><p className="text-sm font-semibold text-slate-900">{s.label}</p><p className="text-xs text-slate-400">{s.desc}</p></div>
                                 </label>
                             ))}
@@ -779,7 +779,7 @@ const CreateExam = () => {
                                                     updatedSecs[sIdx].name = e.target.value;
                                                     setExamData({ ...examData, sections: updatedSecs });
                                                 }}
-                                                className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded text-sm focus:border-[#004AAD] outline-none"
+                                                className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded text-sm focus:border-[#5899B5] outline-none"
                                             />
                                             <button 
                                                 type="button"
@@ -803,7 +803,7 @@ const CreateExam = () => {
                                             updatedSecs.push({ name: `Section ${updatedSecs.length + 1}`, description: '', order: updatedSecs.length });
                                             setExamData({ ...examData, sections: updatedSecs });
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2 border border-dashed border-[#004AAD] text-[#004AAD] text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all w-full justify-center"
+                                        className="flex items-center gap-2 px-4 py-2 border border-dashed border-[#5899B5] text-[#5899B5] text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all w-full justify-center"
                                     >
                                         <Plus size={16} /> Add Section
                                     </button>
@@ -817,7 +817,7 @@ const CreateExam = () => {
                                 <select 
                                     value={examData.settings.negativeMarkValue || 0.25} 
                                     onChange={(e) => setExamData({ ...examData, settings: { ...examData.settings, negativeMarkValue: parseFloat(e.target.value) || 0.25 } })} 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#004AAD] outline-none appearance-none cursor-pointer"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:border-[#5899B5] outline-none appearance-none cursor-pointer"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}
                                 >
                                     <option value="0.25">0.25</option>
@@ -978,7 +978,7 @@ const CreateExam = () => {
             <div className="flex justify-between items-center p-5 bg-white rounded-xl border border-slate-200 mt-8 shadow-sm">
                 <button disabled={step === 1} onClick={() => setStep(step - 1)} className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 disabled:opacity-0"><ChevronLeft size={16} /> Back</button>
                 {step < 3 ? (
-                    <button onClick={() => setStep(step + 1)} className="flex items-center gap-2 px-6 py-2.5 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] transition-colors shadow-md active:scale-95">Next <ChevronRight size={16} /></button>
+                    <button onClick={() => setStep(step + 1)} className="flex items-center gap-2 px-6 py-2.5 bg-[#5899B5] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7690] transition-colors shadow-md active:scale-95">Next <ChevronRight size={16} /></button>
                 ) : (
                     <button disabled={submitting} onClick={handlePublish} className="flex items-center gap-2 px-8 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-md active:scale-95">{submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} {submitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Exam'}</button>
                 )}
@@ -1036,7 +1036,7 @@ const CreateExam = () => {
                         <div
                             onClick={() => bulkFileRef.current?.click()}
                             className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all mb-5 ${
-                                bulkImport.file ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 hover:border-[#004AAD] hover:bg-slate-50'
+                                bulkImport.file ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200 hover:border-[#5899B5] hover:bg-slate-50'
                             }`}
                         >
                             <input ref={bulkFileRef} type="file" accept=".xlsx" className="hidden" onChange={e => setBulkImport(prev => ({ ...prev, file: e.target.files[0], result: null }))} />
@@ -1073,7 +1073,7 @@ const CreateExam = () => {
                             <button
                                 type="button"
                                 onClick={handleDownloadTemplate}
-                                className="inline-flex items-center gap-1 mt-2 text-[#004AAD] font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
+                                className="inline-flex items-center gap-1 mt-2 text-[#5899B5] font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
                             >
                                 <Download size={12} /> Download Template (.xlsx)
                             </button>
@@ -1138,7 +1138,7 @@ const CreateExam = () => {
                                 value={bankSearch}
                                 onChange={(e) => { setBankSearch(e.target.value); }}
                                 onKeyDown={(e) => e.key === 'Enter' && fetchBankQuestions()}
-                                className="w-full pl-4 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                className="w-full pl-4 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                 placeholder="Search questions... (press Enter)"
                             />
                         </div>
@@ -1147,7 +1147,7 @@ const CreateExam = () => {
                         <div className="flex-1 overflow-y-auto space-y-2 mb-4">
                             {bankLoading ? (
                                 <div className="py-12 flex flex-col items-center justify-center gap-2">
-                                    <Loader2 className="animate-spin text-[#004AAD]" size={24} />
+                                    <Loader2 className="animate-spin text-[#5899B5]" size={24} />
                                     <p className="text-xs text-slate-400">Loading bank...</p>
                                 </div>
                             ) : bankQuestions.length === 0 ? (

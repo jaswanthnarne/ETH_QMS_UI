@@ -17,12 +17,12 @@ const StudentHeader = () => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/student/dashboard')}>
-                        <div className="w-10 h-10 bg-[#004AAD] rounded-xl flex items-center justify-center shadow-md">
+                        <div className="w-10 h-10 bg-[#5899B5] rounded-xl flex items-center justify-center shadow-md">
                             <span className="text-white font-extrabold text-xl">E</span>
                         </div>
                         <div>
                             <span className="font-extrabold text-slate-900 text-lg tracking-tight">ETHNOTECH</span>
-                            <span className="text-[#004AAD] font-extrabold text-xs block tracking-widest -mt-1 uppercase">Academy</span>
+                            <span className="text-[#5899B5] font-extrabold text-xs block tracking-widest -mt-1 uppercase">Academy</span>
                         </div>
                     </div>
 
@@ -37,7 +37,7 @@ const StudentHeader = () => {
                             </span>
                         </div>
 
-                        <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-[#004AAD] font-bold shadow-inner relative group">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-[#5899B5] font-bold shadow-inner relative group">
                             <User size={18} />
                             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
                         </div>

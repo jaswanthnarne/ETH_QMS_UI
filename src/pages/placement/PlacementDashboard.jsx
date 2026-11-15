@@ -178,7 +178,7 @@ const PlacementDashboard = () => {
                 </div>
                 <button 
                     onClick={() => { resetForm(); setFormOpen(true); }} 
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm cursor-pointer"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] transition-colors shadow-sm cursor-pointer"
                 >
                     <Plus size={16} /> Post New Job
                 </button>
@@ -187,7 +187,7 @@ const PlacementDashboard = () => {
             {/* Stats section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#004AAD] flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#5899B5] flex items-center justify-center flex-shrink-0">
                         <Briefcase size={22} />
                     </div>
                     <div>
@@ -197,7 +197,7 @@ const PlacementDashboard = () => {
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 text-[#004AAD] flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-50 text-[#5899B5] flex items-center justify-center flex-shrink-0">
                         <Users size={22} />
                     </div>
                     <div>
@@ -214,7 +214,7 @@ const PlacementDashboard = () => {
                     <div className="relative w-full sm:w-72">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD]" 
+                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5]" 
                             placeholder="Search jobs or companies..." 
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -225,7 +225,7 @@ const PlacementDashboard = () => {
                 <div className="p-6 divide-y divide-slate-100">
                     {loading ? (
                         <div className="py-16 text-center">
-                            <Loader2 className="animate-spin mx-auto text-[#004AAD]" size={24} />
+                            <Loader2 className="animate-spin mx-auto text-[#5899B5]" size={24} />
                             <p className="text-sm text-slate-400 mt-2">Loading placement drives...</p>
                         </div>
                     ) : filteredJobs.length === 0 ? (
@@ -302,7 +302,7 @@ const PlacementDashboard = () => {
                                 <div className="flex flex-row lg:flex-col items-center lg:items-end gap-3 self-stretch lg:self-auto justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
                                     <button 
                                         onClick={() => navigate(`/college/${collegeId || user.collegeId?._id || user.collegeId}/placement/jobs/${job._id}/applicants`)}
-                                        className="flex items-center gap-1.5 px-4 py-2 border border-[#004AAD] text-[#004AAD] text-xs font-bold rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                                        className="flex items-center gap-1.5 px-4 py-2 border border-[#5899B5] text-[#5899B5] text-xs font-bold rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                                     >
                                         <Users size={14} /> Applicants
                                     </button>
@@ -336,7 +336,7 @@ const PlacementDashboard = () => {
                     <div className="bg-white max-w-xl w-full rounded-2xl shadow-2xl relative z-10 border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                                <Briefcase className="text-[#004AAD]" size={20} />
+                                <Briefcase className="text-[#5899B5]" size={20} />
                                 {editingJobId ? 'Edit Job Posting' : 'Post New Job'}
                             </h3>
                             <button onClick={() => setFormOpen(false)} className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors text-slate-400">×</button>
@@ -346,34 +346,34 @@ const PlacementDashboard = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Company Name</label>
-                                    <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} placeholder="Google" />
+                                    <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} placeholder="Google" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Job Title</label>
-                                    <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} placeholder="Software Engineer" />
+                                    <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} placeholder="Software Engineer" />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Job Description</label>
-                                <textarea required rows={4} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Draft key job roles, expectations, and requirements..." />
+                                <textarea required rows={4} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Draft key job roles, expectations, and requirements..." />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Location</label>
-                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} placeholder="Bangalore, Hybrid" />
+                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} placeholder="Bangalore, Hybrid" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Salary Package (CTC)</label>
-                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.salaryPackage} onChange={(e) => setFormData({...formData, salaryPackage: e.target.value})} placeholder="12 LPA" />
+                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.salaryPackage} onChange={(e) => setFormData({...formData, salaryPackage: e.target.value})} placeholder="12 LPA" />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Google Form Link (Optional)</label>
                                 <input 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" 
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" 
                                     value={formData.googleFormUrl} 
                                     onChange={(e) => setFormData({...formData, googleFormUrl: e.target.value})} 
                                     placeholder="https://docs.google.com/forms/d/e/.../viewform" 
@@ -384,24 +384,24 @@ const PlacementDashboard = () => {
                             {/* Eligibility rules */}
                             <div className="p-4 border border-slate-200 bg-slate-50 rounded-xl space-y-3">
                                 <h4 className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                    <Settings size={14} className="text-[#004AAD]" />
+                                    <Settings size={14} className="text-[#5899B5]" />
                                     Eligibility Parameters (Optional)
                                 </h4>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Min CGPA</label>
-                                        <input type="number" step="0.01" min="0" max="10" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none" value={formData.minCgpa} onChange={(e) => setFormData({...formData, minCgpa: e.target.value})} placeholder="7.5" />
+                                        <input type="number" step="0.01" min="0" max="10" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none" value={formData.minCgpa} onChange={(e) => setFormData({...formData, minCgpa: e.target.value})} placeholder="7.5" />
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Max Active Backlogs</label>
-                                        <input type="number" min="0" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none" value={formData.maxBacklogs} onChange={(e) => setFormData({...formData, maxBacklogs: e.target.value})} placeholder="0" />
+                                        <input type="number" min="0" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none" value={formData.maxBacklogs} onChange={(e) => setFormData({...formData, maxBacklogs: e.target.value})} placeholder="0" />
                                     </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Eligible Branches (Comma separated)</label>
-                                    <input className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none" value={formData.allowedDepartments} onChange={(e) => setFormData({...formData, allowedDepartments: e.target.value})} placeholder="CSE, ISE, ECE" />
+                                    <input className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none" value={formData.allowedDepartments} onChange={(e) => setFormData({...formData, allowedDepartments: e.target.value})} placeholder="CSE, ISE, ECE" />
                                 </div>
                             </div>
 
@@ -420,7 +420,7 @@ const PlacementDashboard = () => {
                                                         type="checkbox" 
                                                         checked={isChecked} 
                                                         onChange={() => handleBatchCheckbox(b._id)} 
-                                                        className="rounded border-slate-300 text-[#004AAD] focus:ring-blue-100" 
+                                                        className="rounded border-slate-300 text-[#5899B5] focus:ring-blue-100" 
                                                     />
                                                     <span className="text-xs font-semibold text-slate-700">{b.batchName}</span>
                                                 </label>
@@ -433,7 +433,7 @@ const PlacementDashboard = () => {
                             {/* Actions */}
                             <div className="pt-4 flex gap-3 border-t border-slate-100">
                                 <button type="button" onClick={() => setFormOpen(false)} className="flex-1 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50">Cancel</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-2">
+                                <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#5899B5] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-2">
                                     {submitting && <Loader2 size={16} className="animate-spin" />}
                                     {editingJobId ? 'Save Changes' : 'Publish Job Posting'}
                                 </button>

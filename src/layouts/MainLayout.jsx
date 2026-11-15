@@ -240,7 +240,7 @@ const MainLayout = ({ children }) => {
                         {sidebarOpen && (
                             <div className="leading-tight">
                                 <span className="text-sm font-bold text-slate-900 block">Ethnotech</span>
-                                <span className="text-[10px] font-medium text-[#004AAD]">Academy</span>
+                                <span className="text-[10px] font-medium text-[#5899B5]">Academy</span>
                             </div>
                         )}
                     </div>
@@ -258,7 +258,7 @@ const MainLayout = ({ children }) => {
                 {/* Context Badge */}
                 {sidebarOpen && !isStudent && (
                     <div className="px-4 pt-4">
-                        <div className={`px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 ${selectedCollegeId ? 'bg-blue-50 text-[#004AAD] border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                        <div className={`px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 ${selectedCollegeId ? 'bg-blue-50 text-[#5899B5] border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
                             {selectedCollegeId ? <School size={14} /> : <Globe size={14} />}
                             <span className="truncate">{selectedCollegeId ? selectedCollegeName : 'All Colleges'}</span>
                         </div>
@@ -279,7 +279,7 @@ const MainLayout = ({ children }) => {
                                         setSidebarOpen(false);
                                     }
                                 }}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-[#004AAD] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-[#5899B5] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
                             >
                                 <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                                 {sidebarOpen && <span>{item.label}</span>}
@@ -308,7 +308,7 @@ const MainLayout = ({ children }) => {
                 {/* User Section */}
                 <div className="p-4 border-t border-slate-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#004AAD] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-[#5899B5] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                             {displayAvatar}
                         </div>
                         {sidebarOpen && (
@@ -347,14 +347,14 @@ const MainLayout = ({ children }) => {
                         {/* College Selector / Read-only Student Badge */}
                         {isStudent && student?.collegeName && (
                             <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 font-semibold flex items-center gap-2 max-w-[280px] md:max-w-[360px] truncate shadow-sm">
-                                <School size={15} className="text-[#004AAD] flex-shrink-0" />
+                                <School size={15} className="text-[#5899B5] flex-shrink-0" />
                                 <span className="truncate">{student.collegeName}</span>
                             </div>
                         )}
                         {!isStudent && (isGlobalAdmin || user?.role === 'trainer') && (
                             selectedCollegeId ? (
                                 <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 font-semibold flex items-center gap-2 max-w-[280px] md:max-w-[360px] truncate shadow-sm">
-                                    <School size={15} className="text-[#004AAD] flex-shrink-0" />
+                                    <School size={15} className="text-[#5899B5] flex-shrink-0" />
                                     <span className="truncate">{selectedCollegeName}</span>
                                     <button 
                                         onClick={() => { 
@@ -369,7 +369,7 @@ const MainLayout = ({ children }) => {
                                 </div>
                             ) : (
                                 <select 
-                                    className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-[#004AAD] text-slate-600 min-w-[200px]"
+                                    className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-[#5899B5] text-slate-600 min-w-[200px]"
                                     value={selectedCollegeId || ''}
                                     onChange={(e) => {
                                         if (!e.target.value) { 
@@ -425,13 +425,13 @@ const MainLayout = ({ children }) => {
                                             >
                                                 <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                                                     <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                                                        <Bell size={14} className="text-[#004AAD]" />
+                                                        <Bell size={14} className="text-[#5899B5]" />
                                                         System Notifications
                                                     </span>
                                                     {unreadCount > 0 && (
                                                         <button 
                                                             onClick={handleClearAll}
-                                                            className="text-[10px] font-bold text-[#004AAD] hover:underline cursor-pointer"
+                                                            className="text-[10px] font-bold text-[#5899B5] hover:underline cursor-pointer"
                                                         >
                                                             Mark all as read
                                                         </button>
@@ -462,7 +462,7 @@ const MainLayout = ({ children }) => {
                                                                     className={`p-4 flex gap-3 transition-colors text-left hover:bg-slate-50 cursor-pointer ${!notif.isRead ? 'bg-blue-50/15' : ''}`}
                                                                 >
                                                                     <div className={`w-8 h-8 rounded-lg ${typeBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                                                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: notif.type === 'exam_started' ? '#10b981' : notif.type === 'log_submitted' ? '#a855f7' : '#3b82f6' }} />
+                                                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: notif.type === 'exam_started' ? '#10b981' : notif.type === 'log_submitted' ? '#a855f7' : '#5899B5' }} />
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center justify-between gap-2 mb-1">
@@ -474,7 +474,7 @@ const MainLayout = ({ children }) => {
                                                                         <p className="text-xs text-slate-500 leading-relaxed break-words">{notif.message}</p>
                                                                         
                                                                         {!notif.isRead && (
-                                                                            <span className="inline-flex items-center gap-1 text-[9px] text-[#004AAD] font-bold mt-2">
+                                                                            <span className="inline-flex items-center gap-1 text-[9px] text-[#5899B5] font-bold mt-2">
                                                                                 <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" /> New Alert
                                                                             </span>
                                                                         )}

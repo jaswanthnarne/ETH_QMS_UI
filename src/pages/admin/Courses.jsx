@@ -123,7 +123,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Program *</label>
                             <select 
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer text-slate-700 font-medium"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer text-slate-700 font-medium"
                                 value={formData.program}
                                 onChange={(e) => setFormData({...formData, program: e.target.value})}
                             >
@@ -138,7 +138,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Course Name *</label>
                             <input 
                                 required 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
                                 value={formData.name} 
                                 onChange={(e) => setFormData({...formData, name: e.target.value})} 
                                 placeholder="e.g., Python Programming for Beginners" 
@@ -149,7 +149,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Course Code *</label>
                             <input 
                                 required 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono uppercase focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800" 
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono uppercase focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800" 
                                 value={formData.code} 
                                 onChange={(e) => setFormData({...formData, code: e.target.value})} 
                                 placeholder="e.g., PY-101" 
@@ -162,7 +162,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                                 type="number" 
                                 min="1" 
                                 required 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
                                 value={formData.modulesCount || 5} 
                                 onChange={(e) => setFormData({...formData, modulesCount: parseInt(e.target.value) || 1})} 
                                 placeholder="e.g., 5" 
@@ -172,7 +172,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                         <div>
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Description</label>
                             <textarea 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 min-h-[80px] resize-none" 
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 min-h-[80px] resize-none" 
                                 value={formData.description} 
                                 onChange={(e) => setFormData({...formData, description: e.target.value})} 
                                 placeholder="Provide a brief course description..." 
@@ -184,7 +184,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                             <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3">
                                 <div>
                                     <h4 className="text-xs text-slate-700 uppercase flex items-center gap-1.5 font-bold">
-                                        <FileText size={13} className="text-[#004AAD]" /> Course Syllabus (PDF)
+                                        <FileText size={13} className="text-[#5899B5]" /> Course Syllabus (PDF)
                                     </h4>
                                     <p className="text-[11px] text-slate-400 mt-0.5">Upload syllabus details document (Max 5MB)</p>
                                 </div>
@@ -201,7 +201,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                                         type="button"
                                         onClick={() => syllabusInputRef.current?.click()}
                                         disabled={uploadingSyllabus}
-                                        className="px-4 py-2 bg-[#004AAD] text-white rounded-lg text-xs font-semibold hover:bg-[#003580] disabled:opacity-50 flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                        className="px-4 py-2 bg-[#5899B5] text-white rounded-lg text-xs font-semibold hover:bg-[#3D7690] disabled:opacity-50 flex items-center gap-1.5 shadow-sm cursor-pointer"
                                     >
                                         {uploadingSyllabus ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                                         {course.syllabusUrl ? 'Update Syllabus' : 'Upload Syllabus'}
@@ -233,7 +233,7 @@ const CourseModal = ({ course, isOpen, onClose, onSave, token, onRefresh }) => {
                         <button 
                             type="submit" 
                             disabled={submitting} 
-                            className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-sm font-bold hover:bg-[#003580] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-sm font-bold hover:bg-[#3D7690] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                             {submitting && <Loader2 size={16} className="animate-spin" />}
                             {course ? 'Save Changes' : 'Create Course'}
@@ -311,7 +311,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input 
                                     type="text"
-                                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#004AAD] transition-all font-medium text-slate-700"
+                                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#5899B5] transition-all font-medium text-slate-700"
                                     placeholder="Type to search and select course..."
                                     value={courseSearch}
                                     onChange={(e) => {
@@ -347,7 +347,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
                                 )}
                             </div>
                             {formData.courseId && (
-                                <p className="text-xs text-[#004AAD] mt-1.5 font-semibold">Selected Course: {courseSearch}</p>
+                                <p className="text-xs text-[#5899B5] mt-1.5 font-semibold">Selected Course: {courseSearch}</p>
                             )}
                             {unmappedCourses.length === 0 && (
                                 <p className="text-xs text-amber-600 mt-1">All global courses are already mapped to this college.</p>
@@ -357,7 +357,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
                         <div>
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Custom Duration (Optional)</label>
                             <input 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
                                 value={formData.customDuration} 
                                 onChange={(e) => setFormData({...formData, customDuration: e.target.value})} 
                                 placeholder="e.g., 60 hours (Default is course standard)" 
@@ -369,7 +369,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
                                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Start Date (Optional)</label>
                                 <input 
                                     type="date"
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
                                     value={formData.startDate} 
                                     onChange={(e) => setFormData({...formData, startDate: e.target.value})} 
                                 />
@@ -378,7 +378,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
                                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">End Date (Optional)</label>
                                 <input 
                                     type="date"
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none transition-all text-slate-800 font-medium" 
                                     value={formData.endDate} 
                                     onChange={(e) => setFormData({...formData, endDate: e.target.value})} 
                                 />
@@ -397,7 +397,7 @@ const MapCourseModal = ({ isOpen, onClose, onSave, token, globalCourses, mappedC
                         <button 
                             type="submit" 
                             disabled={submitting || unmappedCourses.length === 0} 
-                            className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-sm font-bold hover:bg-[#003580] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-sm font-bold hover:bg-[#3D7690] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                             {submitting && <Loader2 size={16} className="animate-spin" />}
                             Map Course
@@ -585,7 +585,7 @@ const Courses = () => {
             // Style the header row
             const headerRow = sheet.getRow(1);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } }; // Brand Navy Blue
+            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } }; // Brand Navy Blue
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRow.height = 24;
 
@@ -658,7 +658,7 @@ const Courses = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                        <BookOpen className="text-[#004AAD]" size={26} />
+                        <BookOpen className="text-[#5899B5]" size={26} />
                         {effectiveCollegeId ? `Courses - ${selectedCollegeCode || 'College'}` : 'Global Courses'}
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -676,14 +676,14 @@ const Courses = () => {
                         effectiveCollegeId ? (
                             <button 
                                 onClick={() => setIsMapModalOpen(true)} 
-                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-bold rounded-xl hover:bg-[#003580] shadow-md shadow-blue-100 hover:shadow-lg active:scale-95 transition-all w-full md:w-auto shrink-0 cursor-pointer"
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-bold rounded-xl hover:bg-[#3D7690] shadow-md shadow-blue-100 hover:shadow-lg active:scale-95 transition-all w-full md:w-auto shrink-0 cursor-pointer"
                             >
                                 <Plus size={16} /> Map Course
                             </button>
                         ) : (
                             <button 
                                 onClick={() => { setSelectedCourse(null); setIsModalOpen(true); }} 
-                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-bold rounded-xl hover:bg-[#003580] shadow-md shadow-blue-100 hover:shadow-lg active:scale-95 transition-all w-full md:w-auto shrink-0 cursor-pointer"
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-bold rounded-xl hover:bg-[#3D7690] shadow-md shadow-blue-100 hover:shadow-lg active:scale-95 transition-all w-full md:w-auto shrink-0 cursor-pointer"
                             >
                                 <Plus size={16} /> Add Global Course
                             </button>
@@ -695,7 +695,7 @@ const Courses = () => {
             {/* Stats strip */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#004AAD]"><Layers size={20} /></div>
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#5899B5]"><Layers size={20} /></div>
                     <div><p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Courses</p><p className="text-xl font-bold text-slate-800 mt-0.5">{totalCoursesCount}</p></div>
                 </div>
                 <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
@@ -714,7 +714,7 @@ const Courses = () => {
                 <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-slate-50/50">
                     <div className="flex flex-wrap items-center gap-3">
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#004AAD] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
                             value={programFilter}
                             onChange={(e) => setProgramFilter(e.target.value)}
                         >
@@ -727,7 +727,7 @@ const Courses = () => {
 
                         {!effectiveCollegeId && (
                             <select
-                                className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#004AAD] focus:ring-1 focus:ring-blue-100 transition-all"
+                                className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
                                 value={selectedCollegeFilter}
                                 onChange={(e) => setSelectedCollegeFilter(e.target.value)}
                             >
@@ -739,7 +739,7 @@ const Courses = () => {
                         )}
 
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#004AAD] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                         >
@@ -754,7 +754,7 @@ const Courses = () => {
                     <div className="relative w-full md:w-72">
                         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 transition-all" 
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 transition-all" 
                             placeholder="Search by code or title..." 
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -780,7 +780,7 @@ const Courses = () => {
                                 <tr>
                                     <td colSpan="6" className="px-6 py-16 text-center">
                                         <div className="flex flex-col items-center gap-3">
-                                            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                                            <Loader2 className="animate-spin text-[#5899B5]" size={28} />
                                             <span className="text-xs font-semibold text-slate-400">Loading courses...</span>
                                         </div>
                                     </td>
@@ -796,7 +796,7 @@ const Courses = () => {
                                     <tr key={c._id} className="hover:bg-slate-50/40 group transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3.5">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-indigo-50/60 text-[#004AAD] rounded-xl flex items-center justify-center font-bold text-sm shadow-inner shrink-0 uppercase">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-indigo-50/60 text-[#5899B5] rounded-xl flex items-center justify-center font-bold text-sm shadow-inner shrink-0 uppercase">
                                                     {c.name?.substring(0, 2)}
                                                 </div>
                                                 <div className="min-w-0">
@@ -811,7 +811,7 @@ const Courses = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#004AAD] font-bold text-[10px] uppercase">
+                                            <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#5899B5] font-bold text-[10px] uppercase">
                                                 {c.program || 'EWDP'}
                                             </span>
                                         </td>
@@ -854,7 +854,7 @@ const Courses = () => {
                                                     ) : (
                                                         <>
                                                             {user?.role !== 'trainer' && (
-                                                                <button onClick={() => { setSelectedCourse(c); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-lg hover:bg-blue-50 transition-colors" title="Edit Course"><Edit2 size={16} /></button>
+                                                                <button onClick={() => { setSelectedCourse(c); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#5899B5] rounded-lg hover:bg-blue-50 transition-colors" title="Edit Course"><Edit2 size={16} /></button>
                                                             )}
                                                             {user?.role !== 'trainer' && (
                                                                 <button onClick={() => handleDelete(c._id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors" title="Delete Course"><Trash2 size={16} /></button>

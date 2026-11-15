@@ -104,7 +104,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                         {/* Note when editing a trainer inside college scope */}
                         {trainer && selectedCollegeId && (
                             <div className="p-4 bg-blue-50/50 border border-blue-200 text-slate-700 text-xs font-medium rounded-xl flex flex-col gap-1.5">
-                                <p className="font-bold text-[#004AAD] uppercase tracking-wider text-[10px]">Important Note</p>
+                                <p className="font-bold text-[#5899B5] uppercase tracking-wider text-[10px]">Important Note</p>
                                 <p className="leading-relaxed">
                                     Global trainer profile details (name, credentials, and program classification) can only be modified from the Global Dashboard, not inside the college scope.
                                 </p>
@@ -116,12 +116,12 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                                    <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder="John" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder="Doe" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
                                 </div>
                             </div>
@@ -130,8 +130,8 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                         {/* Employee ID (only show in Global Dashboard, hide in College Dashboard) */}
                         {!selectedCollegeId && (
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Employee ID <span className="text-[#004AAD]">*</span></label>
-                                <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none font-mono uppercase"
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Employee ID <span className="text-[#5899B5]">*</span></label>
+                                <input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none font-mono uppercase"
                                     placeholder="e.g. EMP1001" value={formData.employeeId} onChange={e => setFormData({ ...formData, employeeId: e.target.value.toUpperCase() })} />
                                 <p className="text-xs text-slate-400 mt-1">Unique trainer code. Can also be used as a login username</p>
                             </div>
@@ -140,10 +140,10 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                         {/* Mobile */}
                         {!(trainer && selectedCollegeId) && (
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Mobile Number <span className="text-[#004AAD]">*</span></label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Mobile Number <span className="text-[#5899B5]">*</span></label>
                                 <div className="relative">
                                     <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <input required type="tel" className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <input required type="tel" className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder="10-digit mobile number" value={formData.phone}
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                                 </div>
@@ -157,7 +157,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
                                     {trainer ? 'New Password (leave blank to keep)' : 'Password *'}
                                 </label>
-                                <input required={!trainer} minLength={6} type="password" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                <input required={!trainer} minLength={6} type="password" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                     placeholder="Min 6 characters" value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })} />
                             </div>
@@ -167,7 +167,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                         {!(trainer && selectedCollegeId) && (
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Program Classification *</label>
-                                <select required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                <select required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                     value={formData.program} onChange={e => setFormData({ ...formData, program: e.target.value })}>
                                     <option value="EWDP">EWDP</option>
                                     <option value="CFS">CFS</option>
@@ -181,7 +181,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                         {!(trainer && selectedCollegeId) && (
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">College</label>
-                                <select disabled={!!selectedCollegeId} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none disabled:opacity-60"
+                                <select disabled={!!selectedCollegeId} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none disabled:opacity-60"
                                     value={formData.collegeId} onChange={e => setFormData({ ...formData, collegeId: e.target.value })}>
                                     <option value="">Global / All Colleges (Unrestricted)</option>
                                     {colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -200,8 +200,8 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                                         const selected = formData.assignedCourses.includes(c._id);
                                         return (
                                             <button key={c._id} type="button" onClick={() => toggleCourse(c._id)}
-                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm transition-colors ${selected ? 'bg-blue-50 border-[#004AAD] text-[#004AAD]' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}>
-                                                <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border transition-colors ${selected ? 'bg-[#004AAD] border-[#004AAD]' : 'border-slate-300'}`}>
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-left text-sm transition-colors ${selected ? 'bg-blue-50 border-[#5899B5] text-[#5899B5]' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+                                                <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border transition-colors ${selected ? 'bg-[#5899B5] border-[#5899B5]' : 'border-slate-300'}`}>
                                                     {selected && <Check size={10} className="text-white" />}
                                                 </div>
                                                 <div className="truncate">
@@ -213,7 +213,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                                     })}
                                 </div>
                                 {formData.assignedCourses.length > 0 && (
-                                    <p className="text-xs text-[#004AAD] mt-1.5">{formData.assignedCourses.length} course{formData.assignedCourses.length > 1 ? 's' : ''} selected</p>
+                                    <p className="text-xs text-[#5899B5] mt-1.5">{formData.assignedCourses.length} course{formData.assignedCourses.length > 1 ? 's' : ''} selected</p>
                                 )}
 
                                 {/* Course Locations inputs */}
@@ -231,7 +231,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                                                             required
                                                             type="text"
                                                             placeholder="e.g. Room 123"
-                                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD] transition-all font-medium text-slate-700"
+                                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5] transition-all font-medium text-slate-700"
                                                             value={formData.courseLocations?.[cid] || ''}
                                                             onChange={e => {
                                                                 setFormData({
@@ -256,7 +256,7 @@ const TrainerModal = ({ trainer, isOpen, onClose, onSave, colleges, courses, sel
                     <div className="pt-3 flex gap-3">
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50">Cancel</button>
                         <button type="submit" disabled={submitting}
-                            className="flex-1 py-2.5 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-2">
+                            className="flex-1 py-2.5 bg-[#5899B5] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-2">
                             {submitting && <Loader2 size={16} className="animate-spin" />}
                             {trainer ? 'Save Changes' : 'Add Trainer'}
                         </button>
@@ -364,12 +364,12 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                 {/* Header */}
                 <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-50 text-[#004AAD] rounded-xl flex items-center justify-center font-medium text-base shadow-sm">
+                        <div className="w-10 h-10 bg-indigo-50 text-[#5899B5] rounded-xl flex items-center justify-center font-medium text-base shadow-sm">
                             {(trainer.firstName || trainer.phone || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
                             <h3 className="text-slate-800 text-base leading-tight">Trainer Profile</h3>
-                            <span className="inline-flex items-center gap-1.5 mt-0.5 px-2 py-0.5 rounded-full text-[10px] bg-[#004AAD]/10 text-[#004AAD] uppercase">
+                            <span className="inline-flex items-center gap-1.5 mt-0.5 px-2 py-0.5 rounded-full text-[10px] bg-[#5899B5]/10 text-[#5899B5] uppercase">
                                 {trainer.role}
                             </span>
                         </div>
@@ -382,7 +382,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                     {/* Note when viewing a trainer inside college scope */}
                     {effectiveCollegeId && (
                         <div className="p-4 bg-blue-50/50 border border-blue-200 text-slate-700 text-xs font-medium rounded-xl flex flex-col gap-1.5">
-                            <p className="font-bold text-[#004AAD] uppercase tracking-wider text-[10px]">Important Note</p>
+                            <p className="font-bold text-[#5899B5] uppercase tracking-wider text-[10px]">Important Note</p>
                             <p className="leading-relaxed">
                                 Global trainer profile details (name, credentials, and program classification) can only be modified from the Global Dashboard, not inside the college scope.
                             </p>
@@ -405,7 +405,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                                 trainer.assignedCourses?.length > 0 ? (
                                     <div className="flex flex-wrap gap-1 mt-1">
                                         {trainer.assignedCourses.map(c => (
-                                            <span key={c._id} className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-[#004AAD] border border-blue-100">
+                                            <span key={c._id} className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-[#5899B5] border border-blue-100">
                                                 {c.classroomLocation ? `${c.classroomLocation} (${c.code})` : `Not Set (${c.code})`}
                                             </span>
                                         ))}
@@ -421,7 +421,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                         </div>
                         <div>
                             <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Program Classification</span>
-                            <span className="inline-flex items-center mt-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-[#004AAD] uppercase border border-blue-100">
+                            <span className="inline-flex items-center mt-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-[#5899B5] uppercase border border-blue-100">
                                 {trainer.program || 'EWDP'}
                             </span>
                         </div>
@@ -474,7 +474,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                         {trainer.assignedCourses?.length > 0 ? (
                             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                                 {trainer.assignedCourses.map(c => (
-                                    <span key={c._id || c} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-[#004AAD] rounded text-xs border border-blue-100">
+                                    <span key={c._id || c} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-[#5899B5] rounded text-xs border border-blue-100">
                                         <BookOpen size={11} />{c.code} <span className="text-[10px] text-blue-400">({c.name})</span>
                                     </span>
                                 ))}
@@ -489,7 +489,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3">
                             <div>
                                 <h4 className="text-xs text-slate-700 uppercase flex items-center gap-1.5 font-bold">
-                                    <FileText size={13} className="text-[#004AAD]" /> Trainer Details Document (PDF)
+                                    <FileText size={13} className="text-[#5899B5]" /> Trainer Details Document (PDF)
                                 </h4>
                                 {!effectiveCollegeId && (
                                     <p className="text-[11px] text-slate-400 mt-0.5">Upload a PDF containing all the details about the trainer (Max 5MB)</p>
@@ -510,7 +510,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                                             type="button"
                                             onClick={() => pdfInputRef.current?.click()}
                                             disabled={uploadingPdf}
-                                            className="px-4 py-2 bg-[#004AAD] text-white rounded-lg text-xs font-semibold hover:bg-[#003580] disabled:opacity-50 flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                            className="px-4 py-2 bg-[#5899B5] text-white rounded-lg text-xs font-semibold hover:bg-[#3D7690] disabled:opacity-50 flex items-center gap-1.5 shadow-sm cursor-pointer"
                                         >
                                             {uploadingPdf ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                                             {trainer.pdfUrl ? 'Update PDF' : 'Upload PDF'}
@@ -537,7 +537,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                         <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3">
                             <div>
                                 <h4 className="text-xs text-slate-700 uppercase flex items-center gap-1.5">
-                                    <KeyRound size={13} className="text-[#004AAD]" /> Reset Password
+                                    <KeyRound size={13} className="text-[#5899B5]" /> Reset Password
                                 </h4>
                                 <p className="text-[11px] text-slate-400 mt-0.5">Quickly update this trainer's login password</p>
                             </div>
@@ -547,7 +547,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                                     required
                                     minLength={6}
                                     type="password"
-                                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD] font-mono"
+                                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5] font-mono"
                                     placeholder="New password (min 6 chars)"
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
@@ -555,7 +555,7 @@ const TrainerProfileModal = ({ trainer, isOpen, onClose, onEdit, onDelete, token
                                 <button
                                     type="submit"
                                     disabled={resetting}
-                                    className="px-4 py-2 bg-[#004AAD] text-white rounded-lg text-xs hover:bg-[#003580] disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+                                    className="px-4 py-2 bg-[#5899B5] text-white rounded-lg text-xs hover:bg-[#3D7690] disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
                                 >
                                     {resetting && <Loader2 size={12} className="animate-spin" />}
                                     Reset
@@ -827,7 +827,7 @@ const AssignTrainerModal = ({ isOpen, onClose, onSave, trainers, globalTrainers,
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input 
                                     type="text"
-                                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#004AAD] transition-all font-medium text-slate-700"
+                                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#5899B5] transition-all font-medium text-slate-700"
                                     placeholder="Type to search and select trainer..."
                                     value={trainerSearch}
                                     onChange={(e) => {
@@ -863,7 +863,7 @@ const AssignTrainerModal = ({ isOpen, onClose, onSave, trainers, globalTrainers,
                                 )}
                             </div>
                             {formData.trainerId && (
-                                <p className="text-xs text-[#004AAD] mt-1.5 font-semibold">Selected Trainer: {trainerSearch}</p>
+                                <p className="text-xs text-[#5899B5] mt-1.5 font-semibold">Selected Trainer: {trainerSearch}</p>
                             )}
                             {assignableTrainers.length === 0 && (
                                 <p className="text-xs text-amber-600 mt-1">No assignable trainers found (all are already linked to this college).</p>
@@ -876,7 +876,7 @@ const AssignTrainerModal = ({ isOpen, onClose, onSave, trainers, globalTrainers,
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input 
                                     type="text"
-                                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#004AAD] transition-all font-medium text-slate-700"
+                                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#5899B5] transition-all font-medium text-slate-700"
                                     placeholder="Type to search and select course..."
                                     value={courseSearch}
                                     onChange={(e) => {
@@ -912,7 +912,7 @@ const AssignTrainerModal = ({ isOpen, onClose, onSave, trainers, globalTrainers,
                                 )}
                             </div>
                             {formData.courseId && (
-                                <p className="text-xs text-[#004AAD] mt-1.5 font-semibold">Selected Course: {courseSearch}</p>
+                                <p className="text-xs text-[#5899B5] mt-1.5 font-semibold">Selected Course: {courseSearch}</p>
                             )}
                             {courses.length === 0 && (
                                 <p className="text-xs text-amber-600 mt-1">Please map courses to this college first.</p>
@@ -925,7 +925,7 @@ const AssignTrainerModal = ({ isOpen, onClose, onSave, trainers, globalTrainers,
                                 <input 
                                     required
                                     type="text"
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#004AAD] transition-all font-medium text-slate-700"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#5899B5] transition-all font-medium text-slate-700"
                                     placeholder="e.g. Room 123"
                                     value={formData.classroomLocation || ''}
                                     onChange={e => setFormData(prev => ({ ...prev, classroomLocation: e.target.value }))}
@@ -945,7 +945,7 @@ const AssignTrainerModal = ({ isOpen, onClose, onSave, trainers, globalTrainers,
                         <button 
                             type="submit" 
                             disabled={submitting || assignableTrainers.length === 0 || courses.length === 0} 
-                            className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-sm font-bold hover:bg-[#003580] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-sm font-bold hover:bg-[#3D7690] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                             {submitting && <Loader2 size={16} className="animate-spin" />}
                             Assign Trainer
@@ -1228,7 +1228,7 @@ const Trainers = () => {
 
             const headerRow = sheet.getRow(1);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } }; // Brand Navy Blue
+            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } }; // Brand Navy Blue
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRow.height = 24;
 
@@ -1329,7 +1329,7 @@ const Trainers = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                        <Users className="text-[#004AAD]" size={26} />
+                        <Users className="text-[#5899B5]" size={26} />
                         {effectiveCollegeId ? `Trainers - ${selectedCollegeCode || 'College'}` : 'Trainers'}
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
@@ -1351,7 +1351,7 @@ const Trainers = () => {
                     )}
                     {!isReadOnly && (
                         <button onClick={() => { setSelectedTrainer(null); setIsModalOpen(true); }}
-                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-bold rounded-xl hover:bg-[#003580] shadow-md shadow-blue-100 hover:shadow-lg active:scale-95 transition-all w-full md:w-auto shrink-0 cursor-pointer">
+                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-bold rounded-xl hover:bg-[#3D7690] shadow-md shadow-blue-100 hover:shadow-lg active:scale-95 transition-all w-full md:w-auto shrink-0 cursor-pointer">
                             <Plus size={16} /> Add Trainer
                         </button>
                     )}
@@ -1365,7 +1365,7 @@ const Trainers = () => {
                         <h3 className="text-sm font-bold text-slate-700 mr-2">{sortedTrainers.length} trainer{sortedTrainers.length !== 1 ? 's' : ''}</h3>
                         
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#004AAD] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
                             value={programFilter}
                             onChange={(e) => setProgramFilter(e.target.value)}
                         >
@@ -1378,7 +1378,7 @@ const Trainers = () => {
 
                         {!effectiveCollegeId && (
                             <select
-                                className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#004AAD] focus:ring-1 focus:ring-blue-100 transition-all"
+                                className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
                                 value={selectedCollegeFilter}
                                 onChange={(e) => setSelectedCollegeFilter(e.target.value)}
                             >
@@ -1390,7 +1390,7 @@ const Trainers = () => {
                         )}
 
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#004AAD] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                         >
@@ -1403,7 +1403,7 @@ const Trainers = () => {
 
                     <div className="relative w-72">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 transition-all"
+                        <input className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 transition-all"
                             placeholder={effectiveCollegeId ? "Search by name, mobile or classroom..." : "Search by name, mobile or Emp ID..."} value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)} />
                     </div>
@@ -1422,7 +1422,7 @@ const Trainers = () => {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {loading ? (
-                            <tr><td colSpan="6" className="px-6 py-16 text-center"><Loader2 className="animate-spin mx-auto text-[#004AAD]" size={24} /></td></tr>
+                            <tr><td colSpan="6" className="px-6 py-16 text-center"><Loader2 className="animate-spin mx-auto text-[#5899B5]" size={24} /></td></tr>
                         ) : sortedTrainers.length === 0 ? (
                             <tr><td colSpan="6" className="px-6 py-16 text-center text-sm text-slate-400">No trainers found</td></tr>
                         ) : sortedTrainers.map((t) => (
@@ -1447,7 +1447,7 @@ const Trainers = () => {
                                         t.assignedCourses?.length > 0 ? (
                                             <div className="flex flex-wrap gap-1">
                                                 {t.assignedCourses.map(c => c.classroomLocation).filter(Boolean).map((loc, idx) => (
-                                                    <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-[#004AAD] border border-blue-100">
+                                                    <span key={idx} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-[#5899B5] border border-blue-100">
                                                         {loc}
                                                     </span>
                                                 ))}
@@ -1468,7 +1468,7 @@ const Trainers = () => {
                                 </td>
                                 {/* Program */}
                                 <td className="px-6 py-4">
-                                    <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#004AAD] font-bold text-[10px] uppercase">
+                                    <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#5899B5] font-bold text-[10px] uppercase">
                                         {t.program || 'EWDP'}
                                     </span>
                                 </td>
@@ -1485,7 +1485,7 @@ const Trainers = () => {
                                     {t.assignedCourses?.length > 0 ? (
                                         <div className="flex flex-wrap gap-1.5">
                                             {t.assignedCourses.map(c => (
-                                                <span key={c._id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded text-xs border border-blue-100" title={c.name}>
+                                                <span key={c._id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-[#5899B5] rounded text-xs border border-blue-100" title={c.name}>
                                                     <BookOpen size={9} />
                                                     <span>{c.code}</span>
                                                 </span>
@@ -1499,7 +1499,7 @@ const Trainers = () => {
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-2 transition-opacity">
                                         <button onClick={() => { setSelectedTrainer(t); setIsProfileOpen(true); }}
-                                            className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50" title="View Profile">
+                                            className="p-1.5 text-slate-400 hover:text-[#5899B5] rounded-md hover:bg-blue-50" title="View Profile">
                                             <Eye size={16} />
                                         </button>
                                         {t.pdfUrl && (
@@ -1512,7 +1512,7 @@ const Trainers = () => {
                                             !effectiveCollegeId ? (
                                                 <>
                                                     <button onClick={() => { setSelectedTrainer(t); setIsModalOpen(true); }}
-                                                        className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50" title="Edit Trainer">
+                                                        className="p-1.5 text-slate-400 hover:text-[#5899B5] rounded-md hover:bg-blue-50" title="Edit Trainer">
                                                         <Edit2 size={16} />
                                                     </button>
                                                     <button onClick={() => handleDelete(t._id)}
@@ -1523,7 +1523,7 @@ const Trainers = () => {
                                             ) : (
                                                 <>
                                                     <button onClick={() => { setSelectedTrainer(t); setIsModalOpen(true); }}
-                                                        className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50" title="Edit Assigned Courses">
+                                                        className="p-1.5 text-slate-400 hover:text-[#5899B5] rounded-md hover:bg-blue-50" title="Edit Assigned Courses">
                                                         <Edit2 size={16} />
                                                     </button>
                                                     <button onClick={() => handleUnassignTrainer(t)}

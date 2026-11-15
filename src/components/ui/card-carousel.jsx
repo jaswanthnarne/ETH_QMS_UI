@@ -35,7 +35,7 @@ export const CardCarousel = ({
 
   .swiper-pagination-bullet-active {
     width: 50px;
-    background: #004AAD;
+    background: #5899B5;
     opacity: 1;
   }
 
@@ -71,7 +71,7 @@ export const CardCarousel = ({
               <div className="flex-1 p-10 lg:p-20 flex flex-col justify-center relative z-10">
                 <Badge
                   variant="outline"
-                  className="w-fit mb-6 px-4 py-1.5 rounded-full border-slate-200 bg-white text-[10px] font-black uppercase tracking-[0.2em] text-[#004AAD] shadow-sm flex items-center gap-2"
+                  className="w-fit mb-6 px-4 py-1.5 rounded-full border-slate-200 bg-white text-[10px] font-black uppercase tracking-[0.2em] text-[#5899B5] shadow-sm flex items-center gap-2"
                 >
                   <SparklesIcon size={12} className="fill-blue-500" /> Professional Certification
                 </Badge>

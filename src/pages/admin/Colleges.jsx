@@ -20,18 +20,18 @@ const CollegeModal = ({ college, isOpen, onClose, onSave }) => {
                     <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400"><X size={18} /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">College Name</label><input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 outline-none" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Ethnotech Institute of Technology" /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">College Name</label><input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 outline-none" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Ethnotech Institute of Technology" /></div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Code</label><input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono uppercase focus:bg-white focus:border-[#004AAD] outline-none" value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value})} placeholder="ETH-01" /></div>
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Status</label><select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Code</label><input required className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono uppercase focus:bg-white focus:border-[#5899B5] outline-none" value={formData.code} onChange={(e) => setFormData({...formData, code: e.target.value})} placeholder="ETH-01" /></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Status</label><select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.contactEmail} onChange={(e) => setFormData({...formData, contactEmail: e.target.value})} placeholder="admin@college.edu" /></div>
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Phone</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none" value={formData.contactPhone} onChange={(e) => setFormData({...formData, contactPhone: e.target.value})} placeholder="+91 9876543210" /></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.contactEmail} onChange={(e) => setFormData({...formData, contactEmail: e.target.value})} placeholder="admin@college.edu" /></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Phone</label><input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none" value={formData.contactPhone} onChange={(e) => setFormData({...formData, contactPhone: e.target.value})} placeholder="+91 9876543210" /></div>
                     </div>
                     <div className="pt-3 flex gap-3">
                         <button type="button" onClick={onClose} className="flex-1 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50">Cancel</button>
-                        <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#004AAD] text-white rounded-lg text-sm font-semibold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-2">{submitting && <Loader2 size={16} className="animate-spin" />}{college ? 'Save Changes' : 'Create College'}</button>
+                        <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-[#5899B5] text-white rounded-lg text-sm font-semibold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-2">{submitting && <Loader2 size={16} className="animate-spin" />}{college ? 'Save Changes' : 'Create College'}</button>
                     </div>
                 </form>
             </div>
@@ -70,7 +70,7 @@ const Colleges = () => {
                 <div className="flex gap-3">
                     <button onClick={() => handleExport('all', 'All_Colleges')} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors"><Download size={16} /> Export All</button>
                     {!isReadOnly && (
-                        <button onClick={() => { setSelectedCollege(null); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm"><Plus size={16} /> Add College</button>
+                        <button onClick={() => { setSelectedCollege(null); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] transition-colors shadow-sm"><Plus size={16} /> Add College</button>
                     )}
                 </div>
             </div>
@@ -80,13 +80,13 @@ const Colleges = () => {
                     <h3 className="text-sm font-semibold text-slate-700">{filteredColleges.length} college{filteredColleges.length !== 1 ? 's' : ''}</h3>
                     <div className="relative w-72">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD]" placeholder="Search colleges..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <input className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5]" placeholder="Search colleges..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                 </div>
                 <table className="w-full text-left">
                     <thead><tr className="bg-slate-50"><th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">College</th><th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Code</th><th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Status</th><th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-right">Actions</th></tr></thead>
                     <tbody className="divide-y divide-slate-100">
-                        {loading ? (<tr><td colSpan="4" className="px-6 py-16 text-center"><Loader2 className="animate-spin mx-auto text-[#004AAD]" size={24} /><p className="text-sm text-slate-400 mt-2">Loading...</p></td></tr>
+                        {loading ? (<tr><td colSpan="4" className="px-6 py-16 text-center"><Loader2 className="animate-spin mx-auto text-[#5899B5]" size={24} /><p className="text-sm text-slate-400 mt-2">Loading...</p></td></tr>
                         ) : filteredColleges.length === 0 ? (<tr><td colSpan="4" className="px-6 py-16 text-center"><Building2 size={32} className="mx-auto text-slate-200 mb-2" /><p className="text-sm text-slate-400">No colleges found</p></td></tr>
                         ) : filteredColleges.map((college) => (
                             <tr key={college._id} className="hover:bg-slate-50/50 group">
@@ -99,7 +99,7 @@ const Colleges = () => {
                                                 className="w-9 h-9 object-contain rounded-lg border border-slate-100 bg-slate-50"
                                             />
                                         ) : (
-                                            <div className="w-9 h-9 bg-blue-50 text-[#004AAD] rounded-lg flex items-center justify-center font-bold text-sm">
+                                            <div className="w-9 h-9 bg-blue-50 text-[#5899B5] rounded-lg flex items-center justify-center font-bold text-sm">
                                                 {college.name.charAt(0)}
                                             </div>
                                         )}
@@ -113,10 +113,10 @@ const Colleges = () => {
                                 <td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${college.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}><span className={`w-1.5 h-1.5 rounded-full ${college.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />{college.status}</span></td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-2 transition-opacity">
-                                        <button onClick={() => handleManage(college)} className="px-3 py-1.5 bg-[#004AAD] text-white rounded-md text-xs font-medium hover:bg-[#003580] flex items-center gap-1"><ExternalLink size={12} /> Manage</button>
+                                        <button onClick={() => handleManage(college)} className="px-3 py-1.5 bg-[#5899B5] text-white rounded-md text-xs font-medium hover:bg-[#3D7690] flex items-center gap-1"><ExternalLink size={12} /> Manage</button>
                                         {!isReadOnly && (
                                             <>
-                                                <button onClick={() => { setSelectedCollege(college); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded-md hover:bg-blue-50"><Edit2 size={16} /></button>
+                                                <button onClick={() => { setSelectedCollege(college); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-[#5899B5] rounded-md hover:bg-blue-50"><Edit2 size={16} /></button>
                                                 <button onClick={() => handleDelete(college._id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-md hover:bg-red-50"><Trash2 size={16} /></button>
                                             </>
                                         )}

@@ -11,6 +11,11 @@ import Login from './pages/Login';
 import StudentEntry from './pages/StudentEntry';
 import StudentExam from './pages/StudentExam';
 import ResumeExam from './pages/student/ResumeExam';
+import FeaturesPage from './pages/public/FeaturesPage';
+import HowItWorksPage from './pages/public/HowItWorksPage';
+import CampusLifePage from './pages/public/CampusLifePage';
+import TracksPage from './pages/public/TracksPage';
+import FaqPage from './pages/public/FaqPage';
 
 // Dashboard Pages
 import Dashboard from './pages/Dashboard';
@@ -76,6 +81,12 @@ function App() {
                 {/* Student Entry Nodes */}
                 <Route path="/portal" element={<StudentEntry />} />
                 <Route path="/assessment" element={<StudentEntry />} />
+                <Route path="/features" element={<FeaturesPage />} />
+                <Route path="/how-it-works" element={<HowItWorksPage />} />
+                <Route path="/campus-life" element={<CampusLifePage />} />
+                <Route path="/campus" element={<CampusLifePage />} />
+                <Route path="/tracks" element={<TracksPage />} />
+                <Route path="/faq" element={<FaqPage />} />
                 <Route path="/exam/:key" element={
                     <StudentProtectedRoute>
                         <StudentExam />

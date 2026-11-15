@@ -149,7 +149,7 @@ const Allotments = () => {
                         <div className="relative">
                             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input 
-                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-[#004AAD] transition-all" 
+                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-[#5899B5] transition-all" 
                                 placeholder="Search by trainer, exam, key..." 
                                 value={searchTerm} 
                                 onChange={(e) => setSearchTerm(e.target.value)} 
@@ -160,7 +160,7 @@ const Allotments = () => {
                     <div className="overflow-y-auto divide-y divide-slate-100 flex-1 custom-scrollbar">
                         {loading ? (
                             <div className="py-12 text-center">
-                                <Loader2 className="animate-spin mx-auto text-[#004AAD]" size={24} />
+                                <Loader2 className="animate-spin mx-auto text-[#5899B5]" size={24} />
                             </div>
                         ) : filteredTrainers.length === 0 ? (
                             <div className="py-12 text-center text-slate-400">
@@ -177,16 +177,16 @@ const Allotments = () => {
                                     <div 
                                         key={tId}
                                         onClick={() => setSelectedTrainerId(tId)}
-                                        className={`p-4 flex gap-3 items-center cursor-pointer transition-all ${isActive ? 'bg-blue-50/60 border-l-4 border-l-[#004AAD]' : 'hover:bg-slate-50/50'}`}
+                                        className={`p-4 flex gap-3 items-center cursor-pointer transition-all ${isActive ? 'bg-blue-50/60 border-l-4 border-l-[#5899B5]' : 'hover:bg-slate-50/50'}`}
                                     >
-                                        <div className={`w-10 h-10 rounded-xl font-extrabold text-xs flex items-center justify-center flex-shrink-0 shadow-inner ${isActive ? 'bg-blue-100 text-[#004AAD]' : 'bg-slate-100 text-slate-500'}`}>
+                                        <div className={`w-10 h-10 rounded-xl font-extrabold text-xs flex items-center justify-center flex-shrink-0 shadow-inner ${isActive ? 'bg-blue-100 text-[#5899B5]' : 'bg-slate-100 text-slate-500'}`}>
                                             {initials}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h4 className="text-xs font-bold text-slate-800 truncate">{item.trainer.firstName} {item.trainer.lastName}</h4>
                                             <p className="text-[10px] text-slate-400 truncate mt-0.5">{item.trainer.email}</p>
                                         </div>
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-blue-100 text-[#004AAD]' : 'bg-slate-100 text-slate-500'}`}>
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-blue-100 text-[#5899B5]' : 'bg-slate-100 text-slate-500'}`}>
                                             {item.allotments.length} Exam{item.allotments.length !== 1 ? 's' : ''}
                                         </span>
                                     </div>
@@ -203,7 +203,7 @@ const Allotments = () => {
                             {/* Trainer Info Header */}
                             <div className="pb-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex gap-4 items-center">
-                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-[#004AAD] flex items-center justify-center font-extrabold text-base border border-indigo-100 shadow-sm">
+                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-[#5899B5] flex items-center justify-center font-extrabold text-base border border-indigo-100 shadow-sm">
                                         {`${activeTrainerData.trainer.firstName?.charAt(0) || ''}${activeTrainerData.trainer.lastName?.charAt(0) || ''}` || 'U'}
                                     </div>
                                     <div>
@@ -211,7 +211,7 @@ const Allotments = () => {
                                         <p className="text-xs text-slate-400 mt-0.5">{activeTrainerData.trainer.email} {activeTrainerData.trainer.phone ? `• ${activeTrainerData.trainer.phone}` : ''}</p>
                                     </div>
                                 </div>
-                                <span className="text-xs font-bold text-[#004AAD] bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                <span className="text-xs font-bold text-[#5899B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
                                     {activeTrainerData.allotments.length} Active Allotment{activeTrainerData.allotments.length !== 1 ? 's' : ''}
                                 </span>
                             </div>
@@ -221,7 +221,7 @@ const Allotments = () => {
                                 {activeTrainerData.allotments.map((a) => (
                                     <div key={a._id} className="p-4 rounded-xl border border-slate-150 bg-slate-50/20 hover:border-blue-200 transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
                                         <div className="space-y-1.5 flex-1 min-w-0">
-                                            <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-[#004AAD] transition-colors">{a.examId?.title}</h4>
+                                            <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-[#5899B5] transition-colors">{a.examId?.title}</h4>
                                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-semibold text-slate-400">
                                                 <span className="flex items-center gap-1"><BookOpen size={11} /> {a.examId?.courseId?.name} ({a.examId?.courseId?.code})</span>
                                                 <span>•</span>
@@ -235,7 +235,7 @@ const Allotments = () => {
                                                 <code className="text-xs font-mono font-bold text-slate-700 tracking-wide">{a.uniqueKey}</code>
                                                 <button 
                                                     onClick={() => copyToClipboard(a.uniqueKey, a._id)}
-                                                    className="p-1 hover:bg-slate-250 rounded-md text-slate-400 hover:text-[#004AAD] transition-colors cursor-pointer"
+                                                    className="p-1 hover:bg-slate-250 rounded-md text-slate-400 hover:text-[#5899B5] transition-colors cursor-pointer"
                                                     title="Copy Access Key"
                                                 >
                                                     {copied === a._id ? <CheckCircle2 size={13} className="text-emerald-500" /> : <Copy size={13} />}
@@ -246,7 +246,7 @@ const Allotments = () => {
                                             <div className="flex items-center gap-1.5">
                                                 <button
                                                     onClick={() => setSelectedExamDetail(a)}
-                                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-[#004AAD]/10 text-slate-650 hover:text-[#004AAD] rounded-lg text-[10px] font-bold border border-slate-200 hover:border-[#004AAD]/20 transition-all cursor-pointer"
+                                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-[#5899B5]/10 text-slate-650 hover:text-[#5899B5] rounded-lg text-[10px] font-bold border border-slate-200 hover:border-[#5899B5]/20 transition-all cursor-pointer"
                                                     title="View Exam Settings"
                                                 >
                                                     <Info size={12} /> Info
@@ -295,7 +295,7 @@ const Allotments = () => {
                             {/* Modal Header */}
                             <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <div>
-                                    <span className="text-[9px] font-bold text-[#004AAD] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Exam Parameters</span>
+                                    <span className="text-[9px] font-bold text-[#5899B5] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Exam Parameters</span>
                                     <h3 className="font-extrabold text-slate-800 text-base mt-1">{exam.title || 'Exam Information'}</h3>
                                 </div>
                                 <button

@@ -254,7 +254,7 @@ const Reports = () => {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                        <Database className="text-[#004AAD]" size={26} />
+                        <Database className="text-[#5899B5]" size={26} />
                         Exam Reports
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">Export comprehensive multi-sheet reports, analysis, integrity logs, and cohort statistics</p>
@@ -316,7 +316,7 @@ const Reports = () => {
                         </select>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-2 bg-blue-50/50 px-4 py-2.5 rounded-xl border border-blue-100/60 text-xs text-[#004AAD] font-bold">
+                    <div className="flex items-center gap-2 bg-blue-50/50 px-4 py-2.5 rounded-xl border border-blue-100/60 text-xs text-[#5899B5] font-bold">
                         <School size={14} />
                         <span>College: {selectedCollegeName || 'Your College'}</span>
                     </div>
@@ -378,7 +378,7 @@ const Reports = () => {
                     <div className="relative w-full sm:w-72">
                         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#004AAD] focus:ring-2 focus:ring-blue-100 transition-all" 
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 transition-all" 
                             placeholder="Search by exam or course..."
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -389,7 +389,7 @@ const Reports = () => {
                 {/* Subtitle Scope Indicator */}
                 {selectedCollege !== 'all' && currentCollegeName && (
                     <div className="px-6 py-3 bg-blue-50/30 border-b border-blue-50/50 text-xs text-slate-500 flex items-center gap-2">
-                        <School size={13} className="text-[#004AAD]" />
+                        <School size={13} className="text-[#5899B5]" />
                         <span>Filtering records for <span className="font-semibold text-slate-700">{currentCollegeName}</span></span>
                     </div>
                 )}
@@ -398,7 +398,7 @@ const Reports = () => {
                 <div className="overflow-x-auto">
                     {loading ? (
                         <div className="py-20 text-center">
-                            <Loader2 className="animate-spin text-[#004AAD] mx-auto" size={28} />
+                            <Loader2 className="animate-spin text-[#5899B5] mx-auto" size={28} />
                             <p className="text-xs font-semibold text-slate-400 mt-3">Fetching records...</p>
                         </div>
                     ) : (
@@ -425,7 +425,7 @@ const Reports = () => {
                                         <tr key={a._id} className="hover:bg-slate-50/40 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 bg-blue-50 text-[#004AAD] rounded-xl flex items-center justify-center shrink-0">
+                                                    <div className="w-9 h-9 bg-blue-50 text-[#5899B5] rounded-xl flex items-center justify-center shrink-0">
                                                         <FileText size={16} />
                                                     </div>
                                                     <div className="min-w-0">
@@ -467,7 +467,7 @@ const Reports = () => {
                                                             setTimeout(() => setCopiedKey(null), 1500);
                                                         }}
                                                         title="Copy Access Key"
-                                                        className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-[#004AAD] transition-colors cursor-pointer"
+                                                        className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-[#5899B5] transition-colors cursor-pointer"
                                                     >
                                                         {copiedKey === a._id ? (
                                                             <CheckCircle2 size={13} className="text-emerald-500" />
@@ -481,7 +481,7 @@ const Reports = () => {
                                                 <button 
                                                     onClick={() => handleExportExamReport(a.examId?._id || a.examId, a.examId?.title, a.trainerId?._id || a.trainerId, a.batchId?._id || a.batchId)}
                                                     disabled={actionLoading === a.examId?._id}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#004AAD] hover:bg-[#003580] text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#5899B5] hover:bg-[#3D7690] text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50"
                                                 >
                                                     {actionLoading === a.examId?._id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
                                                     Export Results

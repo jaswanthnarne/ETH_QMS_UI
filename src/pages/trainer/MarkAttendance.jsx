@@ -183,7 +183,7 @@ const MarkAttendance = () => {
     if (loading) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={36} />
             </div>
         );
     }
@@ -194,7 +194,7 @@ const MarkAttendance = () => {
             <div className="flex flex-col gap-3">
                 <button 
                     onClick={() => navigate(sessionId ? `/trainer/attendance/history/${batchId}` : '/trainer/attendance')} 
-                    className="flex items-center gap-2 text-slate-500 hover:text-[#004AAD] text-sm font-bold w-fit transition-all active:translate-x-[-2px]"
+                    className="flex items-center gap-2 text-slate-500 hover:text-[#5899B5] text-sm font-bold w-fit transition-all active:translate-x-[-2px]"
                 >
                     <ArrowLeft size={16} /> Back to Attendance Logs
                 </button>
@@ -238,7 +238,7 @@ const MarkAttendance = () => {
                                 required
                                 value={date}
                                 onChange={e => setDate(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 font-semibold"
                             />
                         </div>
 
@@ -250,7 +250,7 @@ const MarkAttendance = () => {
                                 placeholder="e.g. Introduction to React state management"
                                 value={topic}
                                 onChange={e => setTopic(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 font-semibold"
                             />
                         </div>
 
@@ -259,7 +259,7 @@ const MarkAttendance = () => {
                             <select
                                 value={period}
                                 onChange={e => setPeriod(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-700 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-700 font-semibold"
                             >
                                 <option value="Hour 1">Hour 1 (1st Period)</option>
                                 <option value="Hour 2">Hour 2 (2nd Period)</option>
@@ -283,7 +283,7 @@ const MarkAttendance = () => {
                                 max="480"
                                 value={duration}
                                 onChange={e => setDuration(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 font-semibold"
                             />
                         </div>
 
@@ -293,7 +293,7 @@ const MarkAttendance = () => {
                                 required
                                 value={module}
                                 onChange={e => setModule(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-700 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-700 font-semibold"
                             >
                                 <option value="">Select Module</option>
                                 {Array.from({ length: batch?.courseId?.modulesCount || 5 }, (_, i) => (
@@ -416,7 +416,7 @@ const MarkAttendance = () => {
                                                         placeholder="Add brief note..."
                                                         value={currentRec.remarks}
                                                         onChange={e => handleRemarksChange(student._id, e.target.value)}
-                                                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] focus:bg-white focus:border-[#004AAD] outline-none font-medium"
+                                                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] focus:bg-white focus:border-[#5899B5] outline-none font-medium"
                                                     />
                                                 </td>
                                             </tr>
@@ -440,7 +440,7 @@ const MarkAttendance = () => {
                     <button
                         type="submit"
                         disabled={submitting || students.length === 0}
-                        className="px-6 py-3 bg-[#004AAD] hover:bg-[#003580] text-white rounded-xl text-xs font-extrabold disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100"
+                        className="px-6 py-3 bg-[#5899B5] hover:bg-[#3D7690] text-white rounded-xl text-xs font-extrabold disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100"
                     >
                         {submitting ? (
                             <>

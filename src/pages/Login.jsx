@@ -50,21 +50,21 @@ const Login = () => {
 
                 {/* ══════════ HERO SECTION ══════════ */}
                 <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden"
-                    style={{ background: 'linear-gradient(155deg, #f0f5ff 0%, #ffffff 55%, #eef3ff 100%)' }}>
+                    style={{ background: 'linear-gradient(155deg, #F2F8FA 0%, #ffffff 55%, #E1EFF5 100%)' }}>
 
                     {/* Background Accents (matching About / Contact pages) */}
-                    <div className="absolute -top-16 -right-16 w-[480px] h-[480px] rounded-full border-[1.5px] border-[#004AAD]/10 pointer-events-none" />
-                    <div className="absolute top-4 right-4 w-[320px] h-[320px] rounded-full border-[1.5px] border-[#004AAD]/10 pointer-events-none" />
-                    <div className="absolute top-20 right-20 w-[180px] h-[180px] rounded-full bg-[#004AAD]/[0.04] pointer-events-none" />
+                    <div className="absolute -top-16 -right-16 w-[480px] h-[480px] rounded-full border-[1.5px] border-[#5899B5]/10 pointer-events-none" />
+                    <div className="absolute top-4 right-4 w-[320px] h-[320px] rounded-full border-[1.5px] border-[#5899B5]/10 pointer-events-none" />
+                    <div className="absolute top-20 right-20 w-[180px] h-[180px] rounded-full bg-[#5899B5]/[0.04] pointer-events-none" />
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-                        className="absolute top-32 right-64 w-9 h-9 rounded-xl border-[1.5px] border-[#004AAD]/15 pointer-events-none hidden lg:block" />
+                        className="absolute top-32 right-64 w-9 h-9 rounded-xl border-[1.5px] border-[#5899B5]/15 pointer-events-none hidden lg:block" />
                     <motion.div animate={{ rotate: -360 }} transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
-                        className="absolute bottom-24 right-1/3 w-5 h-5 rounded bg-[#004AAD]/10 pointer-events-none hidden lg:block" />
+                        className="absolute bottom-24 right-1/3 w-5 h-5 rounded bg-[#5899B5]/10 pointer-events-none hidden lg:block" />
 
                     {/* Bottom-left floating shapes */}
-                    <div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full border border-[#004AAD]/[0.06] pointer-events-none" />
+                    <div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full border border-[#5899B5]/[0.06] pointer-events-none" />
                     <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                        className="absolute bottom-40 left-16 w-6 h-6 rounded-full bg-[#004AAD]/[0.06] pointer-events-none hidden lg:block" />
+                        className="absolute bottom-40 left-16 w-6 h-6 rounded-full bg-[#5899B5]/[0.06] pointer-events-none hidden lg:block" />
 
                     <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                         <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-center">
@@ -72,13 +72,13 @@ const Login = () => {
                             {/* ── Left Content ── */}
                             <div className="flex-1 max-w-2xl lg:max-w-none">
                                 <FadeIn>
-                                    <span className="inline-block text-[11px] font-bold text-[#004AAD] uppercase tracking-[0.2em] mb-5 px-3 py-1.5 bg-[#004AAD]/[0.07] rounded-full">
+                                    <span className="inline-block text-[11px] font-bold text-[#5899B5] uppercase tracking-[0.2em] mb-5 px-3 py-1.5 bg-[#5899B5]/[0.07] rounded-full">
                                         Management Portal
                                     </span>
                                 </FadeIn>
                                 <FadeIn delay={0.1}>
                                     <h1 className="text-[2.8rem] lg:text-[4rem] font-extrabold text-slate-900 leading-[1.06] tracking-[-0.02em] mb-7">
-                                        Welcome to the<br className="hidden lg:block" /><span className="text-[#004AAD]"> Admin Dashboard</span>
+                                        Welcome to the<br className="hidden lg:block" /><span className="text-[#5899B5]"> Admin Dashboard</span>
                                     </h1>
                                 </FadeIn>
                                 <FadeIn delay={0.2}>
@@ -92,7 +92,7 @@ const Login = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg">
                                         {[
                                             { icon: ShieldCheck, label: 'Role-Based Access', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-                                            { icon: KeyRound, label: 'JWT Secured', color: 'text-[#004AAD]', bg: 'bg-blue-50', border: 'border-blue-100' },
+                                            { icon: KeyRound, label: 'JWT Secured', color: 'text-[#5899B5]', bg: 'bg-blue-50', border: 'border-blue-100' },
                                             { icon: Shield, label: 'Rate Limited', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
                                         ].map((badge, i) => (
                                             <div key={i} className={`flex items-center gap-3 ${badge.bg} ${badge.border} border rounded-xl px-4 py-3 group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-default`}>
@@ -114,7 +114,7 @@ const Login = () => {
                                         className="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100/80 overflow-hidden"
                                     >
                                         {/* Card Header */}
-                                        <div className="bg-[#004AAD] px-8 py-7 relative overflow-hidden">
+                                        <div className="bg-[#5899B5] px-8 py-7 relative overflow-hidden">
                                             {/* Decorative circles inside header */}
                                             <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full" />
                                             <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-white/5 rounded-full" />
@@ -149,13 +149,13 @@ const Login = () => {
                                                     Email, Mobile Number or Employee ID
                                                 </label>
                                                 <div className="relative group">
-                                                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
+                                                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#5899B5] transition-colors" />
                                                     <input
                                                         id="login-email"
                                                         type="text"
                                                         required
                                                         placeholder="e.g. admin@ethnotech.in, 9876543210 or EMP1001"
-                                                        className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium text-slate-800 focus:bg-white focus:border-[#004AAD] focus:ring-[4px] focus:ring-blue-50 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                                                        className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium text-slate-800 focus:bg-white focus:border-[#5899B5] focus:ring-[4px] focus:ring-blue-50 outline-none transition-all placeholder:text-slate-400 shadow-sm"
                                                         value={email}
                                                         onChange={(e) => setEmail(e.target.value)}
                                                     />
@@ -168,20 +168,20 @@ const Login = () => {
                                                     Password
                                                 </label>
                                                 <div className="relative group">
-                                                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
+                                                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#5899B5] transition-colors" />
                                                     <input
                                                         id="login-password"
                                                         type={showPw ? 'text' : 'password'}
                                                         required
                                                         placeholder="••••••••"
-                                                        className="w-full pl-12 pr-14 py-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium text-slate-800 focus:bg-white focus:border-[#004AAD] focus:ring-[4px] focus:ring-blue-50 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                                                        className="w-full pl-12 pr-14 py-4 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium text-slate-800 focus:bg-white focus:border-[#5899B5] focus:ring-[4px] focus:ring-blue-50 outline-none transition-all placeholder:text-slate-400 shadow-sm"
                                                         value={password}
                                                         onChange={(e) => setPassword(e.target.value)}
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPw(!showPw)}
-                                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#004AAD] transition-colors p-1"
+                                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#5899B5] transition-colors p-1"
                                                     >
                                                         {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                                                     </button>
@@ -193,7 +193,7 @@ const Login = () => {
                                                 id="login-submit"
                                                 type="submit"
                                                 disabled={loading}
-                                                className="w-full py-4.5 bg-[#004AAD] hover:bg-[#003a8c] text-white text-[15px] font-extrabold rounded-2xl disabled:opacity-50 transition-all flex items-center justify-center gap-3 mt-2 shadow-[0_10px_25px_-5px_rgba(0,74,173,0.3)] hover:shadow-[0_14px_35px_-5px_rgba(0,74,173,0.4)] active:scale-[0.98] cursor-pointer"
+                                                className="w-full py-4.5 bg-[#5899B5] hover:bg-[#3D7690] text-white text-[15px] font-extrabold rounded-2xl disabled:opacity-50 transition-all flex items-center justify-center gap-3 mt-2 shadow-[0_10px_25px_-5px_rgba(88, 153, 181,0.3)] hover:shadow-[0_14px_35px_-5px_rgba(88, 153, 181,0.4)] active:scale-[0.98] cursor-pointer"
                                             >
                                                 {loading ? (
                                                     <><Loader2 size={18} className="animate-spin" /> Signing in...</>

@@ -82,7 +82,7 @@ const TrainerDashboard = () => {
     if (loading) {
         return (
             <div className="h-[50vh] flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={28} />
             </div>
         );
     }
@@ -118,7 +118,7 @@ const TrainerDashboard = () => {
                     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
                             <h2 className="font-bold text-slate-900 flex items-center gap-2">
-                                <Monitor size={18} className="text-[#004AAD]" /> My Assigned Exams
+                                <Monitor size={18} className="text-[#5899B5]" /> My Assigned Exams
                             </h2>
                             <span className="text-xs text-slate-400 font-medium">{assignedExams.length} exam{assignedExams.length !== 1 ? 's' : ''}</span>
                         </div>
@@ -137,7 +137,7 @@ const TrainerDashboard = () => {
                                             {/* Exam info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded text-xs font-semibold">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-[#5899B5] rounded text-xs font-semibold">
                                                         <BookOpen size={10} /> {exam.courseCode}
                                                     </span>
                                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-xs font-medium">
@@ -164,7 +164,7 @@ const TrainerDashboard = () => {
                                                     <code className="text-sm font-bold font-mono text-slate-900 tracking-wider">{exam.key}</code>
                                                 </div>
                                                 <button onClick={() => copyKey(exam.key, exam.id)}
-                                                    className="p-1.5 text-slate-400 hover:text-[#004AAD] rounded hover:bg-blue-50 transition-colors"
+                                                    className="p-1.5 text-slate-400 hover:text-[#5899B5] rounded hover:bg-blue-50 transition-colors"
                                                     title="Copy key">
                                                     {copied === exam.id ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
                                                 </button>
@@ -173,13 +173,13 @@ const TrainerDashboard = () => {
                                             {/* Actions */}
                                             <div className="flex gap-2 flex-shrink-0">
                                                 <button onClick={() => handleExport(exam.examId, exam.title)}
-                                                    className="p-2 text-slate-400 hover:text-[#004AAD] border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors"
+                                                    className="p-2 text-slate-400 hover:text-[#5899B5] border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors"
                                                     title="Export Results">
                                                     <Download size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate(`/trainer/monitor/${exam.key}`)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm">
+                                                    className="flex items-center gap-2 px-4 py-2 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] transition-colors shadow-sm">
                                                     <Play size={14} fill="currentColor" /> Monitor
                                                 </button>
                                             </div>
@@ -195,7 +195,7 @@ const TrainerDashboard = () => {
                         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                             <div className="px-6 py-4 border-b border-slate-100">
                                 <h2 className="font-bold text-slate-900 flex items-center gap-2">
-                                    <BarChart3 size={18} className="text-[#004AAD]" /> Exam Performance Breakdown
+                                    <BarChart3 size={18} className="text-[#5899B5]" /> Exam Performance Breakdown
                                 </h2>
                             </div>
                             <div className="divide-y divide-slate-100">
@@ -220,7 +220,7 @@ const TrainerDashboard = () => {
                                             </div>
                                             <div className="w-24 hidden sm:block">
                                                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-[#004AAD] rounded-full" style={{ width: `${e.passRate}%` }} />
+                                                    <div className="h-full bg-[#5899B5] rounded-full" style={{ width: `${e.passRate}%` }} />
                                                 </div>
                                             </div>
                                         </div>
@@ -236,14 +236,14 @@ const TrainerDashboard = () => {
                     {/* Curriculum & Logs Summary Card */}
                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                         <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-3 flex items-center gap-2">
-                            <BookOpen size={16} className="text-[#004AAD]" />
+                            <BookOpen size={16} className="text-[#5899B5]" />
                             Curriculum & Daily Progress
                         </h3>
                         <div className="space-y-3">
                             {/* Courses count */}
                             <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/60 rounded-xl hover:bg-slate-100/30 transition-colors">
                                 <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-[#004AAD]"><BookOpen size={14} /></div>
+                                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-[#5899B5]"><BookOpen size={14} /></div>
                                     <div>
                                         <span className="text-xs font-semibold text-slate-700 block">My Courses</span>
                                         <span className="text-[10px] text-slate-400">Curriculums mapped to you</span>
@@ -279,7 +279,7 @@ const TrainerDashboard = () => {
                         <div className="grid grid-cols-2 gap-3 pt-2">
                             <button 
                                 onClick={() => navigate('/trainer/batches')}
-                                className="py-2.5 text-center text-xs font-bold bg-[#004AAD] text-white hover:bg-[#003580] active:scale-95 transition-all rounded-lg cursor-pointer"
+                                className="py-2.5 text-center text-xs font-bold bg-[#5899B5] text-white hover:bg-[#3D7690] active:scale-95 transition-all rounded-lg cursor-pointer"
                             >
                                 Manage Batches
                             </button>

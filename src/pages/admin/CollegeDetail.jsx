@@ -324,7 +324,7 @@ const CollegeDetail = () => {
     if (loading) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={36} />
             </div>
         );
     }
@@ -363,7 +363,7 @@ const CollegeDetail = () => {
         <div className="space-y-6 animate-fade-in duration-300">
             {/* Navigation Header */}
             <div className="flex flex-col gap-4">
-                <button onClick={() => navigate('/admin/colleges')} className="flex items-center gap-2 text-slate-500 hover:text-[#004AAD] text-sm font-bold w-fit transition-all active:translate-x-[-2px]">
+                <button onClick={() => navigate('/admin/colleges')} className="flex items-center gap-2 text-slate-500 hover:text-[#5899B5] text-sm font-bold w-fit transition-all active:translate-x-[-2px]">
                     <ArrowLeft size={16} /> Back to Institutions
                 </button>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
@@ -380,7 +380,7 @@ const CollegeDetail = () => {
                                     className="w-full h-full object-contain"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50/80 text-[#004AAD] flex items-center justify-center font-bold text-xl uppercase">
+                                <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50/80 text-[#5899B5] flex items-center justify-center font-bold text-xl uppercase">
                                     {college.name.charAt(0)}
                                 </div>
                             )}
@@ -437,7 +437,7 @@ const CollegeDetail = () => {
                         onClick={() => setActiveTab(tab)}
                         className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all capitalize tracking-wider ${
                             activeTab === tab 
-                                ? 'bg-[#004AAD] text-white shadow-sm' 
+                                ? 'bg-[#5899B5] text-white shadow-sm' 
                                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
                         }`}
                     >
@@ -452,7 +452,7 @@ const CollegeDetail = () => {
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
                         <div className="border-b border-slate-100 pb-4">
-                            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><School className="text-[#004AAD]" size={18} /> Partner Institution Overview</h3>
+                            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><School className="text-[#5899B5]" size={18} /> Partner Institution Overview</h3>
                             <p className="text-xs text-slate-400 mt-0.5">Details regarding registry, profile, and physical logs.</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -496,7 +496,7 @@ const CollegeDetail = () => {
                                     )}
                                     {uploadingLogo && (
                                         <div className="absolute inset-0 bg-white/75 flex items-center justify-center">
-                                            <Loader2 size={20} className="text-[#004AAD] animate-spin" />
+                                            <Loader2 size={20} className="text-[#5899B5] animate-spin" />
                                         </div>
                                     )}
                                 </div>
@@ -504,7 +504,7 @@ const CollegeDetail = () => {
                                     <button 
                                         onClick={() => logoInputRef.current?.click()}
                                         disabled={uploadingLogo}
-                                        className="flex items-center gap-1.5 px-3.5 py-2 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] transition-colors disabled:opacity-50 shadow-sm"
+                                        className="flex items-center gap-1.5 px-3.5 py-2 bg-[#5899B5] text-white text-xs font-bold rounded-xl hover:bg-[#3D7690] transition-colors disabled:opacity-50 shadow-sm"
                                     >
                                         <Upload size={13} /> {college.logoUrl ? 'Update Logo' : 'Upload Logo'}
                                     </button>
@@ -520,13 +520,13 @@ const CollegeDetail = () => {
                     <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 gap-4">
                             <div>
-                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><BookOpen className="text-[#004AAD]" size={18} /> Mapped Curricula</h3>
+                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><BookOpen className="text-[#5899B5]" size={18} /> Mapped Curricula</h3>
                                 <p className="text-xs text-slate-400 mt-0.5">Courses currently authorized for delivery at this college.</p>
                             </div>
                             {!isReadOnly && (
                                 <button 
                                     onClick={() => { setModalError(''); setIsCourseModalOpen(true); }}
-                                    className="flex items-center gap-2 px-4 py-2 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] shadow-sm transition-all"
+                                    className="flex items-center gap-2 px-4 py-2 bg-[#5899B5] text-white text-xs font-bold rounded-xl hover:bg-[#3D7690] shadow-sm transition-all"
                                 >
                                     <Plus size={14} /> Map Global Course
                                 </button>
@@ -559,7 +559,7 @@ const CollegeDetail = () => {
                                                     {mc.courseId?.description && <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 max-w-sm">{mc.courseId.description}</p>}
                                                 </td>
                                                 <td className="px-5 py-4">
-                                                    <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#004AAD] font-bold text-[10px] uppercase">
+                                                    <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#5899B5] font-bold text-[10px] uppercase">
                                                         {mc.courseId?.program || 'EWDP'}
                                                     </span>
                                                 </td>
@@ -601,13 +601,13 @@ const CollegeDetail = () => {
                     <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 gap-4">
                             <div>
-                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Users className="text-[#004AAD]" size={18} /> Course Trainer Assignment</h3>
+                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Users className="text-[#5899B5]" size={18} /> Course Trainer Assignment</h3>
                                 <p className="text-xs text-slate-400 mt-0.5">Assign qualified trainers to delivered curricula.</p>
                             </div>
                             {!isReadOnly && activeMappedCourses.length > 0 && (
                                 <button 
                                     onClick={() => { setModalError(''); setIsTrainerModalOpen(true); }}
-                                    className="flex items-center gap-2 px-4 py-2 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] shadow-sm transition-all"
+                                    className="flex items-center gap-2 px-4 py-2 bg-[#5899B5] text-white text-xs font-bold rounded-xl hover:bg-[#3D7690] shadow-sm transition-all"
                                 >
                                     <Plus size={14} /> Assign Trainer to Course
                                 </button>
@@ -630,7 +630,7 @@ const CollegeDetail = () => {
                                             onClick={() => setSelectedCourseForTrainers(mc.courseId._id)}
                                             className={`w-full px-4 py-3 text-left rounded-xl border text-xs font-bold transition-all flex flex-col gap-1 ${
                                                 selectedCourseForTrainers === mc.courseId._id
-                                                    ? 'bg-blue-50 border-[#004AAD] text-[#004AAD]'
+                                                    ? 'bg-blue-50 border-[#5899B5] text-[#5899B5]'
                                                     : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                         >
@@ -647,7 +647,7 @@ const CollegeDetail = () => {
                                     </span>
 
                                     {loadingTrainers ? (
-                                        <div className="flex h-32 items-center justify-center"><Loader2 className="animate-spin text-[#004AAD]" size={24} /></div>
+                                        <div className="flex h-32 items-center justify-center"><Loader2 className="animate-spin text-[#5899B5]" size={24} /></div>
                                     ) : courseTrainers.length === 0 ? (
                                         <div className="py-10 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
                                             <Users className="mx-auto text-slate-300 mb-2" size={24} />
@@ -676,7 +676,7 @@ const CollegeDetail = () => {
                                                                 <code className="px-2 py-0.5 bg-slate-100 text-xs font-mono font-bold text-slate-600 rounded-md border border-slate-200/50 uppercase">{ct.trainerId?.employeeId || '—'}</code>
                                                             </td>
                                                             <td className="px-5 py-4">
-                                                                <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#004AAD] font-bold text-[10px] uppercase">
+                                                                <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#5899B5] font-bold text-[10px] uppercase">
                                                                     {ct.trainerId?.program || '—'}
                                                                 </span>
                                                             </td>
@@ -717,14 +717,14 @@ const CollegeDetail = () => {
                     <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center border-b border-slate-100 pb-4 gap-4">
                             <div>
-                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Layers className="text-[#004AAD]" size={18} /> College Batches</h3>
+                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Layers className="text-[#5899B5]" size={18} /> College Batches</h3>
                                 <p className="text-xs text-slate-400 mt-0.5">Manage study cohorts, departments, and course-trainer mappings.</p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="relative w-52 sm:w-60">
                                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                     <input 
-                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]" 
+                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#5899B5]" 
                                         placeholder="Search batches..." 
                                         value={batchSearch} 
                                         onChange={(e) => setBatchSearch(e.target.value)} 
@@ -733,7 +733,7 @@ const CollegeDetail = () => {
                                 {!isReadOnly && activeMappedCourses.length > 0 && (
                                     <button 
                                         onClick={() => { setModalError(''); setIsBatchModalOpen(true); }}
-                                        className="flex items-center gap-2 px-4 py-2 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] shadow-sm transition-all shrink-0"
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#5899B5] text-white text-xs font-bold rounded-xl hover:bg-[#3D7690] shadow-sm transition-all shrink-0"
                                     >
                                         <Plus size={14} /> Add Batch
                                     </button>
@@ -777,7 +777,7 @@ const CollegeDetail = () => {
                                                     {b.trainerId ? `${b.trainerId.firstName} ${b.trainerId.lastName}` : '—'}
                                                 </td>
                                                 <td className="px-5 py-4">
-                                                    <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#004AAD] font-bold text-[10px] uppercase">
+                                                    <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#5899B5] font-bold text-[10px] uppercase">
                                                         {b.program || 'EWDP'}
                                                     </span>
                                                 </td>
@@ -796,7 +796,7 @@ const CollegeDetail = () => {
                                                     <div className="flex justify-end gap-1">
                                                         <Link 
                                                             to={`/admin/batches/${b._id}`}
-                                                            className="p-1.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors inline-block"
+                                                            className="p-1.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors inline-block"
                                                             title="Roster & Imports"
                                                         >
                                                             <ExternalLink size={16} />
@@ -826,13 +826,13 @@ const CollegeDetail = () => {
                     <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center border-b border-slate-100 pb-4 gap-4">
                             <div>
-                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Users className="text-[#004AAD]" size={18} /> Student Registry</h3>
+                                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Users className="text-[#5899B5]" size={18} /> Student Registry</h3>
                                 <p className="text-xs text-slate-400 mt-0.5">Overview of imported students active at this institution.</p>
                             </div>
                             <div className="relative w-full sm:w-64">
                                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input 
-                                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#004AAD]" 
+                                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:border-[#5899B5]" 
                                     placeholder="Search by Name, USN, Department..." 
                                     value={studentSearch} 
                                     onChange={(e) => setStudentSearch(e.target.value)} 
@@ -871,7 +871,7 @@ const CollegeDetail = () => {
                                                 </td>
                                                 <td className="px-5 py-4 font-medium">
                                                     {s.batchId ? (
-                                                        <Link to={`/admin/batches/${s.batchId._id || s.batchId}`} className="text-[#004AAD] hover:underline font-semibold flex items-center gap-1">
+                                                        <Link to={`/admin/batches/${s.batchId._id || s.batchId}`} className="text-[#5899B5] hover:underline font-semibold flex items-center gap-1">
                                                             {s.batchId.batchName || 'View Batch'} <ExternalLink size={11} />
                                                         </Link>
                                                     ) : (
@@ -918,7 +918,7 @@ const CollegeDetail = () => {
                                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Select Course *</label>
                                 <select 
                                     required 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none transition-all cursor-pointer text-slate-700 font-semibold"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none transition-all cursor-pointer text-slate-700 font-semibold"
                                     value={courseFormData.courseId}
                                     onChange={(e) => setCourseFormData({...courseFormData, courseId: e.target.value})}
                                 >
@@ -930,7 +930,7 @@ const CollegeDetail = () => {
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Custom Duration (optional)</label>
                                 <input 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                     placeholder="e.g. 40 Hours / 4 Weeks" 
                                     value={courseFormData.customDuration}
                                     onChange={(e) => setCourseFormData({...courseFormData, customDuration: e.target.value})}
@@ -942,7 +942,7 @@ const CollegeDetail = () => {
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Start Date</label>
                                     <input 
                                         type="date" 
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                         value={courseFormData.startDate}
                                         onChange={(e) => setCourseFormData({...courseFormData, startDate: e.target.value})}
                                     />
@@ -951,7 +951,7 @@ const CollegeDetail = () => {
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">End Date</label>
                                     <input 
                                         type="date" 
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                         value={courseFormData.endDate}
                                         onChange={(e) => setCourseFormData({...courseFormData, endDate: e.target.value})}
                                     />
@@ -960,7 +960,7 @@ const CollegeDetail = () => {
 
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setIsCourseModalOpen(false)} className="flex-1 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Cancel</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-xs font-extrabold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
+                                <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-xs font-extrabold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
                                     {submitting && <Loader2 size={14} className="animate-spin" />} Map Course
                                 </button>
                             </div>
@@ -992,7 +992,7 @@ const CollegeDetail = () => {
                                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Select Trainer *</label>
                                 <select 
                                     required 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none transition-all cursor-pointer text-slate-700 font-semibold"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none transition-all cursor-pointer text-slate-700 font-semibold"
                                     value={trainerFormData.trainerId}
                                     onChange={(e) => setTrainerFormData({ trainerId: e.target.value })}
                                 >
@@ -1005,7 +1005,7 @@ const CollegeDetail = () => {
 
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setIsTrainerModalOpen(false)} className="flex-1 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Cancel</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-xs font-extrabold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
+                                <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-xs font-extrabold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
                                     {submitting && <Loader2 size={14} className="animate-spin" />} Assign
                                 </button>
                             </div>
@@ -1030,7 +1030,7 @@ const CollegeDetail = () => {
                                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Select Course *</label>
                                 <select 
                                     required 
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none transition-all cursor-pointer text-slate-700 font-semibold"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none transition-all cursor-pointer text-slate-700 font-semibold"
                                     value={batchFormData.courseId}
                                     onChange={(e) => {
                                         const cId = e.target.value;
@@ -1055,7 +1055,7 @@ const CollegeDetail = () => {
                                 <select 
                                     required 
                                     disabled={!batchFormData.courseId}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none transition-all cursor-pointer text-slate-700 font-semibold disabled:opacity-50"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none transition-all cursor-pointer text-slate-700 font-semibold disabled:opacity-50"
                                     value={batchFormData.trainerId}
                                     onChange={(e) => setBatchFormData({ ...batchFormData, trainerId: e.target.value })}
                                 >
@@ -1073,7 +1073,7 @@ const CollegeDetail = () => {
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Batch Name *</label>
                                     <input 
                                         required 
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                         placeholder="e.g. Batch-01" 
                                         value={batchFormData.batchName}
                                         onChange={(e) => setBatchFormData({...batchFormData, batchName: e.target.value})}
@@ -1083,7 +1083,7 @@ const CollegeDetail = () => {
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Department *</label>
                                     <input 
                                         required 
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                         placeholder="e.g. CSE" 
                                         value={batchFormData.department}
                                         onChange={(e) => setBatchFormData({...batchFormData, department: e.target.value})}
@@ -1096,7 +1096,7 @@ const CollegeDetail = () => {
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Start Date</label>
                                     <input 
                                         type="date" 
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                         value={batchFormData.startDate}
                                         onChange={(e) => setBatchFormData({...batchFormData, startDate: e.target.value})}
                                     />
@@ -1105,7 +1105,7 @@ const CollegeDetail = () => {
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">End Date</label>
                                     <input 
                                         type="date" 
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800" 
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800" 
                                         value={batchFormData.endDate}
                                         onChange={(e) => setBatchFormData({...batchFormData, endDate: e.target.value})}
                                     />
@@ -1114,7 +1114,7 @@ const CollegeDetail = () => {
 
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setIsBatchModalOpen(false)} className="flex-1 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Cancel</button>
-                                <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-xs font-extrabold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
+                                <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-xs font-extrabold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
                                     {submitting && <Loader2 size={14} className="animate-spin" />} Create Cohort
                                 </button>
                             </div>

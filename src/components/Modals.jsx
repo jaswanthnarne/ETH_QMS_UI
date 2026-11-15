@@ -31,7 +31,7 @@ export const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confi
                     </button>
                     <button 
                         onClick={() => { onConfirm(); onClose(); }}
-                        className={`px-4 py-2 font-semibold text-white rounded-lg transition-colors shadow-sm text-sm ${isDanger ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : 'bg-[#004AAD] hover:bg-blue-800 shadow-blue-200'}`}
+                        className={`px-4 py-2 font-semibold text-white rounded-lg transition-colors shadow-sm text-sm ${isDanger ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : 'bg-[#5899B5] hover:bg-blue-800 shadow-blue-200'}`}
                     >
                         {confirmText}
                     </button>
@@ -64,7 +64,7 @@ export const AlertModal = ({ isOpen, onClose, title, message, type = 'info' }) =
                     
                     <button 
                         onClick={onClose}
-                        className={`w-full py-3 font-bold text-white rounded-xl transition-all shadow-sm ${type === 'error' ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' : 'bg-[#004AAD] hover:bg-blue-800 shadow-blue-200'}`}
+                        className={`w-full py-3 font-bold text-white rounded-xl transition-all shadow-sm ${type === 'error' ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200' : type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' : 'bg-[#5899B5] hover:bg-blue-800 shadow-blue-200'}`}
                     >
                         Got it
                     </button>

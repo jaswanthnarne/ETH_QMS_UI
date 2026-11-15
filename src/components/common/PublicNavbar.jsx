@@ -1,158 +1,147 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 
-const navItems = [
-    { label: 'Student Portal', href: '/' }
+const navLinks = [
+    { label: 'Features', to: '/features' },
+    { label: 'How it works', to: '/how-it-works' },
+    { label: 'Campus life', to: '/campus-life', aliases: ['/campus'] },
+    { label: 'Tracks', to: '/tracks' },
+    { label: 'FAQ', to: '/faq' },
 ];
 
-const DropdownMenu = ({ items, isDarkText }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 8, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 8, scale: 0.97 }}
-        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute top-full left-0 mt-2 w-56 bg-white border border-slate-100 rounded-xl shadow-xl shadow-slate-200/50 overflow-hidden z-50">
-        {items.map((item, i) => (
-            <a key={i} href={item.href}
-                className="flex items-center justify-between px-4 py-3 text-[13px] font-medium text-slate-600 hover:bg-blue-50/60 hover:text-[#004AAD] transition-colors group border-b border-slate-50 last:border-b-0">
-                {item.label}
-                <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-            </a>
-        ))}
-    </motion.div>
-);
-
-const PublicNavbar = ({ isDarkTheme = false }) => {
-    const navigate = useNavigate();
+const PublicNavbar = () => {
     const location = useLocation();
     const [mobileMenu, setMobileMenu] = useState(false);
-    const [navScrolled, setNavScrolled] = useState(false);
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const [mobileExpanded, setMobileExpanded] = useState(null);
-    const closeTimer = useRef(null);
+    const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
-        const handleScroll = () => setNavScrolled(window.scrollY > 30);
-        window.addEventListener('scroll', handleScroll);
-        handleScroll();
-        return () => window.removeEventListener('scroll', handleScroll);
+        const onScroll = () => setScrolled(window.scrollY > 8);
+        window.addEventListener('scroll', onScroll);
+        onScroll();
+        return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    // On sub-pages, always use dark text
-    const isHomePage = location.pathname === '/';
-    const isDarkText = navScrolled || !isDarkTheme || !isHomePage;
+    useEffect(() => {
+        setMobileMenu(false);
+        if (location.hash === '#login') {
+            setTimeout(() => {
+                document.querySelector('#login')?.scrollIntoView({ behavior: 'smooth' });
+            }, 60);
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [location.pathname, location.hash]);
 
-    const handleEnter = (label) => {
-        clearTimeout(closeTimer.current);
-        setOpenDropdown(label);
+    const isHome = ['/', '/portal', '/assessment'].includes(location.pathname);
+
+    const handleLoginClick = (e) => {
+        setMobileMenu(false);
+        if (isHome) {
+            e.preventDefault();
+            document.querySelector('#login')?.scrollIntoView({ behavior: 'smooth' });
+        }
     };
-    const handleLeave = () => {
-        closeTimer.current = setTimeout(() => setOpenDropdown(null), 120);
+
+    const isActiveLink = (link) => {
+        if (location.pathname === link.to) return true;
+        if (link.aliases && link.aliases.includes(location.pathname)) return true;
+        return false;
     };
 
     return (
-        <motion.header
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className={`fixed top-0 w-full z-50 transition-all duration-500 ${isDarkText
-                    ? 'bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 border-b border-slate-100'
-                    : 'bg-transparent'
-                }`}
+        <header
+            className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/75 backdrop-blur-xl backdrop-saturate-150 ${
+                scrolled
+                    ? 'border-b border-slate-200/80 shadow-[0_8px_30px_-10px_rgba(15,23,42,0.10),inset_0_1px_0_0_rgba(255,255,255,0.9)]'
+                    : 'border-b border-slate-200/70 shadow-[0_2px_16px_-6px_rgba(15,23,42,0.05),inset_0_1px_0_0_rgba(255,255,255,0.9)]'
+            }`}
         >
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-                <a href="/" className="flex items-center gap-3 group">
-                    <motion.img
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                        src="/assets/cropped-New-logo-footer-270x270.png"
-                        alt="Ethnotech"
-                        className={`h-10 w-10 ${(!isDarkText) ? 'brightness-0 invert' : ''}`}
-                    />
+            <div className="max-w-6xl mx-auto px-5 lg:px-6 h-16 flex items-center justify-between gap-6">
+                <Link to="/" className="flex items-center gap-2.5 shrink-0">
+                    <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech Academy" className="h-8 w-8 object-contain" />
                     <div className="leading-tight">
-                        <span className={`text-lg font-bold tracking-tight block transition-colors ${isDarkText ? 'text-slate-900' : 'text-white'}`}>Ethnotech</span>
-                        <span className={`text-[10px] font-semibold uppercase tracking-wider transition-colors ${isDarkText ? 'text-[#004AAD]' : 'text-blue-300'}`}>Academy</span>
+                        <span className="block text-[15px] font-bold text-slate-900 tracking-tight">Ethnotech Academy</span>
+                        <span className="block text-[11px] text-slate-500">Student Learning Portal</span>
                     </div>
-                </a>
+                </Link>
 
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center">
-                    {navItems.map((item) => (
-                        <a key={item.label} href={item.href}
-                            className={`inline-flex items-center justify-center px-5 py-2 text-sm font-semibold rounded-full transition ${
-                                isDarkText
-                                    ? 'bg-[#004AAD] text-white shadow-md shadow-blue-500/10 hover:bg-[#003580]'
-                                    : 'bg-white text-[#004AAD] hover:bg-slate-50'
-                            }`}>
-                            {item.label}
-                        </a>
-                    ))}
-                </div>
+                <nav className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-xl bg-white/70 border border-slate-200/70 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)]">
+                    {navLinks.map((l) => {
+                        const active = isActiveLink(l);
+                        return (
+                            <Link
+                                key={l.label}
+                                to={l.to}
+                                className={`px-3.5 py-1.5 rounded-lg text-sm transition-all ${
+                                    active
+                                        ? 'text-[#004AAD] font-semibold bg-sky-50/90 border border-sky-200/90 shadow-2xs'
+                                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/80 font-medium'
+                                }`}
+                            >
+                                {l.label}
+                            </Link>
+                        );
+                    })}
+                </nav>
 
-                <div className="flex items-center gap-3 md:hidden">
-                    <button
-                        onClick={() => setMobileMenu(!mobileMenu)}
-                        className={`p-2 rounded-lg transition-colors ${isDarkText
-                                ? 'text-slate-600 hover:bg-slate-100'
-                                : 'text-white hover:bg-white/10'
-                            }`}
+                <div className="hidden md:flex items-center gap-4 shrink-0">
+                    {/* <a href="/console/admin" className="text-sm text-slate-600 hover:text-slate-900">
+                            Staff login
+                        </a> */}
+                    <Link
+                        to="/#login"
+                        onClick={handleLoginClick}
+                        className="text-sm font-semibold px-4 py-2 rounded-xl bg-[#004AAD] text-white hover:bg-[#003882] shadow-[0_4px_14px_-3px_rgba(0,74,173,0.35),inset_0_1px_0_0_rgba(255,255,255,0.25)] transition-all"
                     >
-                        {mobileMenu ? <X size={24} /> : <Menu size={24} />}
-                    </button>
+                        Student login
+                    </Link>
                 </div>
+
+                <button
+                    onClick={() => setMobileMenu(!mobileMenu)}
+                    className="md:hidden p-2 -mr-2 text-slate-700"
+                    aria-label="Toggle menu"
+                >
+                    {mobileMenu ? <X size={22} /> : <Menu size={22} />}
+                </button>
             </div>
 
-            {/* Mobile Menu */}
-            <AnimatePresence>
-                {mobileMenu && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-white border-t border-slate-100 overflow-hidden shadow-2xl">
-                        <div className="px-6 py-4 space-y-1">
-                            {navItems.map((item) =>
-                                item.dropdown ? (
-                                    <div key={item.label}>
-                                        <button
-                                            onClick={() => setMobileExpanded(mobileExpanded === item.label ? null : item.label)}
-                                            className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 rounded-lg hover:bg-blue-50 hover:text-[#004AAD] transition-colors">
-                                            {item.label}
-                                            <ChevronDown size={14} className={`transition-transform ${mobileExpanded === item.label ? 'rotate-180' : ''}`} />
-                                        </button>
-                                        <AnimatePresence>
-                                            {mobileExpanded === item.label && (
-                                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                                    <div className="pl-4 pb-1 space-y-1">
-                                                        {item.dropdown.map((sub, i) => (
-                                                            <a key={i} href={sub.href}
-                                                                onClick={() => setMobileMenu(false)}
-                                                                className="block px-4 py-2.5 text-[13px] font-medium text-slate-500 rounded-lg hover:bg-blue-50/70 hover:text-[#004AAD] transition-colors">
-                                                                {sub.label}
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                ) : (
-                                    <a key={item.label} href={item.href}
-                                        onClick={() => setMobileMenu(false)}
-                                        className="block px-4 py-3 text-sm font-semibold text-slate-700 rounded-lg hover:bg-blue-50 hover:text-[#004AAD] transition-colors">
-                                        {item.label}
-                                    </a>
-                                )
-                            )}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.header>
+            {mobileMenu && (
+                <div className="md:hidden border-t border-slate-200/80 bg-white/90 backdrop-blur-xl px-5 py-3">
+                    {navLinks.map((l) => {
+                        const active = isActiveLink(l);
+                        return (
+                            <Link
+                                key={l.label}
+                                to={l.to}
+                                onClick={() => setMobileMenu(false)}
+                                className={`block py-2.5 px-3 rounded-lg text-[15px] ${
+                                    active
+                                        ? 'text-[#004AAD] font-semibold bg-sky-50'
+                                        : 'text-slate-700'
+                                }`}
+                            >
+                                {l.label}
+                            </Link>
+                        );
+                    })}
+                    <div className="flex gap-3 pt-3 mt-2 border-t border-slate-100">
+                        {/* <a href="/console/admin" className="flex-1 text-center text-sm py-2.5 rounded-lg border border-slate-300 text-slate-700">
+                            Staff login
+                        </a> */}
+                        <Link
+                            to="/#login"
+                            onClick={handleLoginClick}
+                            className="flex-1 text-center text-sm font-semibold py-2.5 rounded-lg bg-[#004AAD] text-white"
+                        >
+                            Student login
+                        </Link>
+                    </div>
+                </div>
+            )}
+        </header>
     );
 };
 
 export default PublicNavbar;
-

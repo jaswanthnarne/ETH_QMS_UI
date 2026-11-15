@@ -124,7 +124,7 @@ const AuditLogs = () => {
                         <div className="relative">
                             <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             <select
-                                className="pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-650 outline-none focus:border-[#004AAD] appearance-none cursor-pointer"
+                                className="pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-650 outline-none focus:border-[#5899B5] appearance-none cursor-pointer"
                                 value={actionFilter}
                                 onChange={e => { setActionFilter(e.target.value); setPagination(p => ({ ...p, page: 1 })); }}
                             >
@@ -137,7 +137,7 @@ const AuditLogs = () => {
                         <div className="relative w-72">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
-                                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD]"
+                                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5]"
                                 placeholder="Search logs..."
                                 value={search}
                                 onChange={e => { setSearch(e.target.value); setPagination(p => ({ ...p, page: 1 })); }}
@@ -232,7 +232,7 @@ const AuditLogs = () => {
                                         key={p}
                                         onClick={() => setPagination(prev => ({ ...prev, page: p }))}
                                         className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${pagination.page === p
-                                                ? 'bg-[#004AAD] text-white'
+                                                ? 'bg-[#5899B5] text-white'
                                                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                     >

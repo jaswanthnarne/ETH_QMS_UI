@@ -178,7 +178,7 @@ const TrainerExams = () => {
                 </div>
                 <button
                     onClick={() => navigate('/trainer/exams/create')}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] shadow-sm transition-all active:scale-95"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] shadow-sm transition-all active:scale-95"
                 >
                     <Plus size={16} /> Create Exam
                 </button>
@@ -188,7 +188,7 @@ const TrainerExams = () => {
             <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                        <FileText size={18} className="text-[#004AAD]" />
+                        <FileText size={18} className="text-[#5899B5]" />
                     </div>
                     <div>
                         <p className="text-xs text-slate-500">Total</p>
@@ -220,7 +220,7 @@ const TrainerExams = () => {
                 <div className="relative w-full max-w-sm">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
-                        className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD] transition-colors"
+                        className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5] transition-colors"
                         placeholder="Search by title, course..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -235,7 +235,7 @@ const TrainerExams = () => {
                         <button
                             key={f.key}
                             onClick={() => setStatusFilter(f.key)}
-                            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${statusFilter === f.key ? 'bg-[#004AAD] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${statusFilter === f.key ? 'bg-[#5899B5] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
                         >
                             {f.label}
                         </button>
@@ -280,14 +280,14 @@ const TrainerExams = () => {
                                 <div className="p-5 flex-1">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
-                                            <span className="px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded text-[11px] font-bold tracking-wide">
+                                            <span className="px-2 py-0.5 bg-blue-50 text-[#5899B5] rounded text-[11px] font-bold tracking-wide">
                                                 {exam.courseCode || '—'}
                                             </span>
                                         </div>
                                         <StatusBadge status={exam.status} />
                                     </div>
 
-                                    <h4 className="text-[15px] font-bold text-slate-900 mb-1 line-clamp-2 leading-snug group-hover:text-[#004AAD] transition-colors">
+                                    <h4 className="text-[15px] font-bold text-slate-900 mb-1 line-clamp-2 leading-snug group-hover:text-[#5899B5] transition-colors">
                                         {exam.title}
                                     </h4>
                                     <p className="text-xs text-slate-400 mb-4 flex items-center gap-1">
@@ -344,7 +344,7 @@ const TrainerExams = () => {
                                     ) : (
                                         <button
                                             onClick={() => navigate(`/trainer/monitor/${firstKey}`)}
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-[#004AAD] hover:bg-[#003580] text-white rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95"
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-[#5899B5] hover:bg-[#3D7690] text-white rounded-lg text-xs font-semibold transition-all shadow-sm active:scale-95"
                                         >
                                             <Play size={13} fill="currentColor" /> Proctor
                                         </button>
@@ -364,7 +364,7 @@ const TrainerExams = () => {
                                         {isOwner && (
                                             <button
                                                 onClick={() => navigate(`/trainer/exams/edit/${exam.id}`)}
-                                                className="p-2 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors"
                                                 title="Edit"
                                             >
                                                 <Edit size={14} />

@@ -357,7 +357,7 @@ const WaitingRoom = () => {
 
     if (loading) return (
         <div className="h-[50vh] flex flex-col items-center justify-center gap-3">
-            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+            <Loader2 className="animate-spin text-[#5899B5]" size={28} />
             <p className="text-sm text-slate-400">Loading waiting room...</p>
         </div>
     );
@@ -375,7 +375,7 @@ const WaitingRoom = () => {
                         <h1 className="text-2xl font-bold text-slate-900">{exam?.title || 'Exam Room'}</h1>
                         <div className="flex items-center gap-3 mt-1">
                             {exam?.courseCode && (
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#004AAD] bg-blue-50 px-2 py-0.5 rounded">
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#5899B5] bg-blue-50 px-2 py-0.5 rounded">
                                     <BookOpen size={10} /> {exam.courseCode}
                                 </span>
                             )}
@@ -391,7 +391,7 @@ const WaitingRoom = () => {
                         <button 
                             onClick={handleStartSession} 
                             disabled={starting}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-xl hover:bg-[#003580] transition-all shadow-lg shadow-blue-200 disabled:opacity-50"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-xl hover:bg-[#3D7690] transition-all shadow-lg shadow-blue-200 disabled:opacity-50"
                         >
                             {starting ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />} 
                             {starting ? 'Starting...' : 'Start Session'}
@@ -443,7 +443,7 @@ const WaitingRoom = () => {
                             <RotateCcw size={15} /> Reopen Key
                         </button>
                     )}
-                    <button onClick={fetchRoomData} className="p-2 text-slate-400 hover:text-[#004AAD] border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">
+                    <button onClick={fetchRoomData} className="p-2 text-slate-400 hover:text-[#5899B5] border border-slate-200 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">
                         <RefreshCcw size={16} />
                     </button>
                     <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors whitespace-nowrap">
@@ -677,7 +677,7 @@ const WaitingRoom = () => {
                             <div key={msg.id || i} className={`flex ${msg.senderRole === 'trainer' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
                                     msg.senderRole === 'trainer'
-                                        ? 'bg-[#004AAD] text-white rounded-br-md'
+                                        ? 'bg-[#5899B5] text-white rounded-br-md'
                                         : 'bg-slate-100 text-slate-800 rounded-bl-md'
                                 }`}>
                                     {msg.senderRole === 'student' && (
@@ -702,14 +702,14 @@ const WaitingRoom = () => {
                                 value={chatInput}
                                 onChange={(e) => setChatInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-                                className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                 placeholder="Type a reply..."
                                 maxLength={500}
                             />
                             <button
                                 onClick={handleSendChat}
                                 disabled={!chatInput.trim()}
-                                className="px-4 py-2.5 bg-[#004AAD] text-white rounded-xl hover:bg-[#003580] disabled:opacity-40 transition-all"
+                                className="px-4 py-2.5 bg-[#5899B5] text-white rounded-xl hover:bg-[#3D7690] disabled:opacity-40 transition-all"
                             >
                                 <Send size={16} />
                             </button>

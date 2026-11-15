@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Scale, ShieldCheck, Lock } from 'lucide-react';
 
 const termsContent = (
-    <div className="prose prose-slate max-w-none prose-headings:text-[#004AAD] prose-headings:font-bold">
+    <div className="prose prose-slate max-w-none prose-headings:text-[#5899B5] prose-headings:font-bold">
         <h2>1. Acceptance of Terms</h2>
         <p>By accessing or using the Ethnotech Academy assessment platform and related services, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our services.</p>
 
@@ -24,7 +24,7 @@ const termsContent = (
         
         <div className="mt-8 p-6 bg-blue-50 rounded-2xl border border-blue-100">
             <h3 className="text-xl font-bold text-slate-800 mb-2 mt-0">Questions regarding our terms?</h3>
-            <p className="mb-0 text-slate-600">Please reach out to our support team at <a href="mailto:info@ethnotech.in" className="text-[#004AAD] font-semibold no-underline hover:underline">info@ethnotech.in</a> for clarification on any of the points mentioned above.</p>
+            <p className="mb-0 text-slate-600">Please reach out to our support team at <a href="mailto:info@ethnotech.in" className="text-[#5899B5] font-semibold no-underline hover:underline">info@ethnotech.in</a> for clarification on any of the points mentioned above.</p>
         </div>
     </div>
 );

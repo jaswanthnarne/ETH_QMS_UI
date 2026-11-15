@@ -101,7 +101,7 @@ const AttendanceHistory = () => {
             const summarySheet = workbook.addWorksheet('Summary Logs');
             // Heading
             summarySheet.addRow([`Batch Attendance Summary — ${batch?.batchName || 'Batch'}`]);
-            summarySheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            summarySheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             summarySheet.mergeCells(1, 1, 1, 7);
             summarySheet.getRow(1).height = 28;
 
@@ -120,7 +120,7 @@ const AttendanceHistory = () => {
             const headers1 = ['S.No', 'Date', 'Period / Hour', 'Topic Covered', 'Module', 'Head Count', 'Attendance %'];
             const headerRow1 = summarySheet.addRow(headers1);
             headerRow1.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRow1.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRow1.height = 28;
 
@@ -166,7 +166,7 @@ const AttendanceHistory = () => {
             const registerSheet = workbook.addWorksheet('Student Register');
 
             registerSheet.addRow([`Student Attendance Register — ${batch?.batchName || 'Batch'}`]);
-            registerSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            registerSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             registerSheet.mergeCells(1, 1, 1, 4 + chronologicalSessions.length + 3);
             registerSheet.getRow(1).height = 28;
 
@@ -184,16 +184,16 @@ const AttendanceHistory = () => {
             ];
             const headerRow2 = registerSheet.addRow(headers2);
             headerRow2.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRow2.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
             headerRow2.height = 32;
 
             headerRow2.eachCell((cell) => {
                 cell.border = {
-                    top: { style: 'thin', color: { argb: 'FF003580' } },
-                    bottom: { style: 'thin', color: { argb: 'FF003580' } },
-                    left: { style: 'thin', color: { argb: 'FF003580' } },
-                    right: { style: 'thin', color: { argb: 'FF003580' } },
+                    top: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    bottom: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    left: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    right: { style: 'thin', color: { argb: 'FF3D7690' } },
                 };
             });
 
@@ -316,7 +316,7 @@ const AttendanceHistory = () => {
     if (loading) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={36} />
             </div>
         );
     }
@@ -327,7 +327,7 @@ const AttendanceHistory = () => {
             <div className="flex flex-col gap-3">
                 <button 
                     onClick={() => navigate('/trainer/attendance')} 
-                    className="flex items-center gap-2 text-slate-500 hover:text-[#004AAD] text-sm font-bold w-fit transition-all active:translate-x-[-2px]"
+                    className="flex items-center gap-2 text-slate-500 hover:text-[#5899B5] text-sm font-bold w-fit transition-all active:translate-x-[-2px]"
                 >
                     <ArrowLeft size={16} /> Back to Batches
                 </button>
@@ -352,7 +352,7 @@ const AttendanceHistory = () => {
 
                         <button
                             onClick={() => navigate(`/trainer/attendance/mark/${batchId}`)}
-                            className="px-4 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-md shadow-blue-50 transition-all cursor-pointer"
+                            className="px-4 py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-md shadow-blue-50 transition-all cursor-pointer"
                         >
                             <Plus size={16} /> New Session Attendance
                         </button>
@@ -370,7 +370,7 @@ const AttendanceHistory = () => {
             {/* Metrics cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-50 text-[#004AAD] rounded-xl flex items-center justify-center font-extrabold text-lg border border-indigo-100">
+                    <div className="w-12 h-12 bg-indigo-50 text-[#5899B5] rounded-xl flex items-center justify-center font-extrabold text-lg border border-indigo-100">
                         {stats.totalSessions}
                     </div>
                     <div>
@@ -463,7 +463,7 @@ const AttendanceHistory = () => {
                                                         <>
                                                             <button 
                                                                 onClick={() => navigate(`/trainer/attendance/mark/${batchId}?sessionId=${sess._id}`)}
-                                                                className="p-1.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors"
+                                                                className="p-1.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors"
                                                                 title="Edit Session Attendance"
                                                             >
                                                                 <Edit2 size={15} />

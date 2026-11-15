@@ -57,7 +57,7 @@ const TrainerAttendance = () => {
             const summarySheet = workbook.addWorksheet('Summary Logs');
             // Heading
             summarySheet.addRow([`Batch Attendance Summary — ${batch.batchName}`]);
-            summarySheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            summarySheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             summarySheet.mergeCells(1, 1, 1, 7);
             summarySheet.getRow(1).height = 28;
 
@@ -76,7 +76,7 @@ const TrainerAttendance = () => {
             const headers1 = ['S.No', 'Date', 'Period / Hour', 'Topic Covered', 'Module', 'Head Count', 'Attendance %'];
             const headerRow1 = summarySheet.addRow(headers1);
             headerRow1.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRow1.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRow1.height = 28;
 
@@ -121,7 +121,7 @@ const TrainerAttendance = () => {
             const registerSheet = workbook.addWorksheet('Student Register');
 
             registerSheet.addRow([`Student Attendance Register — ${batch.batchName}`]);
-            registerSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            registerSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             registerSheet.mergeCells(1, 1, 1, 4 + chronologicalSessions.length + 3);
             registerSheet.getRow(1).height = 28;
 
@@ -139,16 +139,16 @@ const TrainerAttendance = () => {
             ];
             const headerRow2 = registerSheet.addRow(headers2);
             headerRow2.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRow2.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
             headerRow2.height = 32;
 
             headerRow2.eachCell((cell) => {
                 cell.border = {
-                    top: { style: 'thin', color: { argb: 'FF003580' } },
-                    bottom: { style: 'thin', color: { argb: 'FF003580' } },
-                    left: { style: 'thin', color: { argb: 'FF003580' } },
-                    right: { style: 'thin', color: { argb: 'FF003580' } },
+                    top: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    bottom: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    left: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    right: { style: 'thin', color: { argb: 'FF3D7690' } },
                 };
             });
 
@@ -273,7 +273,7 @@ const TrainerAttendance = () => {
             // --- SHEET 1: Overview ---
             const overviewSheet = workbook.addWorksheet('Batches Overview');
             overviewSheet.addRow([`Trainer Batches Attendance Overview`]);
-            overviewSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            overviewSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             overviewSheet.mergeCells(1, 1, 1, 6);
             overviewSheet.getRow(1).height = 28;
 
@@ -287,7 +287,7 @@ const TrainerAttendance = () => {
             const headersOverview = ['S.No', 'Batch Name', 'College', 'Course', 'Department', 'Roster Size'];
             const headerRowOverview = overviewSheet.addRow(headersOverview);
             headerRowOverview.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRowOverview.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRowOverview.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRowOverview.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRowOverview.height = 28;
 
@@ -340,7 +340,7 @@ const TrainerAttendance = () => {
                 // Add Summary Sheet
                 const summarySheet = workbook.addWorksheet(`${cleanBatchName}_Summary`);
                 summarySheet.addRow([`Batch Summary — ${batch.batchName}`]);
-                summarySheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+                summarySheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
                 summarySheet.mergeCells(1, 1, 1, 7);
                 summarySheet.getRow(1).height = 28;
 
@@ -359,7 +359,7 @@ const TrainerAttendance = () => {
                 const headers1 = ['S.No', 'Date', 'Period / Hour', 'Topic Covered', 'Module', 'Head Count', 'Attendance %'];
                 const headerRow1 = summarySheet.addRow(headers1);
                 headerRow1.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-                headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+                headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
                 headerRow1.alignment = { vertical: 'middle', horizontal: 'center' };
                 headerRow1.height = 28;
 
@@ -403,7 +403,7 @@ const TrainerAttendance = () => {
                 // Add Register Sheet
                 const registerSheet = workbook.addWorksheet(`${cleanBatchName}_Register`);
                 registerSheet.addRow([`Student Register — ${batch.batchName}`]);
-                registerSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+                registerSheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
                 registerSheet.mergeCells(1, 1, 1, 4 + chronologicalSessions.length + 3);
                 registerSheet.getRow(1).height = 28;
 
@@ -421,16 +421,16 @@ const TrainerAttendance = () => {
                 ];
                 const headerRow2 = registerSheet.addRow(headers2);
                 headerRow2.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-                headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+                headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
                 headerRow2.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
                 headerRow2.height = 32;
 
                 headerRow2.eachCell((cell) => {
                     cell.border = {
-                        top: { style: 'thin', color: { argb: 'FF003580' } },
-                        bottom: { style: 'thin', color: { argb: 'FF003580' } },
-                        left: { style: 'thin', color: { argb: 'FF003580' } },
-                        right: { style: 'thin', color: { argb: 'FF003580' } },
+                        top: { style: 'thin', color: { argb: 'FF3D7690' } },
+                        bottom: { style: 'thin', color: { argb: 'FF3D7690' } },
+                        left: { style: 'thin', color: { argb: 'FF3D7690' } },
+                        right: { style: 'thin', color: { argb: 'FF3D7690' } },
                     };
                 });
 
@@ -550,7 +550,7 @@ const TrainerAttendance = () => {
     if (loading) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={36} />
             </div>
         );
     }
@@ -561,7 +561,7 @@ const TrainerAttendance = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2.5">
-                        <CalendarCheck className="text-[#004AAD]" size={28} />
+                        <CalendarCheck className="text-[#5899B5]" size={28} />
                         Student Attendance
                     </h1>
                     <p className="text-xs text-slate-500 mt-1">
@@ -586,7 +586,7 @@ const TrainerAttendance = () => {
                             placeholder="Search batches..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:border-[#004AAD] outline-none font-medium shadow-sm transition-all"
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:border-[#5899B5] outline-none font-medium shadow-sm transition-all"
                         />
                     </div>
                 </div>
@@ -606,11 +606,11 @@ const TrainerAttendance = () => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-blue-50 text-[#004AAD] rounded-xl flex items-center justify-center font-bold text-sm border border-blue-100 shadow-inner group-hover:scale-105 transition-transform">
+                                        <div className="w-10 h-10 bg-blue-50 text-[#5899B5] rounded-xl flex items-center justify-center font-bold text-sm border border-blue-100 shadow-inner group-hover:scale-105 transition-transform">
                                             <Layers size={18} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-slate-800 text-sm group-hover:text-[#004AAD] transition-colors">{batch.batchName}</h3>
+                                            <h3 className="font-bold text-slate-800 text-sm group-hover:text-[#5899B5] transition-colors">{batch.batchName}</h3>
                                             <span className="text-[10px] text-slate-400 font-semibold uppercase">{batch.program || 'EWDP'}</span>
                                         </div>
                                     </div>
@@ -644,7 +644,7 @@ const TrainerAttendance = () => {
                                     </button>
                                     <button
                                         onClick={() => navigate(`/trainer/attendance/mark/${batch._id}`)}
-                                        className="flex-1 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-blue-50 transition-all active:scale-98"
+                                        className="flex-1 py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-blue-50 transition-all active:scale-98"
                                     >
                                         Take Attendance <ArrowRight size={12} />
                                     </button>

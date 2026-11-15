@@ -234,7 +234,7 @@ const StudentDashboard = () => {
                         background-color: #ffffff;
                     }
                     .header {
-                        border-bottom: 3px solid #004AAD;
+                        border-bottom: 3px solid #5899B5;
                         padding-bottom: 20px;
                         margin-bottom: 30px;
                         display: flex;
@@ -257,7 +257,7 @@ const StudentDashboard = () => {
                         text-align: right;
                     }
                     .institution-badge {
-                        background-color: #004AAD;
+                        background-color: #5899B5;
                         color: white;
                         padding: 6px 12px;
                         border-radius: 6px;
@@ -285,7 +285,7 @@ const StudentDashboard = () => {
                     .section-title {
                         font-size: 16px;
                         font-weight: 700;
-                        color: #004AAD;
+                        color: #5899B5;
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                         border-bottom: 2px solid #f1f5f9;
@@ -909,7 +909,7 @@ const StudentDashboard = () => {
 
             
             {/* Glassmorphic Profile Banner */}
-            <div className="bg-gradient-to-r from-[#004AAD] to-[#003580] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
+            <div className="bg-gradient-to-r from-[#5899B5] to-[#3D7690] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:2.5rem_2.5rem]" />
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div className="space-y-3">
@@ -962,7 +962,7 @@ const StudentDashboard = () => {
                                 {/* Dashboard Widgets */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                     <div className="bg-white border border-slate-100 shadow-sm rounded-[1.5rem] p-6 flex items-center gap-4 hover:shadow-md transition-all duration-300">
-                                        <div className="p-4 bg-blue-50 text-[#004AAD] rounded-2xl">
+                                        <div className="p-4 bg-blue-50 text-[#5899B5] rounded-2xl">
                                             <BookOpen size={24} />
                                         </div>
                                         <div>
@@ -1008,14 +1008,14 @@ const StudentDashboard = () => {
                                             type="text"
                                             required
                                             placeholder="Enter Exam Key"
-                                            className="px-5 py-3 border border-slate-200 rounded-2xl outline-none font-semibold font-mono focus:border-[#004AAD] uppercase w-full md:w-44 text-sm"
+                                            className="px-5 py-3 border border-slate-200 rounded-2xl outline-none font-semibold font-mono focus:border-[#5899B5] uppercase w-full md:w-44 text-sm"
                                             value={examLauncherKey}
                                             onChange={(e) => setExamLauncherKey(e.target.value)}
                                         />
                                         <button
                                             type="submit"
                                             disabled={!examLauncherKey.trim()}
-                                            className="px-6 py-3 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer transition active:scale-[0.97] text-sm whitespace-nowrap disabled:opacity-50"
+                                            className="px-6 py-3 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer transition active:scale-[0.97] text-sm whitespace-nowrap disabled:opacity-50"
                                         >
                                             Launch <ArrowRight size={16} />
                                         </button>
@@ -1031,7 +1031,7 @@ const StudentDashboard = () => {
 
                                     {loadingExams ? (
                                         <div className="flex justify-center items-center py-10">
-                                            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                                            <Loader2 className="animate-spin text-[#5899B5]" size={28} />
                                         </div>
                                     ) : activeExams.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
@@ -1042,10 +1042,10 @@ const StudentDashboard = () => {
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             {activeExams.map((item, idx) => (
-                                                <div key={idx} className="border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-[#004AAD]/20 transition-all duration-300 bg-white flex flex-col justify-between group">
+                                                <div key={idx} className="border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-[#5899B5]/20 transition-all duration-300 bg-white flex flex-col justify-between group">
                                                     <div>
                                                         <div className="flex justify-between items-start gap-2">
-                                                            <span className="text-[10px] font-semibold text-[#004AAD] uppercase bg-blue-50 px-2.5 py-1 rounded-full tracking-wider">
+                                                            <span className="text-[10px] font-semibold text-[#5899B5] uppercase bg-blue-50 px-2.5 py-1 rounded-full tracking-wider">
                                                                 {item.exam.courseName || 'Course'}
                                                             </span>
                                                             {item.isCompleted ? (
@@ -1056,7 +1056,7 @@ const StudentDashboard = () => {
                                                                 <span className="bg-blue-500 text-white text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full animate-pulse">Active</span>
                                                             )}
                                                         </div>
-                                                        <h4 className="text-base font-semibold text-slate-800 mt-3 group-hover:text-[#004AAD] transition-colors leading-snug">
+                                                        <h4 className="text-base font-semibold text-slate-800 mt-3 group-hover:text-[#5899B5] transition-colors leading-snug">
                                                             {item.exam.title}
                                                         </h4>
                                                         
@@ -1087,7 +1087,7 @@ const StudentDashboard = () => {
                                                         ) : (
                                                             <button
                                                                 onClick={() => navigate(`/exam/${item.sessionKey}`)}
-                                                                className="w-full py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-sm group-hover:shadow-md"
+                                                                className="w-full py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-sm group-hover:shadow-md"
                                                             >
                                                                 Launch Test <ArrowRight size={14} />
                                                             </button>
@@ -1114,7 +1114,7 @@ const StudentDashboard = () => {
 
                                     {loadingAttempts ? (
                                         <div className="flex justify-center items-center py-10">
-                                            <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                                            <Loader2 className="animate-spin text-[#5899B5]" size={28} />
                                         </div>
                                     ) : attempts.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
@@ -1164,7 +1164,7 @@ const StudentDashboard = () => {
                                                                 <td className="py-4 px-4">
                                                                     {attempt.isMock ? (
                                                                         attempt.isActive && attempt.isStarted ? (
-                                                                            <span className="bg-blue-50 text-[#004AAD] text-xs font-semibold px-2.5 py-1 rounded-md border border-blue-100 inline-block animate-pulse">Pending</span>
+                                                                            <span className="bg-blue-50 text-[#5899B5] text-xs font-semibold px-2.5 py-1 rounded-md border border-blue-100 inline-block animate-pulse">Pending</span>
                                                                         ) : (
                                                                             <span className="bg-slate-50 text-slate-500 text-xs font-semibold px-2.5 py-1 rounded-md border border-slate-200 inline-block">Not Attempted</span>
                                                                         )
@@ -1180,7 +1180,7 @@ const StudentDashboard = () => {
                                                                             attempt.isActive && attempt.isStarted ? (
                                                                                 <button
                                                                                     onClick={() => navigate(`/exam/${attempt.sessionId}`)}
-                                                                                    className="px-3.5 py-1.5 bg-[#004AAD] hover:bg-[#003580] text-white text-xs font-semibold rounded-lg transition cursor-pointer"
+                                                                                    className="px-3.5 py-1.5 bg-[#5899B5] hover:bg-[#3D7690] text-white text-xs font-semibold rounded-lg transition cursor-pointer"
                                                                                 >
                                                                                     Launch
                                                                                 </button>
@@ -1238,7 +1238,7 @@ const StudentDashboard = () => {
                                             onClick={() => setProfileSubTab('personal')}
                                             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                             profileSubTab === 'personal'
-                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    ? 'bg-[#5899B5] text-white shadow-sm'
                                                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
                                             }`}
                                         >
@@ -1249,7 +1249,7 @@ const StudentDashboard = () => {
                                             onClick={() => setProfileSubTab('academic')}
                                             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                                 profileSubTab === 'academic'
-                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    ? 'bg-[#5899B5] text-white shadow-sm'
                                                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
                                             }`}
                                         >
@@ -1260,7 +1260,7 @@ const StudentDashboard = () => {
                                             onClick={() => setProfileSubTab('skills')}
                                             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                                 profileSubTab === 'skills'
-                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    ? 'bg-[#5899B5] text-white shadow-sm'
                                                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
                                             }`}
                                         >
@@ -1271,7 +1271,7 @@ const StudentDashboard = () => {
                                             onClick={() => setProfileSubTab('resume')}
                                             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                                 profileSubTab === 'resume'
-                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    ? 'bg-[#5899B5] text-white shadow-sm'
                                                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
                                             }`}
                                         >
@@ -1282,7 +1282,7 @@ const StudentDashboard = () => {
                                             onClick={() => setProfileSubTab('preferences')}
                                             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                                 profileSubTab === 'preferences'
-                                                    ? 'bg-[#004AAD] text-white shadow-sm'
+                                                    ? 'bg-[#5899B5] text-white shadow-sm'
                                                     : 'bg-slate-100 text-slate-650 hover:bg-slate-200'
                                             }`}
                                         >
@@ -1313,7 +1313,7 @@ const StudentDashboard = () => {
                                                     type="text"
                                                     required
                                                     placeholder="Enter your full name"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={personalName}
                                                     onChange={(e) => setPersonalName(e.target.value)}
                                                 />
@@ -1324,7 +1324,7 @@ const StudentDashboard = () => {
                                                 <input
                                                     type="email"
                                                     placeholder="Enter email address"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={personalEmail}
                                                     onChange={(e) => setPersonalEmail(e.target.value)}
                                                 />
@@ -1335,7 +1335,7 @@ const StudentDashboard = () => {
                                                 <input
                                                     type="text"
                                                     placeholder="Enter mobile number"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={personalMobile}
                                                     onChange={(e) => setPersonalMobile(e.target.value)}
                                                 />
@@ -1349,7 +1349,7 @@ const StudentDashboard = () => {
                                                     min="0"
                                                     max="10"
                                                     placeholder="Enter your CGPA (e.g. 8.5)"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={personalCgpa}
                                                     onChange={(e) => setPersonalCgpa(e.target.value)}
                                                 />
@@ -1361,7 +1361,7 @@ const StudentDashboard = () => {
                                                     type="number"
                                                     min="0"
                                                     placeholder="Enter active backlogs"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={personalBacklogs}
                                                     onChange={(e) => setPersonalBacklogs(e.target.value)}
                                                 />
@@ -1372,7 +1372,7 @@ const StudentDashboard = () => {
                                             <button
                                                 type="submit"
                                                 disabled={profileSaving}
-                                                className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
+                                                className="px-8 py-3.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
                                             >
                                                 {profileSaving ? <Loader2 size={16} className="animate-spin" /> : null}
                                                 Save Personal Details
@@ -1441,15 +1441,15 @@ const StudentDashboard = () => {
                                         {/* Skills Tags */}
                                         <div className="space-y-2">
                                             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Key Professional Skills</label>
-                                            <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50/30 focus-within:bg-white focus-within:border-[#004AAD] transition-all">
+                                            <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50/30 focus-within:bg-white focus-within:border-[#5899B5] transition-all">
                                                 <div className="flex flex-wrap gap-2 mb-2">
                                                     {skillsList.map((skill, i) => (
-                                                        <span key={i} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-[#004AAD] text-xs font-semibold px-2.5 py-1 rounded-lg">
+                                                        <span key={i} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-[#5899B5] text-xs font-semibold px-2.5 py-1 rounded-lg">
                                                             {skill}
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleRemoveSkill(skill)}
-                                                                className="text-[#004AAD]/60 hover:text-[#004AAD] text-[10px] font-semibold p-0.5"
+                                                                className="text-[#5899B5]/60 hover:text-[#5899B5] text-[10px] font-semibold p-0.5"
                                                             >
                                                                 ✕
                                                             </button>
@@ -1473,7 +1473,7 @@ const StudentDashboard = () => {
                                             <textarea
                                                 placeholder="Write a brief professional summary of your key strengths, projects, or achievements..."
                                                 rows={4}
-                                                className="w-full px-5 py-4 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                className="w-full px-5 py-4 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                 value={capabilities}
                                                 onChange={(e) => setCapabilities(e.target.value)}
                                             />
@@ -1483,7 +1483,7 @@ const StudentDashboard = () => {
                                             <button
                                                 type="submit"
                                                 disabled={profileSaving}
-                                                className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
+                                                className="px-8 py-3.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
                                             >
                                                 {profileSaving ? <Loader2 size={16} className="animate-spin" /> : null}
                                                 Save Skills
@@ -1532,15 +1532,15 @@ const StudentDashboard = () => {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <label className="border-2 border-dashed border-slate-200 hover:border-[#004AAD]/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-slate-50/30 group">
+                                            <label className="border-2 border-dashed border-slate-200 hover:border-[#5899B5]/50 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-slate-50/30 group">
                                                 {uploadingResume ? (
                                                     <div className="flex flex-col items-center">
-                                                        <Loader2 size={32} className="animate-spin text-[#004AAD]" />
+                                                        <Loader2 size={32} className="animate-spin text-[#5899B5]" />
                                                         <p className="text-slate-700 font-semibold mt-3 text-sm">Uploading and configuring PDF...</p>
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <Upload size={32} className="text-slate-400 group-hover:text-[#004AAD] group-hover:scale-110 transition duration-300" />
+                                                        <Upload size={32} className="text-slate-400 group-hover:text-[#5899B5] group-hover:scale-110 transition duration-300" />
                                                         <p className="text-slate-800 font-semibold text-sm mt-3 leading-tight">Select Resume PDF</p>
                                                         <p className="text-slate-400 text-xs mt-1.5 max-w-[200px]">PDF format only (Max 5MB limits)</p>
                                                     </>
@@ -1570,7 +1570,7 @@ const StudentDashboard = () => {
                                                 <input
                                                     type="text"
                                                     placeholder="e.g. 4.5 - 6.0 LPA"
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition placeholder:text-slate-400 bg-slate-50/30 focus:bg-white"
                                                     value={expectedCTC}
                                                     onChange={(e) => setExpectedCTC(e.target.value)}
                                                 />
@@ -1579,7 +1579,7 @@ const StudentDashboard = () => {
                                             <div className="space-y-2">
                                                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Preferred Job Type</label>
                                                 <select
-                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 focus:border-[#004AAD] focus:ring-4 focus:ring-blue-50 outline-none transition bg-slate-50/30 focus:bg-white cursor-pointer"
+                                                    className="w-full px-5 py-3.5 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 focus:border-[#5899B5] focus:ring-4 focus:ring-blue-50 outline-none transition bg-slate-50/30 focus:bg-white cursor-pointer"
                                                     value={jobType}
                                                     onChange={(e) => setJobType(e.target.value)}
                                                 >
@@ -1602,7 +1602,7 @@ const StudentDashboard = () => {
                                                                 type="checkbox"
                                                                 checked={prefRoles.includes(role)}
                                                                 onChange={() => handleToggleRole(role)}
-                                                                className="rounded border-slate-350 text-[#004AAD] focus:ring-[#004AAD]"
+                                                                className="rounded border-slate-350 text-[#5899B5] focus:ring-[#5899B5]"
                                                             />
                                                             {role}
                                                         </label>
@@ -1620,7 +1620,7 @@ const StudentDashboard = () => {
                                                                 type="checkbox"
                                                                 checked={prefLocations.includes(loc)}
                                                                 onChange={() => handleToggleLocation(loc)}
-                                                                className="rounded border-slate-350 text-[#004AAD] focus:ring-[#004AAD]"
+                                                                className="rounded border-slate-350 text-[#5899B5] focus:ring-[#5899B5]"
                                                             />
                                                             {loc}
                                                         </label>
@@ -1633,7 +1633,7 @@ const StudentDashboard = () => {
                                             <button
                                                 type="submit"
                                                 disabled={profileSaving}
-                                                className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
+                                                className="px-8 py-3.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
                                             >
                                                 {profileSaving ? <Loader2 size={16} className="animate-spin" /> : null}
                                                 Save Career Preferences
@@ -1650,7 +1650,7 @@ const StudentDashboard = () => {
                                 {/* Summary Widgets */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                     <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 flex items-center gap-4 hover:shadow-md transition-all duration-300">
-                                        <div className="p-4 bg-blue-50 text-[#004AAD] rounded-2xl">
+                                        <div className="p-4 bg-blue-50 text-[#5899B5] rounded-2xl">
                                             <BookOpen size={24} />
                                         </div>
                                         <div>
@@ -1710,12 +1710,12 @@ const StudentDashboard = () => {
                                                     <thead>
                                                         <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                                             <th 
-                                                                className="pb-3 pr-4 cursor-pointer select-none hover:text-[#004AAD] transition-colors"
+                                                                className="pb-3 pr-4 cursor-pointer select-none hover:text-[#5899B5] transition-colors"
                                                                 onClick={() => setAttendanceSortDesc(!attendanceSortDesc)}
                                                             >
                                                                 <div className="flex items-center gap-1.5">
                                                                     Date
-                                                                    <span className="text-[10px] text-[#004AAD] font-bold">
+                                                                    <span className="text-[10px] text-[#5899B5] font-bold">
                                                                         {attendanceSortDesc ? '▼' : '▲'}
                                                                     </span>
                                                                 </div>
@@ -2040,19 +2040,19 @@ const StudentDashboard = () => {
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Current Password</label>
                                     <div className="relative group">
-                                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#004AAD] transition-colors" />
+                                        <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#5899B5] transition-colors" />
                                         <input
                                             type={showPw1 ? 'text' : 'password'}
                                             required
                                             placeholder="Enter current password"
-                                            className="w-full pl-12 pr-12 py-3.5 bg-slate-50/30 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#004AAD] focus:ring-[4px] focus:ring-blue-50 outline-none transitionplaceholder:text-slate-400"
+                                            className="w-full pl-12 pr-12 py-3.5 bg-slate-50/30 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#5899B5] focus:ring-[4px] focus:ring-blue-50 outline-none transitionplaceholder:text-slate-400"
                                             value={currentPw}
                                             onChange={(e) => setCurrentPw(e.target.value)}
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPw1(!showPw1)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#004AAD] transition-colors p-1"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#5899B5] transition-colors p-1"
                                         >
                                             {showPw1 ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
@@ -2065,7 +2065,7 @@ const StudentDashboard = () => {
                                         type="password"
                                         required
                                         placeholder="At least 6 characters"
-                                        className="w-full px-5 py-3.5 bg-slate-50/30 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#004AAD] focus:ring-[4px] focus:ring-blue-50 outline-none transition placeholder:text-slate-400"
+                                        className="w-full px-5 py-3.5 bg-slate-50/30 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#5899B5] focus:ring-[4px] focus:ring-blue-50 outline-none transition placeholder:text-slate-400"
                                         value={newPw}
                                         onChange={(e) => setNewPw(e.target.value)}
                                     />
@@ -2078,14 +2078,14 @@ const StudentDashboard = () => {
                                             type={showPw2 ? 'text' : 'password'}
                                             required
                                             placeholder="Re-enter new password"
-                                            className="w-full px-5 py-3.5 bg-slate-50/30 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#004AAD] focus:ring-[4px] focus:ring-blue-50 outline-none transition placeholder:text-slate-400"
+                                            className="w-full px-5 py-3.5 bg-slate-50/30 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#5899B5] focus:ring-[4px] focus:ring-blue-50 outline-none transition placeholder:text-slate-400"
                                             value={confirmPw}
                                             onChange={(e) => setConfirmPw(e.target.value)}
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPw2(!showPw2)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#004AAD] transition-colors p-1"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#5899B5] transition-colors p-1"
                                         >
                                             {showPw2 ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
@@ -2096,7 +2096,7 @@ const StudentDashboard = () => {
                                     <button
                                         type="submit"
                                         disabled={pwSaving || !currentPw.trim() || !newPw.trim() || !confirmPw.trim()}
-                                        className="px-8 py-3.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
+                                        className="px-8 py-3.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-2xl flex items-center gap-2 cursor-pointer shadow-md shadow-blue-500/10 active:scale-[0.98] transition duration-200 text-sm disabled:opacity-50"
                                     >
                                         {pwSaving ? <Loader2 size={16} className="animate-spin" /> : null}
                                         Update Password
@@ -2327,7 +2327,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={28} />
                 <span className="text-slate-400 text-sm font-semibold ml-2">Loading placement drives...</span>
             </div>
         );
@@ -2336,7 +2336,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
     return (
         <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 space-y-6">
             <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-50 text-[#004AAD] rounded-2xl">
+                <div className="p-3 bg-blue-50 text-[#5899B5] rounded-2xl">
                     <Briefcase size={22} />
                 </div>
                 <div>
@@ -2359,10 +2359,10 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
                         const isApplied = job.isApplied;
 
                         return (
-                            <div key={job._id} className="border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-[#004AAD]/20 transition-all duration-300 bg-white flex flex-col justify-between group">
+                            <div key={job._id} className="border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-[#5899B5]/20 transition-all duration-300 bg-white flex flex-col justify-between group">
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-start gap-2">
-                                        <span className="text-[10px] font-semibold text-[#004AAD] uppercase bg-blue-50 px-2.5 py-1 rounded-full tracking-wider">
+                                        <span className="text-[10px] font-semibold text-[#5899B5] uppercase bg-blue-50 px-2.5 py-1 rounded-full tracking-wider">
                                             {job.company}
                                         </span>
                                         {isApplied ? (
@@ -2376,7 +2376,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
                                         )}
                                     </div>
 
-                                    <h4 className="text-base font-semibold text-slate-800 group-hover:text-[#004AAD] transition-colors leading-snug">
+                                    <h4 className="text-base font-semibold text-slate-800 group-hover:text-[#5899B5] transition-colors leading-snug">
                                         {job.title}
                                     </h4>
 
@@ -2435,7 +2435,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
                                                 }
                                             }}
                                             disabled={applyingId === job._id}
-                                            className="w-full py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
+                                            className="w-full py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
                                         >
                                             {applyingId === job._id ? (
                                                 <Loader2 className="animate-spin" size={14} />
@@ -2474,7 +2474,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
                             <div className="px-6 py-5 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                                        <Briefcase size={18} className="text-[#004AAD]" />
+                                        <Briefcase size={18} className="text-[#5899B5]" />
                                         Application Form: {embedFormJob.company}
                                     </h3>
                                     <p className="text-xs text-slate-500 mt-0.5">Role: {embedFormJob.title}</p>
@@ -2488,7 +2488,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
                             </div>
 
                             <div className="p-6 space-y-4 flex-1 overflow-y-auto flex flex-col">
-                                <div className="p-3.5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-[#004AAD] font-medium leading-relaxed">
+                                <div className="p-3.5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-[#5899B5] font-medium leading-relaxed">
                                     <strong>Instructions:</strong> Please fill out and submit the Google Form displayed below. After completing the form, you <strong>must</strong> click the <strong>"Confirm & Complete Application"</strong> button at the bottom to register your application in the placement system.
                                 </div>
 
@@ -2522,7 +2522,7 @@ const StudentPlacementTab = ({ token, student, setAlertState }) => {
                                             setEmbedFormJob(null);
                                             await handleApply(id);
                                         }}
-                                        className="px-6 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/10 cursor-pointer transition"
+                                        className="px-6 py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/10 cursor-pointer transition"
                                     >
                                         Confirm & Complete Application
                                     </button>

@@ -33,7 +33,7 @@ const NotFound = () => {
                     <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech Logo" className="h-10 w-10" />
                     <div className="text-left leading-none mt-0.5">
                         <span className="text-lg font-extrabold text-slate-800 tracking-tight block">Ethnotech</span>
-                        <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#004AAD] mt-0.5 block">Academy</span>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#5899B5] mt-0.5 block">Academy</span>
                     </div>
                 </div>
 
@@ -42,9 +42,9 @@ const NotFound = () => {
                     {/* Visual 404 Display */}
                     <div className="relative mb-6">
                         {/* Glow effect */}
-                        <div className="absolute inset-0 bg-[#004AAD]/10 rounded-full blur-xl scale-125 animate-pulse" />
+                        <div className="absolute inset-0 bg-[#5899B5]/10 rounded-full blur-xl scale-125 animate-pulse" />
                         <div className="w-20 h-20 bg-blue-50/50 rounded-2xl flex items-center justify-center border border-blue-100/50 shadow-sm relative">
-                            <Compass size={36} className="text-[#004AAD] animate-[spin_10s_linear_infinite]" />
+                            <Compass size={36} className="text-[#5899B5] animate-[spin_10s_linear_infinite]" />
                         </div>
                     </div>
 
@@ -61,7 +61,7 @@ const NotFound = () => {
                     <div className="w-full border-t border-slate-100 pt-6 mt-8 space-y-3">
                         <button
                             onClick={handleGoHome}
-                            className="w-full bg-[#004AAD] hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                            className="w-full bg-[#5899B5] hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <Home size={16} />
                             Return to Dashboard
@@ -81,7 +81,7 @@ const NotFound = () => {
                 <div className="text-[10px] text-slate-400 uppercase tracking-widest leading-relaxed">
                     Ethnotech Academy Assessment Platform
                     <br />
-                    <span className="text-[#004AAD] font-bold">Secure Environment Verified</span>
+                    <span className="text-[#5899B5] font-bold">Secure Environment Verified</span>
                 </div>
             </div>
         </div>

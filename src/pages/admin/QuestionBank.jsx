@@ -197,7 +197,7 @@ const QuestionBank = () => {
                     <p className="text-sm text-slate-500 mt-1">Course-based question repository categorized by Subject, Difficulty & Bloom's Taxonomy</p>
                 </div>
                 {!isReadOnly && (
-                    <button onClick={() => setAddOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm">
+                    <button onClick={() => setAddOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] transition-colors shadow-sm">
                         <Plus size={16} /> Add Question
                     </button>
                 )}
@@ -237,27 +237,27 @@ const QuestionBank = () => {
                         type="text"
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                         placeholder="Search questions..."
                     />
                 </div>
                 <select value={filterSubject} onChange={(e) => { setFilterSubject(e.target.value); setPage(1); }}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none">
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none">
                     <option value="">All Subjects</option>
                     {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
                 <select value={filterDifficulty} onChange={(e) => { setFilterDifficulty(e.target.value); setPage(1); }}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none">
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none">
                     <option value="">All Difficulty</option>
                     {DIFFICULTY_LEVELS.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
                 </select>
                 <select value={filterBlooms} onChange={(e) => { setFilterBlooms(e.target.value); setPage(1); }}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none">
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none">
                     <option value="">All Bloom's Levels</option>
                     {BLOOMS_LEVELS.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
                 </select>
                 <select value={filterCourse} onChange={(e) => { setFilterCourse(e.target.value); setPage(1); }}
-                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none">
+                    className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none">
                     <option value="">All Courses</option>
                     {courses.map(c => <option key={c._id} value={c._id}>{c.name} ({c.code})</option>)}
                 </select>
@@ -276,7 +276,7 @@ const QuestionBank = () => {
 
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-3">
-                        <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                        <Loader2 className="animate-spin text-[#5899B5]" size={28} />
                         <p className="text-sm text-slate-400">Loading question bank...</p>
                     </div>
                 ) : questions.length === 0 ? (
@@ -393,7 +393,7 @@ const QuestionBank = () => {
                             {/* Course Selector */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Course *</label>
-                                <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                     value={newQ.courseId} onChange={(e) => setNewQ({ ...newQ, courseId: e.target.value })}>
                                     <option value="">Select a course...</option>
                                     {courses.map(c => <option key={c._id} value={c._id}>{c.name} ({c.code})</option>)}
@@ -404,7 +404,7 @@ const QuestionBank = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Subject *</label>
-                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder="e.g. Python, Networking, DBMS"
                                         value={newQ.subject} onChange={(e) => setNewQ({ ...newQ, subject: e.target.value })}
                                         list="subjects-list"
@@ -415,7 +415,7 @@ const QuestionBank = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Topic</label>
-                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder="e.g. Loops, TCP/IP, Normalization"
                                         value={newQ.topic} onChange={(e) => setNewQ({ ...newQ, topic: e.target.value })} />
                                 </div>
@@ -425,14 +425,14 @@ const QuestionBank = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Difficulty</label>
-                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         value={newQ.difficulty} onChange={(e) => setNewQ({ ...newQ, difficulty: e.target.value })}>
                                         {DIFFICULTY_LEVELS.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1"><Brain size={12} /> Bloom's Level</label>
-                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         value={newQ.bloomsLevel} onChange={(e) => setNewQ({ ...newQ, bloomsLevel: e.target.value })}>
                                         {BLOOMS_LEVELS.map(b => <option key={b.id} value={b.id}>{b.label}</option>)}
                                     </select>
@@ -443,7 +443,7 @@ const QuestionBank = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Question Type</label>
-                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         value={newQ.type} onChange={(e) => {
                                             const t = e.target.value;
                                             setNewQ({ ...newQ, type: t, correctAnswer: '', correctAnswers: [],
@@ -455,7 +455,7 @@ const QuestionBank = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Points</label>
-                                    <input type="number" min="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center focus:bg-white focus:border-[#004AAD] outline-none"
+                                    <input type="number" min="1" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center focus:bg-white focus:border-[#5899B5] outline-none"
                                         value={newQ.points} onChange={(e) => setNewQ({ ...newQ, points: parseInt(e.target.value) || 1 })} />
                                 </div>
                             </div>
@@ -463,7 +463,7 @@ const QuestionBank = () => {
                             {/* Question Text */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Question Text *</label>
-                                <textarea className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none resize-none min-h-[80px]"
+                                <textarea className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none resize-none min-h-[80px]"
                                     placeholder="Enter the question..." value={newQ.text} onChange={(e) => setNewQ({ ...newQ, text: e.target.value })} />
                             </div>
 
@@ -482,14 +482,14 @@ const QuestionBank = () => {
                                             {newQ.type === 'single_correct' ? (
                                                 <button type="button" onClick={() => opt.trim() && setNewQ({ ...newQ, correctAnswer: opt })}
                                                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                                        newQ.correctAnswer === opt && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#004AAD]'
+                                                        newQ.correctAnswer === opt && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#5899B5]'
                                                     }`}>
                                                     {newQ.correctAnswer === opt && opt !== '' && <CheckCircle2 size={12} />}
                                                 </button>
                                             ) : (
                                                 <button type="button" onClick={() => opt.trim() && toggleMultipleCorrect(opt)}
                                                     className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 ${
-                                                        newQ.correctAnswers?.includes(opt) && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#004AAD]'
+                                                        newQ.correctAnswers?.includes(opt) && opt !== '' ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-[#5899B5]'
                                                     }`}>
                                                     {newQ.correctAnswers?.includes(opt) && opt !== '' && <CheckCircle2 size={12} />}
                                                 </button>
@@ -503,7 +503,7 @@ const QuestionBank = () => {
                                         </div>
                                     ))}
                                     {newQ.options.length < 6 && (
-                                        <button onClick={() => setNewQ({ ...newQ, options: [...newQ.options, ''] })} className="text-xs text-[#004AAD] font-semibold hover:underline">+ Add Option</button>
+                                        <button onClick={() => setNewQ({ ...newQ, options: [...newQ.options, ''] })} className="text-xs text-[#5899B5] font-semibold hover:underline">+ Add Option</button>
                                     )}
                                 </div>
                             )}
@@ -528,7 +528,7 @@ const QuestionBank = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Correct Answer</label>
                                     <input type={newQ.type === 'numeric' ? 'number' : 'text'}
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder={newQ.type === 'numeric' ? 'Enter the correct number...' : 'Type the exact correct answer...'}
                                         value={newQ.correctAnswer} onChange={(e) => setNewQ({ ...newQ, correctAnswer: e.target.value })} />
                                 </div>
@@ -537,7 +537,7 @@ const QuestionBank = () => {
                             {/* Tags */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1"><Tag size={12} /> Tags (comma-separated)</label>
-                                <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#004AAD] outline-none"
+                                <input className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:border-[#5899B5] outline-none"
                                     placeholder="e.g. unit-1, important, semester-final"
                                     value={newQ.tags} onChange={(e) => setNewQ({ ...newQ, tags: e.target.value })} />
                             </div>
@@ -546,7 +546,7 @@ const QuestionBank = () => {
                         <div className="mt-6 flex justify-end gap-3">
                             <button onClick={() => setAddOpen(false)} className="px-5 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700">Cancel</button>
                             <button onClick={handleAddQuestion} disabled={addLoading}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-[#004AAD] text-white text-sm font-bold rounded-xl hover:bg-[#003580] disabled:opacity-50 transition-all shadow-lg shadow-blue-200">
+                                className="flex items-center gap-2 px-6 py-2.5 bg-[#5899B5] text-white text-sm font-bold rounded-xl hover:bg-[#3D7690] disabled:opacity-50 transition-all shadow-lg shadow-blue-200">
                                 {addLoading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                                 {addLoading ? 'Adding...' : 'Add to Bank'}
                             </button>

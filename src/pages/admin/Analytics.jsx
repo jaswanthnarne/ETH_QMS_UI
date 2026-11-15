@@ -202,8 +202,8 @@ const Analytics = () => {
                         <>
                             {user.role === 'super_admin' && (
                                 selectedCollegeId ? (
-                                    <div className="flex items-center gap-2 bg-blue-50 text-[#004AAD] px-3.5 py-2.5 rounded-lg border border-blue-150 shadow-sm">
-                                        <School size={15} className="text-[#004AAD] flex-shrink-0" />
+                                    <div className="flex items-center gap-2 bg-blue-50 text-[#5899B5] px-3.5 py-2.5 rounded-lg border border-blue-150 shadow-sm">
+                                        <School size={15} className="text-[#5899B5] flex-shrink-0" />
                                         <span className="text-xs font-bold">
                                             College: {selectedCollegeName || 'Managed College'}
                                         </span>
@@ -271,7 +271,7 @@ const Analytics = () => {
                             }
                             handleExport(exportType, cid, exportName);
                         }}
-                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-lg text-sm transition-all shadow-sm active:scale-95 cursor-pointer"
+                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-lg text-sm transition-all shadow-sm active:scale-95 cursor-pointer"
                     >
                         <Download size={14} /> Export Report
                     </button>
@@ -308,7 +308,7 @@ const Analytics = () => {
                             <h3 className="text-lg font-bold text-slate-900 tracking-tight">Submission Velocity</h3>
                             <p className="text-xs font-semibold text-slate-400 mt-0.5">Assessment attempts over time</p>
                         </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-[#004AAD] text-[10px] font-bold rounded-lg uppercase tracking-wider">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-[#5899B5] text-[10px] font-bold rounded-lg uppercase tracking-wider">
                             <Calendar size={12} /> Active Window
                         </div>
                     </div>
@@ -317,15 +317,15 @@ const Analytics = () => {
                             <AreaChart data={stats?.timeline || []}>
                                 <defs>
                                     <linearGradient id="colorAttempts" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#004AAD" stopOpacity={0.15} />
-                                        <stop offset="95%" stopColor="#004AAD" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#5899B5" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="#5899B5" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} dy={10} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="attempts" name="Submissions" stroke="#004AAD" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAttempts)" />
+                                <Area type="monotone" dataKey="attempts" name="Submissions" stroke="#5899B5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorAttempts)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -358,7 +358,7 @@ const Analytics = () => {
                     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                             <h3 className="font-bold text-slate-900 text-sm">Trainer Efficacy</h3>
-                            <span className="text-[10px] font-semibold text-[#004AAD] bg-blue-50 px-2.5 py-1 rounded-md tracking-wider">TOP PERFORMERS</span>
+                            <span className="text-[10px] font-semibold text-[#5899B5] bg-blue-50 px-2.5 py-1 rounded-md tracking-wider">TOP PERFORMERS</span>
                         </div>
                         <div className="p-4 space-y-2 max-h-[440px] overflow-y-auto custom-scrollbar">
                             {stats.trainers.map((t, i) => (
@@ -368,14 +368,14 @@ const Analytics = () => {
                                     className="flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50/50 transition-all group"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#004AAD] flex items-center justify-center font-bold text-sm">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#5899B5] flex items-center justify-center font-bold text-sm">
                                             {t.name.charAt(0)}
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-900 text-sm">{t.name}</h4>
                                             <div className="flex items-center gap-3 mt-1">
                                                 <span className="text-[9px] font-semibold text-slate-400 tracking-wider uppercase">{t.totalStudents} attempts</span>
-                                                <span className="text-[9px] font-semibold text-[#004AAD] tracking-wider uppercase">Avg {t.avgScore}%</span>
+                                                <span className="text-[9px] font-semibold text-[#5899B5] tracking-wider uppercase">Avg {t.avgScore}%</span>
                                             </div>
                                         </div>
                                     </div>
@@ -386,7 +386,7 @@ const Analytics = () => {
                                         </div>
                                         <button 
                                             onClick={() => handleExport('trainer', t.trainerId, t.name)} 
-                                            className="p-2.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50/50 rounded-xl active:scale-95 transition-all" 
+                                            className="p-2.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50/50 rounded-xl active:scale-95 transition-all" 
                                             title="Export trainer report"
                                         >
                                             <Download size={16} />
@@ -404,7 +404,7 @@ const Analytics = () => {
                     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                             <h3 className="font-bold text-slate-900 text-sm">Course Attainment</h3>
-                            <span className="text-[10px] font-semibold text-[#004AAD] bg-blue-50 px-2.5 py-1 rounded-md tracking-wider">CURRICULUM IMPACT</span>
+                            <span className="text-[10px] font-semibold text-[#5899B5] bg-blue-50 px-2.5 py-1 rounded-md tracking-wider">CURRICULUM IMPACT</span>
                         </div>
                         <div className="p-4 space-y-2 max-h-[440px] overflow-y-auto custom-scrollbar">
                             {stats.courses.map((c, i) => (
@@ -414,22 +414,22 @@ const Analytics = () => {
                                     className="flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50/50 transition-all group"
                                 >
                                     <div className="flex items-center gap-4 flex-1">
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 text-[#004AAD] flex items-center justify-center font-semibold text-xs">
+                                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 text-[#5899B5] flex items-center justify-center font-semibold text-xs">
                                             {c.code}
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-slate-900 text-sm line-clamp-1">{c.name}</h4>
                                             <div className="flex items-center gap-3 mt-1.5">
                                                 <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
-                                                    <div className="h-full bg-[#004AAD] rounded-full transition-all duration-1000" style={{ width: `${c.passRate}%` }} />
+                                                    <div className="h-full bg-[#5899B5] rounded-full transition-all duration-1000" style={{ width: `${c.passRate}%` }} />
                                                 </div>
-                                                <span className="text-xs font-bold text-[#004AAD] min-w-[35px] text-right">{c.passRate}%</span>
+                                                <span className="text-xs font-bold text-[#5899B5] min-w-[35px] text-right">{c.passRate}%</span>
                                             </div>
                                         </div>
                                     </div>
                                     <button 
                                         onClick={() => handleExport('course', c.courseId, c.name)} 
-                                        className="ml-4 p-2.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50/50 rounded-xl active:scale-95 transition-all"
+                                        className="ml-4 p-2.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50/50 rounded-xl active:scale-95 transition-all"
                                     >
                                         <Download size={16} />
                                     </button>
@@ -457,9 +457,9 @@ const Analytics = () => {
                                 whileHover={{ y: -4, scale: 1.005 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                 key={i} 
-                                className="relative p-6 rounded-xl border border-slate-200 bg-slate-50/30 hover:bg-white hover:border-slate-350 transition-all group overflow-hidden border-l-4 border-l-[#004AAD]"
+                                className="relative p-6 rounded-xl border border-slate-200 bg-slate-50/30 hover:bg-white hover:border-slate-350 transition-all group overflow-hidden border-l-4 border-l-[#5899B5]"
                             >
-                                <h4 className="font-bold text-slate-900 text-sm mb-4 line-clamp-2 h-10 group-hover:text-[#004AAD] transition-colors">{exam.title}</h4>
+                                <h4 className="font-bold text-slate-900 text-sm mb-4 line-clamp-2 h-10 group-hover:text-[#5899B5] transition-colors">{exam.title}</h4>
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="p-3 bg-white rounded-xl border border-slate-100">
                                         <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Submissions</span>
@@ -467,7 +467,7 @@ const Analytics = () => {
                                     </div>
                                     <div className="p-3 bg-white rounded-xl border border-slate-100">
                                         <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Avg Score</span>
-                                        <span className="text-lg font-bold text-[#004AAD] mt-0.5 block">{exam.avgScore}%</span>
+                                        <span className="text-lg font-bold text-[#5899B5] mt-0.5 block">{exam.avgScore}%</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between pt-4 border-t border-slate-100">
@@ -477,7 +477,7 @@ const Analytics = () => {
                                     </div>
                                     <button 
                                         onClick={() => handleExport('exam', exam.id || exam.examId, exam.title)} 
-                                        className="flex items-center gap-1.5 px-4 py-2 bg-[#004AAD] hover:bg-[#004AAD]/95 text-white font-semibold rounded-xl text-[10px] transition-all shadow-md active:scale-95 cursor-pointer uppercase"
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-[#5899B5] hover:bg-[#5899B5]/95 text-white font-semibold rounded-xl text-[10px] transition-all shadow-md active:scale-95 cursor-pointer uppercase"
                                     >
                                         <Download size={10} /> Report
                                     </button>

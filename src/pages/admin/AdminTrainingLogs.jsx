@@ -276,8 +276,8 @@ const AdminTrainingLogs = () => {
                             </select>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-2 bg-blue-50 text-[#004AAD] px-3.5 py-2.5 rounded-lg border border-blue-200 shadow-sm">
-                            <School size={15} className="text-[#004AAD]" />
+                        <div className="flex items-center gap-2 bg-blue-50 text-[#5899B5] px-3.5 py-2.5 rounded-lg border border-blue-200 shadow-sm">
+                            <School size={15} className="text-[#5899B5]" />
                             <span className="text-xs font-bold">
                                 College: {selectedCollegeName || 'Managed College'}
                             </span>
@@ -320,7 +320,7 @@ const AdminTrainingLogs = () => {
                     <button 
                         onClick={handleExport}
                         disabled={exportLoading || logs.length === 0}
-                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-lg text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-lg text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
                     >
                         {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                         Export to Excel
@@ -335,7 +335,7 @@ const AdminTrainingLogs = () => {
                     <div className="relative w-72">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#004AAD]" 
+                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5]" 
                             placeholder="Search by trainer, course, topic, batch..." 
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 
@@ -345,7 +345,7 @@ const AdminTrainingLogs = () => {
 
                 {loading ? (
                     <div className="p-12 flex justify-center">
-                        <Loader2 className="animate-spin text-[#004AAD]" size={32} />
+                        <Loader2 className="animate-spin text-[#5899B5]" size={32} />
                     </div>
                 ) : logs.length === 0 ? (
                     <div className="p-12 text-center text-slate-500">
@@ -466,7 +466,7 @@ const AdminTrainingLogs = () => {
                                             </div>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-50/50 px-3 py-2 rounded-xl border border-slate-100 text-xs">
-                                            <span className="font-bold text-[#004AAD]">{log.presentCount} / {log.actualCount} present</span>
+                                            <span className="font-bold text-[#5899B5]">{log.presentCount} / {log.actualCount} present</span>
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${parseFloat(log.avgAttendance) >= 85 ? 'bg-emerald-50 text-emerald-700' : parseFloat(log.avgAttendance) < 70 ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
                                                 Att: {log.avgAttendance}%
                                             </span>
@@ -486,7 +486,7 @@ const AdminTrainingLogs = () => {
                         {/* Modal Header */}
                         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
-                                <span className="text-xs font-bold text-[#004AAD] uppercase tracking-wider bg-blue-50 px-2.5 py-1 rounded-md">Session Log Details</span>
+                                <span className="text-xs font-bold text-[#5899B5] uppercase tracking-wider bg-blue-50 px-2.5 py-1 rounded-md">Session Log Details</span>
                                 <h3 className="text-lg font-bold text-slate-900 mt-2 flex items-center gap-2">
                                     <Calendar size={18} className="text-slate-400" />
                                     Session Date: {new Date(selectedLog.sessionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}

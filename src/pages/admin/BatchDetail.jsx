@@ -81,7 +81,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name *</label>
                             <input 
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 font-semibold"
                                 placeholder="e.g. John Doe"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -91,7 +91,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">University Seat Number (USN) *</label>
                             <input 
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 uppercase font-bold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 uppercase font-bold"
                                 placeholder="e.g. 1CIT22CS001"
                                 value={formData.usn}
                                 onChange={e => setFormData({ ...formData, usn: e.target.value.toUpperCase() })}
@@ -104,7 +104,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email Address</label>
                             <input 
                                 type="email"
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800"
                                 placeholder="e.g. john@gmail.com"
                                 value={formData.email}
                                 onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -113,7 +113,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Mobile Number</label>
                             <input 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800"
                                 placeholder="e.g. 9876543210"
                                 value={formData.mobile}
                                 onChange={e => setFormData({ ...formData, mobile: e.target.value })}
@@ -126,7 +126,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Semester</label>
                             <input 
                                 type="number" min="1" max="8"
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800"
                                 placeholder="e.g. 6"
                                 value={formData.semester}
                                 onChange={e => setFormData({ ...formData, semester: e.target.value })}
@@ -135,7 +135,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Department</label>
                             <input 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 uppercase"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 uppercase"
                                 placeholder="e.g. CSE"
                                 value={formData.department}
                                 onChange={e => setFormData({ ...formData, department: e.target.value })}
@@ -144,7 +144,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Division</label>
                             <input 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800 uppercase"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800 uppercase"
                                 placeholder="e.g. A"
                                 value={formData.division}
                                 onChange={e => setFormData({ ...formData, division: e.target.value })}
@@ -157,7 +157,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">CGPA</label>
                             <input 
                                 type="number" step="0.01" min="0" max="10"
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800"
                                 placeholder="e.g. 8.5"
                                 value={formData.cgpa}
                                 onChange={e => setFormData({ ...formData, cgpa: e.target.value })}
@@ -167,7 +167,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Active Backlogs</label>
                             <input 
                                 type="number" min="0"
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-800"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-800"
                                 placeholder="e.g. 0"
                                 value={formData.backlogs}
                                 onChange={e => setFormData({ ...formData, backlogs: e.target.value })}
@@ -179,7 +179,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Status</label>
                             <select 
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-700 font-semibold"
+                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-700 font-semibold"
                                 value={formData.status}
                                 onChange={e => setFormData({ ...formData, status: e.target.value })}
                             >
@@ -191,7 +191,7 @@ const StudentModal = ({ student, isOpen, onClose, onSave }) => {
 
                     <div className="pt-4 flex gap-3">
                         <button type="button" onClick={onClose} className="flex-1 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50">Cancel</button>
-                        <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#004AAD] text-white rounded-xl text-xs font-extrabold hover:bg-[#003580] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
+                        <button type="submit" disabled={submitting} className="flex-1 py-3 bg-[#5899B5] text-white rounded-xl text-xs font-extrabold hover:bg-[#3D7690] disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md shadow-blue-100">
                             {submitting && <Loader2 size={14} className="animate-spin" />} Save Student
                         </button>
                     </div>
@@ -249,7 +249,7 @@ const BatchDetail = () => {
 
             // 1. Title Row
             sheet.addRow([`Student Roster — ${batch.batchName || 'Batch'}`]);
-            sheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            sheet.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             sheet.mergeCells(1, 1, 1, 11);
             sheet.getRow(1).height = 28;
  
@@ -269,7 +269,7 @@ const BatchDetail = () => {
             const excelHeaders = ['S.No', 'Student Name', 'USN', 'Department', 'Semester', 'Division', 'Email', 'Mobile', 'CGPA', 'Backlogs', 'Status'];
             const headerRow = sheet.addRow(excelHeaders);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
             headerRow.height = 28;
  
@@ -664,7 +664,7 @@ const BatchDetail = () => {
     if (loading) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                <Loader2 className="animate-spin text-[#5899B5]" size={36} />
             </div>
         );
     }
@@ -696,7 +696,7 @@ const BatchDetail = () => {
             <div className="flex flex-col gap-4">
                 <Link 
                     to={user?.role === 'trainer' ? '/trainer/batches' : (urlCollegeId ? `/college/${urlCollegeId}/admin/batches` : `/admin/colleges/${batch.collegeId?._id || batch.collegeId}`)} 
-                    className="flex items-center gap-2 text-slate-500 hover:text-[#004AAD] text-sm font-bold w-fit transition-all active:translate-x-[-2px]"
+                    className="flex items-center gap-2 text-slate-500 hover:text-[#5899B5] text-sm font-bold w-fit transition-all active:translate-x-[-2px]"
                 >
                     <ArrowLeft size={16} /> Back to Batches
                 </Link>
@@ -704,13 +704,13 @@ const BatchDetail = () => {
                 {/* Metadata summary card */}
                 <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-50 text-[#004AAD] rounded-xl flex items-center justify-center font-bold text-lg border border-indigo-100 shadow-inner">
+                        <div className="w-12 h-12 bg-indigo-50 text-[#5899B5] rounded-xl flex items-center justify-center font-bold text-lg border border-indigo-100 shadow-inner">
                             <Layers size={22} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
                                 <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">{batch.batchName}</h1>
-                                <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#004AAD] font-bold text-[10px] uppercase">
+                                <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[#5899B5] font-bold text-[10px] uppercase">
                                     {batch.program || 'EWDP'}
                                 </span>
                             </div>
@@ -748,7 +748,7 @@ const BatchDetail = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-100">
                         <div>
                             <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                                <FileSpreadsheet className="text-[#004AAD]" size={20} /> Spreadsheet Import Preview
+                                <FileSpreadsheet className="text-[#5899B5]" size={20} /> Spreadsheet Import Preview
                             </h3>
                             <p className="text-xs text-slate-500 mt-1">
                                 Review the staged student records. You must correct all flagged validation errors or remove them before saving.
@@ -832,7 +832,7 @@ const BatchDetail = () => {
                                                         type="text"
                                                         value={editFormData.name || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD] font-semibold"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5] font-semibold"
                                                         placeholder="Name"
                                                     />
                                                 ) : (
@@ -847,7 +847,7 @@ const BatchDetail = () => {
                                                         type="text"
                                                         value={editFormData.usn || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, usn: e.target.value.toUpperCase() }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD] font-bold uppercase"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5] font-bold uppercase"
                                                         placeholder="USN"
                                                     />
                                                 ) : (
@@ -864,7 +864,7 @@ const BatchDetail = () => {
                                                         type="text"
                                                         value={editFormData.department || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, department: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="Dept"
                                                     />
                                                 ) : (
@@ -880,7 +880,7 @@ const BatchDetail = () => {
                                                         min="1" max="8"
                                                         value={editFormData.semester || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, semester: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="Sem"
                                                     />
                                                 ) : (
@@ -895,7 +895,7 @@ const BatchDetail = () => {
                                                         type="text"
                                                         value={editFormData.division || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, division: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="Div"
                                                     />
                                                 ) : (
@@ -910,7 +910,7 @@ const BatchDetail = () => {
                                                         type="email"
                                                         value={editFormData.email || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="Email"
                                                     />
                                                 ) : (
@@ -925,7 +925,7 @@ const BatchDetail = () => {
                                                         type="text"
                                                         value={editFormData.mobile || ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, mobile: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="Mobile"
                                                     />
                                                 ) : (
@@ -942,7 +942,7 @@ const BatchDetail = () => {
                                                         min="0" max="10"
                                                         value={editFormData.cgpa !== undefined ? editFormData.cgpa : ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, cgpa: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="CGPA"
                                                     />
                                                 ) : (
@@ -958,7 +958,7 @@ const BatchDetail = () => {
                                                         min="0"
                                                         value={editFormData.backlogs !== undefined ? editFormData.backlogs : ''}
                                                         onChange={e => setEditFormData(prev => ({ ...prev, backlogs: e.target.value }))}
-                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]"
+                                                        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]"
                                                         placeholder="Backlogs"
                                                     />
                                                 ) : (
@@ -988,7 +988,7 @@ const BatchDetail = () => {
                                                         <>
                                                             <button
                                                                 onClick={() => handleStartEdit(index, s)}
-                                                                className="p-1 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors"
+                                                                className="p-1 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors"
                                                                 title="Edit row"
                                                             >
                                                                 <Edit2 size={14} />
@@ -1023,7 +1023,7 @@ const BatchDetail = () => {
                             type="button"
                             onClick={handleConfirmImport}
                             disabled={uploading || previewList.some(s => s.error)}
-                            className="px-6 py-3 bg-[#004AAD] text-white rounded-xl text-xs font-extrabold hover:bg-[#003580] disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-md shadow-blue-100"
+                            className="px-6 py-3 bg-[#5899B5] text-white rounded-xl text-xs font-extrabold hover:bg-[#3D7690] disabled:opacity-50 transition-all flex items-center gap-1.5 shadow-md shadow-blue-100"
                         >
                             {uploading && <Loader2 size={14} className="animate-spin" />}
                             Confirm & Save Roster
@@ -1055,7 +1055,7 @@ const BatchDetail = () => {
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={uploading}
-                                    className="w-full sm:w-auto px-5 py-3 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-100"
+                                    className="w-full sm:w-auto px-5 py-3 bg-[#5899B5] text-white text-xs font-bold rounded-xl hover:bg-[#3D7690] disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-100"
                                 >
                                     {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
                                     {uploading ? 'Parsing File...' : 'Upload Student Spreadsheet'}
@@ -1078,7 +1078,7 @@ const BatchDetail = () => {
 
                         {/* Information Card */}
                         <div className="bg-indigo-50/30 border border-indigo-100 rounded-2xl p-6 shadow-sm space-y-4">
-                            <h3 className="text-sm font-bold text-[#004AAD] flex items-center gap-1.5">
+                            <h3 className="text-sm font-bold text-[#5899B5] flex items-center gap-1.5">
                                 <AlertCircle size={18} /> Import Guidelines
                             </h3>
                             <ul className="text-xs text-slate-600 space-y-2.5 list-disc pl-4 leading-relaxed">
@@ -1101,7 +1101,7 @@ const BatchDetail = () => {
                         <div className="relative w-full sm:w-64">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input 
-                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-[#004AAD]" 
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-[#5899B5]" 
                                 placeholder="Search by Name, USN, Department..." 
                                 value={searchTerm} 
                                 onChange={(e) => setSearchTerm(e.target.value)} 
@@ -1119,7 +1119,7 @@ const BatchDetail = () => {
                         {!isReadOnly && (
                             <button 
                                 onClick={() => { setSelectedStudent(null); setIsStudentModalOpen(true); }}
-                                className="flex items-center gap-1.5 px-4 py-2 bg-[#004AAD] text-white text-xs font-bold rounded-xl hover:bg-[#003580] shadow-sm transition-all shrink-0"
+                                className="flex items-center gap-1.5 px-4 py-2 bg-[#5899B5] text-white text-xs font-bold rounded-xl hover:bg-[#3D7690] shadow-sm transition-all shrink-0"
                             >
                                 <Plus size={14} /> Add Student
                             </button>
@@ -1197,7 +1197,7 @@ const BatchDetail = () => {
                                                     <>
                                                         <button 
                                                             onClick={() => { setSelectedStudent(s); setIsStudentModalOpen(true); }}
-                                                            className="p-1.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded-lg transition-colors"
+                                                            className="p-1.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors"
                                                             title="Edit Student"
                                                         >
                                                             <Edit2 size={16} />
@@ -1263,7 +1263,7 @@ const BatchDetail = () => {
                                 <input 
                                     type="text"
                                     required
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#004AAD] outline-none text-slate-850 font-bold"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-[#5899B5] outline-none text-slate-850 font-bold"
                                     placeholder="Enter new password"
                                     value={newStudentPassword}
                                     onChange={e => setNewStudentPassword(e.target.value)}

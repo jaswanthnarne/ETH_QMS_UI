@@ -55,7 +55,7 @@ function TestimonialCard({ name, username, body, college }) {
           "{body}"
         </blockquote>
         <div className="mt-4 pt-3 border-t border-slate-100">
-          <span className="text-[10px] font-bold text-[#004AAD] bg-blue-50 px-2.5 py-0.5 rounded-full">{college}</span>
+          <span className="text-[10px] font-bold text-[#5899B5] bg-blue-50 px-2.5 py-0.5 rounded-full">{college}</span>
         </div>
       </CardContent>
     </Card>

@@ -188,7 +188,7 @@ const AdminAttendance = () => {
 
             // ── Title rows ──
             const titleRow = sheet.addRow([`Attendance Register — ${daywiseData.batchName}`]);
-            titleRow.font = { bold: true, size: 14, color: { argb: 'FF004AAD' } };
+            titleRow.font = { bold: true, size: 14, color: { argb: 'FF5899B5' } };
             sheet.mergeCells(1, 1, 1, 5 + sessions.length + 3);
             titleRow.height = 28;
 
@@ -211,17 +211,17 @@ const AdminAttendance = () => {
             ];
             const headerRow = sheet.addRow(headerValues);
             headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF004AAD' } };
+            headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF5899B5' } };
             headerRow.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
             headerRow.height = 32;
 
             // Add borders to header
             headerRow.eachCell((cell) => {
                 cell.border = {
-                    top: { style: 'thin', color: { argb: 'FF003580' } },
-                    bottom: { style: 'thin', color: { argb: 'FF003580' } },
-                    left: { style: 'thin', color: { argb: 'FF003580' } },
-                    right: { style: 'thin', color: { argb: 'FF003580' } },
+                    top: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    bottom: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    left: { style: 'thin', color: { argb: 'FF3D7690' } },
+                    right: { style: 'thin', color: { argb: 'FF3D7690' } },
                 };
             });
 
@@ -358,7 +358,7 @@ const AdminAttendance = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
                 <div>
                     <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2.5">
-                        <CalendarCheck className="text-[#004AAD]" size={28} />
+                        <CalendarCheck className="text-[#5899B5]" size={28} />
                         Attendance Register
                     </h1>
                     <p className="text-xs text-slate-500 mt-1">
@@ -382,11 +382,11 @@ const AdminAttendance = () => {
             {effectiveCollegeId && (
                 <div className="bg-blue-50/80 border border-blue-100/50 rounded-2xl p-4 flex items-center justify-between gap-3 animate-in fade-in duration-300">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#004AAD] flex items-center justify-center flex-shrink-0 shadow-inner">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#5899B5] flex items-center justify-center flex-shrink-0 shadow-inner">
                             <School size={20} />
                         </div>
                         <div>
-                            <span className="text-[10px] font-bold text-[#004AAD] uppercase tracking-wider block">Active Institution Context</span>
+                            <span className="text-[10px] font-bold text-[#5899B5] uppercase tracking-wider block">Active Institution Context</span>
                             <h3 className="text-sm font-bold text-slate-800 leading-tight mt-0.5">
                                 {activeCollege?.name || selectedCollegeName || "Loading college details..."}
                             </h3>
@@ -406,7 +406,7 @@ const AdminAttendance = () => {
                         <select
                             value={filterCollegeId}
                             onChange={e => setFilterCollegeId(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-700 font-semibold"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-700 font-semibold"
                         >
                             <option value="">Select Institution</option>
                             {colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -423,7 +423,7 @@ const AdminAttendance = () => {
                         disabled={!effectiveCollegeId}
                         value={filterCourseId}
                         onChange={e => { setFilterCourseId(e.target.value); setFilterBatchId(''); }}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-700 font-semibold disabled:opacity-50"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-700 font-semibold disabled:opacity-50"
                     >
                         <option value="">All Courses</option>
                         {courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -439,7 +439,7 @@ const AdminAttendance = () => {
                         disabled={!effectiveCollegeId}
                         value={filterBatchId}
                         onChange={e => setFilterBatchId(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none text-slate-700 font-semibold disabled:opacity-50"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none text-slate-700 font-semibold disabled:opacity-50"
                     >
                         <option value="">— Select a Batch —</option>
                         {filteredBatchesList.map(b => <option key={b._id} value={b._id}>{b.batchName}</option>)}
@@ -459,7 +459,7 @@ const AdminAttendance = () => {
                             placeholder="Search by name or USN..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#004AAD] outline-none font-medium transition-all disabled:opacity-50"
+                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:border-[#5899B5] outline-none font-medium transition-all disabled:opacity-50"
                         />
                     </div>
                 </div>
@@ -469,7 +469,7 @@ const AdminAttendance = () => {
             {filterBatchId && daywiseData && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-50 text-[#004AAD] rounded-xl flex items-center justify-center font-extrabold text-sm border border-blue-100">
+                        <div className="w-10 h-10 bg-blue-50 text-[#5899B5] rounded-xl flex items-center justify-center font-extrabold text-sm border border-blue-100">
                             {daywiseData.totalSessions}
                         </div>
                         <div>
@@ -529,7 +529,7 @@ const AdminAttendance = () => {
                 </div>
             ) : loading ? (
                 <div className="h-[40vh] flex items-center justify-center">
-                    <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                    <Loader2 className="animate-spin text-[#5899B5]" size={36} />
                 </div>
             ) : !daywiseData || daywiseData.sessions.length === 0 ? (
                 <div className="p-16 text-center bg-white border border-slate-200 rounded-2xl shadow-sm">
@@ -544,7 +544,7 @@ const AdminAttendance = () => {
                     <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
                             <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                                <BarChart3 size={16} className="text-[#004AAD]" />
+                                <BarChart3 size={16} className="text-[#5899B5]" />
                                 Day-wise Attendance Register
                             </h3>
                             <p className="text-[11px] text-slate-500 mt-0.5">
@@ -596,7 +596,7 @@ const AdminAttendance = () => {
 
                                         <th className="p-3 text-center min-w-[50px] text-[10px] font-bold text-emerald-600 uppercase tracking-wider border-l-2 border-slate-200">P</th>
                                         <th className="p-3 text-center min-w-[50px] text-[10px] font-bold text-rose-600 uppercase tracking-wider">A</th>
-                                        <th className="p-3 text-center min-w-[70px] text-[10px] font-bold text-[#004AAD] uppercase tracking-wider">%</th>
+                                        <th className="p-3 text-center min-w-[70px] text-[10px] font-bold text-[#5899B5] uppercase tracking-wider">%</th>
                                     </tr>
                                 </thead>
 
@@ -715,7 +715,7 @@ const AdminAttendance = () => {
 
                             {loadingHistory ? (
                                 <div className="h-40 flex items-center justify-center">
-                                    <Loader2 className="animate-spin text-[#004AAD]" size={28} />
+                                    <Loader2 className="animate-spin text-[#5899B5]" size={28} />
                                 </div>
                             ) : studentHistory.length === 0 ? (
                                 <div className="text-center text-slate-400 text-xs py-8">

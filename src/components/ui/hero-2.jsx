@@ -38,7 +38,7 @@ export const AuroraHero = ({ children, className }) => {
         {/* The Aurora Background */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           {/* Main Aurora Blob 1 (Brand Blue Color) */}
-          <div className="absolute -top-1/4 left-1/4 h-[500px] w-[500px] animate-[aurora-1_25s_ease-in-out_infinite] rounded-full bg-[#004AAD]/15 opacity-60 blur-[100px] filter" />
+          <div className="absolute -top-1/4 left-1/4 h-[500px] w-[500px] animate-[aurora-1_25s_ease-in-out_infinite] rounded-full bg-[#5899B5]/15 opacity-60 blur-[100px] filter" />
           {/* Main Aurora Blob 2 (Accent Indigo Color) */}
           <div className="absolute -bottom-1/4 right-1/4 h-[500px] w-[500px] animate-[aurora-2_25s_ease-in-out_infinite] rounded-full bg-indigo-500/10 opacity-40 blur-[100px] filter" />
         </div>

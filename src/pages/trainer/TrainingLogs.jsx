@@ -437,7 +437,7 @@ const TrainingLogs = () => {
                 </div>
                 <button 
                     onClick={handleOpenCreate} 
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] shadow-sm transition-all active:scale-95"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] shadow-sm transition-all active:scale-95"
                 >
                     <Plus size={16} /> Log Daily Batch
                 </button>
@@ -484,7 +484,7 @@ const TrainingLogs = () => {
                         <button 
                             onClick={handleExport}
                             disabled={exportLoading || filteredLogs.length === 0}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#004AAD] hover:bg-[#003580] text-white font-semibold rounded-lg text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-lg text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
                             {exportLoading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
                             Export Logs
@@ -493,7 +493,7 @@ const TrainingLogs = () => {
                         <div className="relative w-full sm:w-48">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input 
-                                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#004AAD]" 
+                                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-[#5899B5]" 
                                 placeholder="Search..." 
                                 value={searchTerm} 
                                 onChange={(e) => setSearchTerm(e.target.value)} 
@@ -504,7 +504,7 @@ const TrainingLogs = () => {
 
                 {loading ? (
                     <div className="py-24 flex flex-col items-center justify-center gap-3">
-                        <Loader2 className="animate-spin text-[#004AAD]" size={24} />
+                        <Loader2 className="animate-spin text-[#5899B5]" size={24} />
                         <p className="text-xs font-semibold text-slate-400">Loading progress logbook...</p>
                     </div>
                 ) : logs.length === 0 ? (
@@ -514,7 +514,7 @@ const TrainingLogs = () => {
                         <p className="text-sm text-slate-400 mt-1 max-w-sm">Keep a clean record of your daily batches, module items, and attendee statistics.</p>
                         <button 
                             onClick={handleOpenCreate} 
-                            className="mt-5 flex items-center gap-2 px-4 py-2 border border-[#004AAD] text-[#004AAD] text-xs font-bold rounded-lg hover:bg-blue-50 transition-all"
+                            className="mt-5 flex items-center gap-2 px-4 py-2 border border-[#5899B5] text-[#5899B5] text-xs font-bold rounded-lg hover:bg-blue-50 transition-all"
                         >
                             Log First Batch Day
                         </button>
@@ -553,7 +553,7 @@ const TrainingLogs = () => {
                                                 <td className="px-6 py-4 font-medium text-slate-700">{log.collegeId?.name || '—'}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="font-semibold text-[#004AAD]">{log.courseId?.name || '—'}</span>
+                                                        <span className="font-semibold text-[#5899B5]">{log.courseId?.name || '—'}</span>
                                                         {log.courseId?.code && (
                                                             <span className="text-[10px] text-slate-400 font-bold mt-0.5">{log.courseId.code}</span>
                                                         )}
@@ -563,7 +563,7 @@ const TrainingLogs = () => {
                                                     {log.startDate ? new Date(log.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    <span className="px-2 py-0.5 bg-blue-50 text-[#004AAD] rounded text-xs font-bold">
+                                                    <span className="px-2 py-0.5 bg-blue-50 text-[#5899B5] rounded text-xs font-bold">
                                                         {log.batches?.length || 0} batches
                                                     </span>
                                                 </td>
@@ -581,7 +581,7 @@ const TrainingLogs = () => {
                                                     <div className="flex justify-end items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                                                         <button 
                                                             onClick={() => handleOpenView(log)} 
-                                                            className="p-1.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded" 
+                                                            className="p-1.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded" 
                                                             title="View Details"
                                                         >
                                                             <Eye size={15} />
@@ -623,10 +623,10 @@ const TrainingLogs = () => {
                                                 <span className="text-xs font-bold text-slate-800">
                                                     {new Date(log.logDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </span>
-                                                <h4 className="font-bold text-[#004AAD] text-sm mt-0.5">{log.courseId?.name || '—'}</h4>
+                                                <h4 className="font-bold text-[#5899B5] text-sm mt-0.5">{log.courseId?.name || '—'}</h4>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <button onClick={() => handleOpenView(log)} className="p-1.5 text-slate-400 hover:text-[#004AAD] hover:bg-blue-50 rounded"><Eye size={15} /></button>
+                                                <button onClick={() => handleOpenView(log)} className="p-1.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded"><Eye size={15} /></button>
                                                 <button onClick={() => handleOpenEdit(log)} className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded"><Edit size={15} /></button>
                                                 <button onClick={() => handleDelete(log._id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"><Trash2 size={15} /></button>
                                             </div>
@@ -639,7 +639,7 @@ const TrainingLogs = () => {
                                             <div>
                                                 <span className="block font-bold text-slate-400 text-[10px] uppercase">Stats</span>
                                                 <div className="flex flex-col gap-0.5 mt-0.5">
-                                                    <span className="font-bold text-[#004AAD]">{log.batches?.length || 0} batches</span>
+                                                    <span className="font-bold text-[#5899B5]">{log.batches?.length || 0} batches</span>
                                                     <span className="text-[10px] text-slate-500 font-semibold">{totalPresent}/{totalActual} Present ({avgPercent}%)</span>
                                                 </div>
                                             </div>
@@ -666,7 +666,7 @@ const TrainingLogs = () => {
 
                         <div className="flex items-center gap-3 mb-5">
                             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                                <Calendar size={20} className="text-[#004AAD]" />
+                                <Calendar size={20} className="text-[#5899B5]" />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900">{isEditing ? 'Modify Daily Progress Log' : 'Create Daily Progress Log'}</h3>
@@ -686,7 +686,7 @@ const TrainingLogs = () => {
                                             required
                                             value={formData.collegeId} 
                                             onChange={e => setFormData(prev => ({ ...prev, collegeId: e.target.value, courseId: '' }))}
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none"
+                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none"
                                         >
                                             <option value="">Select College</option>
                                             {colleges.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -699,7 +699,7 @@ const TrainingLogs = () => {
                                                 <button 
                                                     type="button" 
                                                     onClick={() => setCourseModalOpen(true)}
-                                                    className="text-[10px] text-[#004AAD] font-bold hover:underline"
+                                                    className="text-[10px] text-[#5899B5] font-bold hover:underline"
                                                 >
                                                     + Create Course
                                                 </button>
@@ -711,7 +711,7 @@ const TrainingLogs = () => {
                                                 disabled={!formData.collegeId || loadingCourses}
                                                 value={formData.courseId} 
                                                 onChange={e => setFormData(prev => ({ ...prev, courseId: e.target.value }))}
-                                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none disabled:opacity-60 font-semibold"
+                                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none disabled:opacity-60 font-semibold"
                                             >
                                                 <option value="">
                                                     {!formData.collegeId ? 'Select college first' : loadingCourses ? 'Loading college courses...' : courses.length === 0 ? 'No courses found — click create' : 'Select Course'}
@@ -730,7 +730,7 @@ const TrainingLogs = () => {
                                             required
                                             value={formData.startDate}
                                             onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none font-semibold"
+                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none font-semibold"
                                         />
                                     </div>
                                     <div>
@@ -740,7 +740,7 @@ const TrainingLogs = () => {
                                             required
                                             value={formData.logDate}
                                             onChange={e => setFormData(prev => ({ ...prev, logDate: e.target.value }))}
-                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#004AAD] outline-none font-semibold"
+                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-[#5899B5] outline-none font-semibold"
                                         />
                                     </div>
                                 </div>
@@ -753,7 +753,7 @@ const TrainingLogs = () => {
                                     <button 
                                         type="button" 
                                         onClick={handleAddBatch} 
-                                        className="text-xs font-bold text-[#004AAD] bg-blue-50 border border-blue-100 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
+                                        className="text-xs font-bold text-[#5899B5] bg-blue-50 border border-blue-100 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
                                     >
                                         <Plus size={12} /> Add Time Slot Batch
                                     </button>
@@ -812,7 +812,7 @@ const TrainingLogs = () => {
                                                                     handleBatchFieldChange(index, 'department', matched.department);
                                                                 }
                                                             }}
-                                                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none font-semibold"
+                                                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none font-semibold"
                                                         >
                                                             <option value="">Choose Batch</option>
                                                             {filteredTemplates.map(t => (
@@ -830,7 +830,7 @@ const TrainingLogs = () => {
                                                     placeholder="e.g. 9:00 AM - 10:00 AM"
                                                     value={batch.timeSlot}
                                                     onChange={e => handleBatchFieldChange(index, 'timeSlot', e.target.value)}
-                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none"
+                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none"
                                                 />
                                             </div>
                                             <div>
@@ -841,7 +841,7 @@ const TrainingLogs = () => {
                                                     placeholder="e.g. CSE / ECE"
                                                     value={batch.department}
                                                     onChange={e => handleBatchFieldChange(index, 'department', e.target.value)}
-                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none"
+                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none"
                                                 />
                                             </div>
                                         </div>
@@ -859,7 +859,7 @@ const TrainingLogs = () => {
                                                             required
                                                             value={batch.moduleTaught}
                                                             onChange={e => handleBatchFieldChange(index, 'moduleTaught', e.target.value)}
-                                                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none"
+                                                            className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none"
                                                         >
                                                             <option value="">Select Module</option>
                                                             {modules.map(mod => (
@@ -877,7 +877,7 @@ const TrainingLogs = () => {
                                                     min="1"
                                                     value={batch.actualCount}
                                                     onChange={e => handleBatchFieldChange(index, 'actualCount', parseInt(e.target.value) || 0)}
-                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none font-bold text-center"
+                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none font-bold text-center"
                                                 />
                                             </div>
                                             <div>
@@ -889,7 +889,7 @@ const TrainingLogs = () => {
                                                     max={batch.actualCount}
                                                     value={batch.presentCount}
                                                     onChange={e => handleBatchFieldChange(index, 'presentCount', parseInt(e.target.value) || 0)}
-                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none font-bold text-center"
+                                                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none font-bold text-center"
                                                 />
                                             </div>
                                         </div>
@@ -902,7 +902,7 @@ const TrainingLogs = () => {
                                                 placeholder="Explain exactly what topics were taught and any exercises completed during the time slot..."
                                                 value={batch.topicsCovered}
                                                 onChange={e => handleBatchFieldChange(index, 'topicsCovered', e.target.value)}
-                                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none resize-none"
+                                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none resize-none"
                                             />
                                         </div>
                                     </div>
@@ -921,7 +921,7 @@ const TrainingLogs = () => {
                                 <button 
                                     type="submit" 
                                     disabled={submitting}
-                                    className="flex items-center gap-1.5 px-6 py-2 bg-[#004AAD] hover:bg-[#003580] text-white text-sm font-bold rounded-lg shadow disabled:opacity-50 active:scale-95 transition-all"
+                                    className="flex items-center gap-1.5 px-6 py-2 bg-[#5899B5] hover:bg-[#3D7690] text-white text-sm font-bold rounded-lg shadow disabled:opacity-50 active:scale-95 transition-all"
                                 >
                                     {submitting ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                                     {isEditing ? 'Save Updates' : 'Log Day'}
@@ -946,7 +946,7 @@ const TrainingLogs = () => {
 
                         <div className="flex items-center gap-3 mb-5 border-b border-slate-100 pb-3">
                             <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                <Eye size={20} className="text-[#004AAD]" />
+                                <Eye size={20} className="text-[#5899B5]" />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900">
@@ -976,7 +976,7 @@ const TrainingLogs = () => {
                                 </div>
                                 <div>
                                     <span className="text-slate-400 font-semibold uppercase">Total Batches Conducted</span>
-                                    <p className="font-bold text-[#004AAD] mt-0.5 text-sm">
+                                    <p className="font-bold text-[#5899B5] mt-0.5 text-sm">
                                         {selectedLog.batches?.length || 0} batches
                                     </p>
                                 </div>
@@ -995,7 +995,7 @@ const TrainingLogs = () => {
                                                         {batch.batchName}
                                                     </span>
                                                     <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
-                                                        <Clock size={11} className="text-[#004AAD]" /> {batch.timeSlot}
+                                                        <Clock size={11} className="text-[#5899B5]" /> {batch.timeSlot}
                                                     </span>
                                                 </div>
                                                 <span className="text-xs text-slate-400 font-semibold uppercase">DEPT: {batch.department}</span>
@@ -1053,7 +1053,7 @@ const TrainingLogs = () => {
                         </button>
 
                         <div className="flex items-center gap-2 mb-4">
-                            <BookOpen size={16} className="text-[#004AAD]" />
+                            <BookOpen size={16} className="text-[#5899B5]" />
                             <h4 className="font-bold text-slate-900 text-sm">Create & Map Course</h4>
                         </div>
 
@@ -1066,7 +1066,7 @@ const TrainingLogs = () => {
                                     placeholder="e.g. Advanced Java & Spring Boot"
                                     value={courseForm.name}
                                     onChange={e => setCourseForm(prev => ({ ...prev, name: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none font-medium"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none font-medium"
                                 />
                             </div>
 
@@ -1078,7 +1078,7 @@ const TrainingLogs = () => {
                                     placeholder="e.g. AJ-SB-01"
                                     value={courseForm.code}
                                     onChange={e => setCourseForm(prev => ({ ...prev, code: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none font-bold"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none font-bold"
                                 />
                             </div>
 
@@ -1089,7 +1089,7 @@ const TrainingLogs = () => {
                                     placeholder="Brief details about topics included..."
                                     value={courseForm.description}
                                     onChange={e => setCourseForm(prev => ({ ...prev, description: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none resize-none font-medium"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none resize-none font-medium"
                                 />
                             </div>
 
@@ -1104,7 +1104,7 @@ const TrainingLogs = () => {
                                 <button 
                                     type="submit" 
                                     disabled={creatingCourse}
-                                    className="flex items-center gap-1 px-4 py-1.5 bg-[#004AAD] hover:bg-[#003580] text-white text-xs font-bold rounded-lg disabled:opacity-50"
+                                    className="flex items-center gap-1 px-4 py-1.5 bg-[#5899B5] hover:bg-[#3D7690] text-white text-xs font-bold rounded-lg disabled:opacity-50"
                                 >
                                     {creatingCourse ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
                                     Create & Select

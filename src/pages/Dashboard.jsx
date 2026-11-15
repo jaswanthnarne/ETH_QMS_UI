@@ -266,10 +266,10 @@ const Dashboard = () => {
         <div className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col h-full shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                    <UserPlus size={18} className="text-[#004AAD]" />
+                    <UserPlus size={18} className="text-[#5899B5]" />
                     <h3 className="text-lg font-bold text-slate-900">Active Trainers</h3>
                 </div>
-                <button onClick={() => navigate('/admin/trainers')} className="text-xs font-semibold text-[#004AAD] hover:underline flex items-center gap-1">
+                <button onClick={() => navigate('/admin/trainers')} className="text-xs font-semibold text-[#5899B5] hover:underline flex items-center gap-1">
                     Manage <ChevronRight size={14} />
                 </button>
             </div>
@@ -292,8 +292,8 @@ const Dashboard = () => {
                     </div>
                 ) : (
                     stats.activeTrainers.map((trainer) => (
-                        <div key={trainer.id} className="relative group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#004AAD]/20 hover:bg-blue-50/30 transition-all cursor-default">
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#004AAD] flex items-center justify-center font-bold text-sm">
+                        <div key={trainer.id} className="relative group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#5899B5]/20 hover:bg-blue-50/30 transition-all cursor-default">
+                            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#5899B5] flex items-center justify-center font-bold text-sm">
                                 {trainer.initials}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -317,7 +317,7 @@ const Dashboard = () => {
                             </div>
                             
                             <div className="text-right">
-                                <div className="text-xs font-semibold text-[#004AAD] bg-blue-50 px-2.5 py-1 rounded-lg">
+                                <div className="text-xs font-semibold text-[#5899B5] bg-blue-50 px-2.5 py-1 rounded-lg">
                                     {trainer.testsDone} tests
                                 </div>
                             </div>
@@ -333,7 +333,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-900">Recent Activity</h3>
-                <button onClick={() => navigate('/admin/audit')} className="text-xs font-semibold text-[#004AAD] hover:underline flex items-center gap-1">
+                <button onClick={() => navigate('/admin/audit')} className="text-xs font-semibold text-[#5899B5] hover:underline flex items-center gap-1">
                     View all <ChevronRight size={14} />
                 </button>
             </div>
@@ -401,7 +401,7 @@ const Dashboard = () => {
                         <div className="w-px h-8 bg-slate-100" />
                         <div className="text-right">
                             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Avg Score</p>
-                            <p className="text-lg font-bold text-[#004AAD]">{analytics.summary.avgScore}%</p>
+                            <p className="text-lg font-bold text-[#5899B5]">{analytics.summary.avgScore}%</p>
                         </div>
                     </div>
                 )}
@@ -427,15 +427,15 @@ const Dashboard = () => {
                             <AreaChart data={analytics.timeline}>
                                 <defs>
                                     <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#004AAD" stopOpacity={0.12} />
-                                        <stop offset="95%" stopColor="#004AAD" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#5899B5" stopOpacity={0.12} />
+                                        <stop offset="95%" stopColor="#5899B5" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} dy={8} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="attempts" name="Submissions" stroke="#004AAD" strokeWidth={2.5} fillOpacity={1} fill="url(#dashGrad)" />
+                                <Area type="monotone" dataKey="attempts" name="Submissions" stroke="#5899B5" strokeWidth={2.5} fillOpacity={1} fill="url(#dashGrad)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -472,17 +472,17 @@ const Dashboard = () => {
             };
 
             const capabilities = user.role === 'regional_manager' ? [
-                { title: 'Scoped Access Scope', desc: 'Allows viewing and monitoring only the colleges assigned to you.', icon: ShieldCheck, color: 'text-[#004AAD] bg-blue-50' },
+                { title: 'Scoped Access Scope', desc: 'Allows viewing and monitoring only the colleges assigned to you.', icon: ShieldCheck, color: 'text-[#5899B5] bg-blue-50' },
                 { title: 'Training & Log Reviews', desc: 'Inspect trainer sessions, progress entries, and classroom locations.', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50' },
                 { title: 'Student & Batch Directories', desc: 'Monitor active cohorts, USN rosters, and student enrollment records.', icon: Users, color: 'text-purple-600 bg-purple-50' },
                 { title: 'Write Protections Enabled', desc: 'All creation, editing, imports, and deletion rights are disabled.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
             ] : user.role === 'placement' ? [
-                { title: 'Campus Placements Management', desc: 'Publish job drives, set dynamic eligibility rules, and track candidate progress.', icon: School, color: 'text-[#004AAD] bg-blue-50' },
+                { title: 'Campus Placements Management', desc: 'Publish job drives, set dynamic eligibility rules, and track candidate progress.', icon: School, color: 'text-[#5899B5] bg-blue-50' },
                 { title: 'Assigned Batch Targeting', desc: 'Select specific course cohorts and batches when posting career opportunities.', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50' },
                 { title: 'Review Applicants & Resumes', desc: 'Audit applicant lists, evaluation scores, and download candidate resumes.', icon: Users, color: 'text-purple-600 bg-purple-50' },
                 { title: 'Institutional Directories', desc: 'Access read-only views of institution courses, trainers, and enrolled students.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
             ] : [
-                { title: 'Scoped Assistant Access', desc: 'Allows assistant monitoring of your assigned colleges context.', icon: ShieldCheck, color: 'text-[#004AAD] bg-blue-50' },
+                { title: 'Scoped Assistant Access', desc: 'Allows assistant monitoring of your assigned colleges context.', icon: ShieldCheck, color: 'text-[#5899B5] bg-blue-50' },
                 { title: 'View Academic Performance', desc: 'View exams, allotments, syllabus details, and audit records.', icon: FileText, color: 'text-indigo-600 bg-indigo-50' },
                 { title: 'Attendance Analytics', desc: 'Check student attendance history and log records for trainer compliance.', icon: Activity, color: 'text-purple-600 bg-purple-50' },
                 { title: 'Write Protections Enabled', desc: 'System editing, logo uploads, and batch modifications are disabled.', icon: ShieldCheck, color: 'text-amber-600 bg-amber-50' },
@@ -494,11 +494,11 @@ const Dashboard = () => {
                     <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="space-y-1.5">
-                                <span className="inline-block text-[10px] font-bold text-[#004AAD] bg-[#004AAD]/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                                <span className="inline-block text-[10px] font-bold text-[#5899B5] bg-[#5899B5]/10 px-3 py-1 rounded-full uppercase tracking-wider">
                                     {user.role === 'regional_manager' ? 'Regional Manager' : user.role === 'placement' ? 'Placement Officer' : 'Asst Regional Manager'} Scoped Session
                                 </span>
                                 <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-                                    Welcome to your <span className="text-[#004AAD]">Management Workspace</span>
+                                    Welcome to your <span className="text-[#5899B5]">Management Workspace</span>
                                 </h1>
                                 <p className="text-sm text-slate-500 max-w-xl">
                                     Select one of the institutions below to load its workspace.
@@ -542,7 +542,7 @@ const Dashboard = () => {
 
                                 {fetchingColleges ? (
                                     <div className="flex justify-center items-center py-20">
-                                        <Loader2 className="animate-spin text-[#004AAD]" size={36} />
+                                        <Loader2 className="animate-spin text-[#5899B5]" size={36} />
                                     </div>
                                 ) : assignedCollegesList.length === 0 ? (
                                     <div className="p-12 text-center">
@@ -557,15 +557,15 @@ const Dashboard = () => {
                                                 key={c._id}
                                                 whileHover={{ y: -4, scale: 1.01 }}
                                                 onClick={() => handleCollegeSelect(c)}
-                                                className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between gap-5 hover:border-[#004AAD]/30 transition-all duration-300 cursor-pointer text-center relative overflow-hidden group shadow-sm hover:shadow-md"
+                                                className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between gap-5 hover:border-[#5899B5]/30 transition-all duration-300 cursor-pointer text-center relative overflow-hidden group shadow-sm hover:shadow-md"
                                             >
-                                                <div className="absolute top-0 left-0 right-0 h-1 bg-[#004AAD]/5 group-hover:bg-[#004AAD] transition-all" />
+                                                <div className="absolute top-0 left-0 right-0 h-1 bg-[#5899B5]/5 group-hover:bg-[#5899B5] transition-all" />
 
                                                 <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden mx-auto transition-transform duration-300 group-hover:scale-105 shadow-inner">
                                                     {c.logoUrl ? (
                                                         <img src={c.logoUrl} alt={`${c.name} logo`} className="w-full h-full object-contain p-1.5" />
                                                     ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 text-[#004AAD] flex items-center justify-center font-extrabold text-lg uppercase">
+                                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 text-[#5899B5] flex items-center justify-center font-extrabold text-lg uppercase">
                                                             {c.name.charAt(0)}
                                                         </div>
                                                     )}
@@ -575,7 +575,7 @@ const Dashboard = () => {
                                                     <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                         {c.code}
                                                     </span>
-                                                    <h4 className="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-[#004AAD] transition-colors">
+                                                    <h4 className="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-[#5899B5] transition-colors">
                                                         {c.name}
                                                     </h4>
                                                     {c.contactEmail && (
@@ -585,7 +585,7 @@ const Dashboard = () => {
                                                     )}
                                                 </div>
 
-                                                <button className="w-full py-2 bg-slate-50 group-hover:bg-[#004AAD] text-slate-600 group-hover:text-white text-xs font-bold rounded-lg transition-all duration-300 border border-slate-150 group-hover:border-[#004AAD]">
+                                                <button className="w-full py-2 bg-slate-50 group-hover:bg-[#5899B5] text-slate-600 group-hover:text-white text-xs font-bold rounded-lg transition-all duration-300 border border-slate-150 group-hover:border-[#5899B5]">
                                                     Open Dashboard
                                                 </button>
                                             </motion.div>
@@ -617,7 +617,7 @@ const Dashboard = () => {
                     <button
                         onClick={() => handleExport('overall', null, 'Overall_Platform')}
                         title="Exports all student attempt data across every college, course and exam as a multi-sheet Excel file"
-                        className="flex items-center gap-2 px-5 py-2.5 bg-[#004AAD] text-white text-sm font-semibold rounded-lg hover:bg-[#003580] transition-colors shadow-sm active:scale-95 cursor-pointer"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] transition-colors shadow-sm active:scale-95 cursor-pointer"
                     >
                         <Download size={16} /> Export Master Report
                     </button>
@@ -634,13 +634,13 @@ const Dashboard = () => {
                     <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div onClick={() => navigate('/admin/colleges')} className="bg-white p-8 rounded-3xl border border-slate-200/80 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group flex flex-col justify-between shadow-sm">
                             <div>
-                                <div className="w-14 h-14 bg-blue-50 text-[#004AAD] rounded-2xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                                <div className="w-14 h-14 bg-blue-50 text-[#5899B5] rounded-2xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
                                     <Building2 size={28} />
                                 </div>
                                 <h3 className="text-lg font-bold text-slate-900 mb-2">Manage Colleges</h3>
                                 <p className="text-sm text-slate-500 mb-4">Add, edit, or remove institutional profiles from the system.</p>
                             </div>
-                            <span className="text-sm text-[#004AAD] font-semibold flex items-center gap-1">Open <ChevronRight size={16} /></span>
+                            <span className="text-sm text-[#5899B5] font-semibold flex items-center gap-1">Open <ChevronRight size={16} /></span>
                         </div>
 
                         <div onClick={() => navigate('/admin/trainers')} className="bg-white p-8 rounded-3xl border border-slate-200/80 hover:shadow-md hover:border-purple-200 transition-all cursor-pointer group flex flex-col justify-between shadow-sm">
@@ -728,13 +728,13 @@ const Dashboard = () => {
                             return (
                                 <div
                                     onClick={isReadOnly ? undefined : () => logoInputRef.current?.click()}
-                                    className={`relative group w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 border-slate-100 flex items-center justify-center overflow-hidden ${isReadOnly ? 'cursor-default' : 'cursor-pointer'} bg-slate-50 shadow-inner flex-shrink-0 transition-all ${!isReadOnly ? 'hover:border-[#004AAD]/30' : ''}`}
+                                    className={`relative group w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 border-slate-100 flex items-center justify-center overflow-hidden ${isReadOnly ? 'cursor-default' : 'cursor-pointer'} bg-slate-50 shadow-inner flex-shrink-0 transition-all ${!isReadOnly ? 'hover:border-[#5899B5]/30' : ''}`}
                                     title={isReadOnly ? undefined : "Click to upload or change college logo"}
                                 >
                                     {collegeData?.logoUrl ? (
                                         <img src={collegeData.logoUrl} alt={`${selectedCollegeName} logo`} className="w-full h-full object-contain p-1" />
                                     ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 text-[#004AAD] flex items-center justify-center font-extrabold text-2xl uppercase">
+                                        <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 text-[#5899B5] flex items-center justify-center font-extrabold text-2xl uppercase">
                                             {(selectedCollegeName || 'C').charAt(0)}
                                         </div>
                                     )}
@@ -757,7 +757,7 @@ const Dashboard = () => {
 
                         <div>
                             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                <span className="px-3 py-1 bg-[#004AAD]/10 text-[#004AAD] text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                <span className="px-3 py-1 bg-[#5899B5]/10 text-[#5899B5] text-[10px] font-bold rounded-full uppercase tracking-wider">
                                     {collegeData?.code || selectedCollegeName}
                                 </span>
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-full border border-emerald-100">
@@ -766,7 +766,7 @@ const Dashboard = () => {
                                 </span>
                             </div>
                             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-                                {selectedCollegeName || 'College'} <span className="text-[#004AAD]">Dashboard</span>
+                                {selectedCollegeName || 'College'} <span className="text-[#5899B5]">Dashboard</span>
                             </h1>
                             <p className="text-sm text-slate-400 mt-1 flex items-center gap-1.5">
                                 <Clock size={12} /> {currentDate}
@@ -836,10 +836,10 @@ const Dashboard = () => {
                 <div className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <UserPlus size={18} className="text-[#004AAD]" />
+                            <UserPlus size={18} className="text-[#5899B5]" />
                             <h3 className="text-lg font-bold text-slate-900">Active Trainers</h3>
                         </div>
-                        <button onClick={() => navigate(`/college/${selectedCollegeId}/admin/trainers`)} className="text-xs font-semibold text-[#004AAD] hover:underline flex items-center gap-1">
+                        <button onClick={() => navigate(`/college/${selectedCollegeId}/admin/trainers`)} className="text-xs font-semibold text-[#5899B5] hover:underline flex items-center gap-1">
                             Manage <ChevronRight size={14} />
                         </button>
                     </div>
@@ -862,8 +862,8 @@ const Dashboard = () => {
                             </div>
                         ) : (
                             stats.activeTrainers.map((trainer) => (
-                                <div key={trainer.id} className="relative group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#004AAD]/20 hover:bg-blue-50/30 transition-all cursor-default">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#004AAD] flex items-center justify-center font-bold text-sm">
+                                <div key={trainer.id} className="relative group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#5899B5]/20 hover:bg-blue-50/30 transition-all cursor-default">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#5899B5] flex items-center justify-center font-bold text-sm">
                                         {trainer.initials}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -871,7 +871,7 @@ const Dashboard = () => {
                                         <p className="text-xs text-slate-500 truncate">{trainer.collegeName}</p>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-xs font-semibold text-[#004AAD] bg-blue-50 px-2.5 py-1 rounded-lg">
+                                        <div className="text-xs font-semibold text-[#5899B5] bg-blue-50 px-2.5 py-1 rounded-lg">
                                             {trainer.testsDone} tests
                                         </div>
                                     </div>

@@ -885,7 +885,7 @@ const StudentExam = () => {
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
                         body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 700px; margin: 0 auto; line-height: 1.5; }
-                        .header { border-bottom: 2px solid #004AAD; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .header { border-bottom: 2px solid #5899B5; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
                         .header h1 { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; }
                         .header p { font-size: 14px; color: #64748b; margin: 5px 0; font-weight: 500; }
                         
@@ -913,8 +913,8 @@ const StudentExam = () => {
                         .breakdown-val { font-size: 18px; font-weight: 900; margin: 8px 0 0 0; }
                         
                         .footer { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 45px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 500; }
-                        .no-print-btn { background-color: #004AAD; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
-                        .no-print-btn:hover { background-color: #003580; }
+                        .no-print-btn { background-color: #5899B5; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
+                        .no-print-btn:hover { background-color: #3D7690; }
                         @media print {
                             .no-print { display: none; }
                             body { padding: 20px; }
@@ -927,7 +927,7 @@ const StudentExam = () => {
                     </div>
                     <div class="header">
                          <h1>Assessment Mark Sheet</h1>
-                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #004AAD; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
+                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #5899B5; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
                     </div>
 
                     <p class="section-title">Candidate Details</p>
@@ -984,7 +984,7 @@ const StudentExam = () => {
                         </div>
                         <div class="breakdown-card">
                             <p class="breakdown-lbl">Final Marks</p>
-                            <p class="breakdown-val" style="color: #004AAD;">${result.score} pts</p>
+                            <p class="breakdown-val" style="color: #5899B5;">${result.score} pts</p>
                         </div>
                     </div>
 
@@ -1045,7 +1045,7 @@ const StudentExam = () => {
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
                         body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.5; }
-                        .header { border-bottom: 2px solid #004AAD; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .header { border-bottom: 2px solid #5899B5; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
                         .header h1 { font-size: 24px; font-weight: 900; color: #0f172a; margin: 0 0 10px 0; }
                         .header p { font-size: 14px; color: #64748b; margin: 5px 0; font-weight: 500; }
                         
@@ -1057,8 +1057,8 @@ const StudentExam = () => {
                         .info-value { font-size: 13px; font-weight: 600; color: #334155; }
                         
                         .footer { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 500; }
-                        .no-print-btn { background-color: #004AAD; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
-                        .no-print-btn:hover { background-color: #003580; }
+                        .no-print-btn { background-color: #5899B5; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
+                        .no-print-btn:hover { background-color: #3D7690; }
                         @media print {
                             .no-print { display: none; }
                             body { padding: 20px; }
@@ -1071,7 +1071,7 @@ const StudentExam = () => {
                     </div>
                     <div class="header">
                          <h1>Candidate Response Matrix</h1>
-                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #004AAD; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
+                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #5899B5; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
                     </div>
 
                     <p class="section-title">Candidate Details</p>
@@ -1138,12 +1138,12 @@ const StudentExam = () => {
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
                         body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.5; }
-                        .header { border-bottom: 2px solid #004AAD; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
+                        .header { border-bottom: 2px solid #5899B5; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
                         .header h1 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; }
                         .header p { font-size: 14px; color: #64748b; margin: 5px 0; font-weight: 500; }
                         .footer { border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 40px; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 500; }
-                        .no-print-btn { background-color: #004AAD; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
-                        .no-print-btn:hover { background-color: #003580; }
+                        .no-print-btn { background-color: #5899B5; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background-color 0.2s; }
+                        .no-print-btn:hover { background-color: #3D7690; }
                         @media print {
                             body { padding: 20px; }
                             .no-print { display: none; }
@@ -1158,7 +1158,7 @@ const StudentExam = () => {
                          <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Logo" style="height: 40px; width: 40px; margin-bottom: 10px;" />
                          <h1>${exam?.title || 'Assessment Question Paper'}</h1>
                          <p><strong>Duration:</strong> ${exam?.duration || ''} Min | <strong>Total Questions:</strong> ${questions.length} | <strong>Total Marks:</strong> ${questions.reduce((acc, q) => acc + (parseInt(q.points) || 0), 0)}</p>
-                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #004AAD; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
+                         <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 0.1em; color: #5899B5; font-weight: bold;">Ethnotech Academy Assessment Portal</p>
                     </div>
                     <div class="content">
                          ${questionsHtml}
@@ -1302,7 +1302,7 @@ const StudentExam = () => {
                 `}</style>
                 {/* ——— Top Hero Banner ——— */}
                 <div className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] overflow-hidden">
-                    <div className="no-print absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 20%, rgba(0,74,173,0.15) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.08) 0%, transparent 50%)' }} />
+                    <div className="no-print absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 20%, rgba(88, 153, 181,0.15) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.08) 0%, transparent 50%)' }} />
                     <div className="max-w-3xl mx-auto px-6 pt-10 pb-28 relative z-10">
                         <div className="flex items-center gap-2.5 justify-center mb-10">
                             <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech" className="h-8 w-8 brightness-0 invert opacity-90" />
@@ -1358,7 +1358,7 @@ const StudentExam = () => {
                                                 <button
                                                     type="button"
                                                     onClick={handleDownloadMarksheet}
-                                                    className="no-print w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#004AAD] hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95"
+                                                    className="no-print w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#5899B5] hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95"
                                                 >
                                                     <FileSpreadsheet size={13} /> Download Mark Sheet
                                                 </button>
@@ -1430,7 +1430,7 @@ const StudentExam = () => {
                                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Final Adjusted Marks</p>
                                                 <p className="text-[11px] text-slate-455 mt-0.5 leading-relaxed">Sum of points earned minus penalties (minimum capped at 0)</p>
                                             </div>
-                                            <p className="text-xl font-black text-[#004AAD] mt-3">{result.score} / {result.totalMarks} pts</p>
+                                            <p className="text-xl font-black text-[#5899B5] mt-3">{result.score} / {result.totalMarks} pts</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1597,7 +1597,7 @@ const StudentExam = () => {
                         {result.settings?.allowDownloadQuestionPaper !== false && (
                             <button
                                 onClick={handleDownloadQuestionPaper}
-                                className="flex-1 py-3.5 rounded-xl bg-[#004AAD] hover:bg-[#003580] text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="flex-1 py-3.5 rounded-xl bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 <FileText size={15} /> Print Question Paper
                             </button>
@@ -1660,7 +1660,7 @@ const StudentExam = () => {
         return (
             <div className="min-h-screen bg-[#f8f9fb] flex flex-col items-center justify-center p-6 text-center font-sans">
                 <div className="bg-white p-10 md:p-12 rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-200/80 max-w-lg w-full flex flex-col items-center relative overflow-hidden">
-                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,74,173,0.05) 0%, transparent 60%)' }} />
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(88, 153, 181,0.05) 0%, transparent 60%)' }} />
                     <div className="w-20 h-20 bg-blue-50/50 rounded-2xl flex items-center justify-center mb-8 relative border border-blue-100/50">
                         <Clock size={36} className="text-blue-600" />
                         <span className="absolute top-[-4px] right-[-4px] flex h-4 w-4">
@@ -1710,7 +1710,7 @@ const StudentExam = () => {
                     {hasProctoring && (
                         <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6 text-left">
                             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                                <ShieldCheck size={14} className="text-[#004AAD]" /> Security Verification Required
+                                <ShieldCheck size={14} className="text-[#5899B5]" /> Security Verification Required
                             </h4>
                             <div className="space-y-2.5">
                                 {needsWebcam && (
@@ -1754,7 +1754,7 @@ const StudentExam = () => {
                     <button
                         onClick={handleStartExam}
                         disabled={requestingMedia}
-                        className="w-full bg-[#004AAD] hover:bg-[#003580] text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
+                        className="w-full bg-[#5899B5] hover:bg-[#3D7690] text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
                     >
                         {requestingMedia ? (
                             <>
@@ -1824,12 +1824,12 @@ const StudentExam = () => {
 
             {/* Header */}
             <header className="bg-white border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between z-50 shadow-sm relative overflow-hidden">
-                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(0,74,173,0.02) 0%, transparent 100%)' }} />
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(88, 153, 181,0.02) 0%, transparent 100%)' }} />
                 <div className="flex items-center gap-3.5 relative z-10">
                     <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech" className="h-9 w-9" />
                     <div className="leading-none hidden sm:block mt-0.5">
                         <span className="text-[15px] font-extrabold text-slate-800 tracking-tight block">Ethnotech</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#004AAD] mt-0.5 block">Academy</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#5899B5] mt-0.5 block">Academy</span>
                     </div>
                     <div className="h-7 w-px bg-slate-200 mx-1 hidden md:block" />
                     <div className="hidden md:block">
@@ -1931,7 +1931,7 @@ const StudentExam = () => {
                                                 isLocked 
                                                     ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed opacity-60' 
                                                     : isActive 
-                                                        ? 'bg-[#004AAD] text-white border-[#004AAD] shadow-md' 
+                                                        ? 'bg-[#5899B5] text-white border-[#5899B5] shadow-md' 
                                                         : 'bg-white text-slate-650 border-slate-200 hover:border-slate-350'
                                             }`}
                                         >
@@ -2023,7 +2023,7 @@ const StudentExam = () => {
                                                                     });
                                                                 }
                                                             }}
-                                                            className="bg-[#004AAD] hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95 animate-pulse"
+                                                            className="bg-[#5899B5] hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm active:scale-95 animate-pulse"
                                                         >
                                                             Next Section <ArrowRight size={11} />
                                                         </button>
@@ -2219,7 +2219,7 @@ const StudentExam = () => {
                     )}
 
                     <div className="bg-white p-7 rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex flex-col overflow-hidden relative">
-                        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(0,74,173,0.02) 0%, transparent 100%)' }} />
+                        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(88, 153, 181,0.02) 0%, transparent 100%)' }} />
                         <div className="flex items-center justify-between mb-6 relative z-10">
                             <h3 className="text-[11px] font-bold text-slate-800 uppercase tracking-[0.15em]">Navigation Map</h3>
                             <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-[10px] font-bold tracking-widest border border-blue-100">
@@ -2506,7 +2506,7 @@ const StudentExam = () => {
                     {!chatOpen && (
                         <button
                             onClick={() => setChatOpen(true)}
-                            className="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-[#004AAD] text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-[#003580] transition-all active:scale-90"
+                            className="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-[#5899B5] text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-[#3D7690] transition-all active:scale-90"
                         >
                             <MessageSquare size={22} />
                             {unreadChat > 0 && (
@@ -2521,7 +2521,7 @@ const StudentExam = () => {
                     {chatOpen && (
                         <div className="fixed bottom-6 right-6 z-[100] w-80 h-[420px] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
                             {/* Header */}
-                            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-[#004AAD]">
+                            <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-[#5899B5]">
                                 <div className="flex items-center gap-2">
                                     <MessageSquare size={16} className="text-white" />
                                     <span className="text-sm font-bold text-white">Chat with Trainer</span>
@@ -2542,7 +2542,7 @@ const StudentExam = () => {
                                 ) : chatMessages.map((msg, i) => (
                                     <div key={msg.id || i} className={`flex ${msg.senderId === rollNumber ? 'justify-end' : 'justify-start'}`}>
                                         <div className={`max-w-[80%] px-3 py-2 rounded-xl text-xs ${msg.senderId === rollNumber
-                                            ? 'bg-[#004AAD] text-white rounded-br-sm'
+                                            ? 'bg-[#5899B5] text-white rounded-br-sm'
                                             : 'bg-slate-100 text-slate-800 rounded-bl-sm'
                                             }`}>
                                             {msg.senderRole === 'trainer' && (
@@ -2565,14 +2565,14 @@ const StudentExam = () => {
                                         value={chatInput}
                                         onChange={(e) => setChatInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-                                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#004AAD] outline-none"
+                                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:border-[#5899B5] outline-none"
                                         placeholder="Type a message..."
                                         maxLength={500}
                                     />
                                     <button
                                         onClick={handleSendChat}
                                         disabled={!chatInput.trim()}
-                                        className="px-3 py-2 bg-[#004AAD] text-white rounded-lg hover:bg-[#003580] disabled:opacity-40 transition-all"
+                                        className="px-3 py-2 bg-[#5899B5] text-white rounded-lg hover:bg-[#3D7690] disabled:opacity-40 transition-all"
                                     >
                                         <Send size={14} />
                                     </button>
