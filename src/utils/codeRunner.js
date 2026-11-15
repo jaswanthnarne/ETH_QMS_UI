@@ -4,10 +4,9 @@
  * 100% Zero-Cost Client-Side Execution Engine for Antigravity / Ethnotech Coding Arena.
  * Runs on Vercel at ₹0 cost, supporting 1,500+ simultaneous students.
  * 
- * Engines:
- * 1. JavaScript: Isolated native Web Worker with watchdog timeout, console.log interception, and deep equality.
- * 2. Python 3: Real CPython 3.11 in WebAssembly via Pyodide. Executes arbitrary algorithms, recursion, DP, data structures, and standard libraries.
- * 3. C / C++ / Java: Client-side syntax transpiler for standard DSA logic.
+ * Engines (Strictly Python 3 & JavaScript):
+ * 1. Python 3: Real CPython 3.11 in WebAssembly via Pyodide. Executes arbitrary algorithms, recursion, DP, data structures, and standard libraries.
+ * 2. JavaScript: Isolated native Web Worker with watchdog timeout, console.log interception, and deep equality.
  */
 
 // Deep equality comparator for test case verification
@@ -321,96 +320,12 @@ json.dumps(_actual_res, default=_custom_serializer)
 };
 
 // ============================================================================
-// 3. C / C++ / JAVA TRANSPILER (CLIENT-SIDE PREVIEW)
-// ============================================================================
-const transpileCJavaToJs = (code) => {
-    let src = code.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-
-    // Normalize signature
-    src = src.replace(
-        /(?:public\s+|private\s+|static\s+)*(?:vector<\s*[a-zA-Z0-9_]+\s*>|int\s*\[\s*\]|int\s*\*|long\s+long|int|long|double|float|bool|boolean|String|string)\s+solve\s*\(([^)]*)\)/g,
-        (_, paramsStr) => {
-            const cleanParams = paramsStr
-                .split(',')
-                .map((p) => p.trim())
-                .filter(Boolean)
-                .map((p) => {
-                    const tokens = p.replace(/&/g, ' ').replace(/\[\s*\]/g, '').trim().split(/\s+/);
-                    return tokens[tokens.length - 1];
-                })
-                .join(', ');
-            return `function solve(${cleanParams})`;
-        }
-    );
-
-    // Arrays & vectors
-    src = src.replace(/(?:[a-zA-Z0-9_]+)\s*\[\s*\]\s+([a-zA-Z0-9_]+)\s*=\s*new\s+(?:[a-zA-Z0-9_]+)\s*\[\s*([^\]]+)\s*\]/g, 'let $1 = new Array($2).fill(0)');
-    src = src.replace(/(?:[a-zA-Z0-9_]+)\s*\[\s*\]\s+([a-zA-Z0-9_]+)\s*=/g, 'let $1 =');
-    src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)\s*\(\s*([^,]+),\s*([^)]+)\)/g, 'let $1 = new Array($2).fill($3)');
-    src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)\s*\(\s*([^)]+)\)/g, 'let $1 = new Array($2).fill(0)');
-    src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)/g, 'let $1');
-
-    // Java helpers
-    src = src.replace(/Arrays\.fill\s*\(\s*([a-zA-Z0-9_]+)\s*,\s*([^)]+)\)/g, '$1.fill($2)');
-    src = src.replace(/Arrays\.sort\s*\(\s*([a-zA-Z0-9_]+)\s*\)/g, '$1.sort((a,b)=>(typeof a==="number"?a-b:("" + a).localeCompare("" + b)))');
-    src = src.replace(/\.toCharArray\s*\(\s*\)/g, ".split('')");
-    src = src.replace(/\.charAt\s*\(\s*([^)]+)\)/g, '[$1]');
-
-    // C++ STL sort & swap
-    src = src.replace(/sort\s*\(\s*([a-zA-Z0-9_]+)\.begin\(\)\s*,\s*\1\.end\(\)\s*\)/g, '$1.sort((a,b)=>a-b)');
-    src = src.replace(/swap\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, '([$1, $2] = [$2, $1])');
-
-    // Range-based for loop
-    src = src.replace(/for\s*\(\s*(?:const\s+)?(?:auto|int|long|char|String|string)\s*&?\s*([a-zA-Z0-9_]+)\s*:\s*([^)]+)\)/g, 'for (let $1 of $2)');
-
-    // Common types
-    src = src.replace(/\b(?:long\s+long|unsigned\s+int|int|long|double|float|bool|boolean|char\s*\[\s*\]|char|string|String)\b/g, 'let');
-
-    // Returns
-    src = src.replace(/new\s+let\s*\[\s*\]\s*\{([^}]*)\}/g, '[$1]');
-    src = src.replace(/new\s+int\s*\[\s*\]\s*\{([^}]*)}/g, '[$1]');
-    src = src.replace(/return\s+\{([^}]*)\}\s*;/g, 'return [$1];');
-
-    // Length / Size
-    src = src.replace(/\.size\s*\(\s*\)/g, '.length');
-    src = src.replace(/\.length\s*\(\s*\)/g, '.length');
-
-    // Math trunc
-    src = src.replace(/\(([^)]+)\)\s*\/\s*(\d+|[a-zA-Z0-9_]+)/g, 'Math.trunc(($1) / $2)');
-    src = src.replace(/([a-zA-Z0-9_]+)\s*\/\s*(\d+)/g, 'Math.trunc($1 / $2)');
-
-    const header = `
-        const max = Math.max;
-        const min = Math.min;
-        const abs = Math.abs;
-    `;
-    return `${header}\n${src}`;
-};
-
-export const executeTranspiledCJava = async (lang, code, testCases) => {
-    let js;
-    try {
-        js = transpileCJavaToJs(code);
-    } catch (e) {
-        return {
-            status: 'Compilation Error',
-            error: e.message || String(e),
-            results: []
-        };
-    }
-    return executeJavaScript(js, testCases);
-};
-
-// ============================================================================
-// MAIN DISPATCHER
+// MAIN DISPATCHER (STRICTLY PYTHON & JAVASCRIPT)
 // ============================================================================
 export const executeCode = async (lang, code, testCases, onStatus) => {
     if (lang === 'python') {
         return executePython(code, testCases, onStatus);
     }
-    if (lang === 'javascript') {
-        return executeJavaScript(code, testCases);
-    }
-    // C, C++, Java fallback preview
-    return executeTranspiledCJava(lang, code, testCases);
+    // Default: JavaScript (ES6)
+    return executeJavaScript(code, testCases);
 };

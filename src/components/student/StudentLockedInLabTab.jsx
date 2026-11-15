@@ -87,14 +87,11 @@ export const LockedInCartoonSvg = ({ variant = 'hub', className = 'w-64 h-32' })
 };
 
 // ============================================================================
-// LANGUAGE DEFINITIONS
+// LANGUAGE DEFINITIONS (STRICTLY PYTHON 3 & JAVASCRIPT)
 // ============================================================================
 const LANGUAGES = [
     { id: 'python', label: 'Python 3', ext: '.py', badge: 'bg-emerald-50 text-emerald-700' },
-    { id: 'javascript', label: 'JavaScript (ES6)', ext: '.js', badge: 'bg-amber-50 text-amber-800' },
-    { id: 'c', label: 'C (GCC)', ext: '.c', badge: 'bg-slate-100 text-slate-800' },
-    { id: 'cpp', label: 'C++ (G++)', ext: '.cpp', badge: 'bg-blue-50 text-blue-700' },
-    { id: 'java', label: 'Java (OpenJDK)', ext: '.java', badge: 'bg-orange-50 text-orange-700' }
+    { id: 'javascript', label: 'JavaScript (ES6)', ext: '.js', badge: 'bg-amber-50 text-amber-800' }
 ];
 
 const COMPANIES = [
@@ -140,11 +137,10 @@ const highlightCode = (code, lang) => {
     const escapeHtml = (str) =>
         str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    const cKeywords = new Set(['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'boolean', 'string', 'String', 'vector', 'if', 'else', 'for', 'while', 'return', 'public', 'private', 'static', 'new', 'class', 'struct', 'switch', 'case', 'break', 'continue', 'default', 'const', 'unsigned', 'signed', 'auto', 'sizeof']);
     const pyKeywords = new Set(['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'range', 'len', 'min', 'max', 'abs', 'sum', 'sorted', 'print', 'import', 'from', 'as', 'class', 'pass', 'break', 'continue', 'lambda', 'True', 'False', 'None', 'and', 'or', 'not', 'is']);
     const jsKeywords = new Set(['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'of', 'in', 'switch', 'case', 'break', 'continue', 'default', 'new', 'class', 'typeof', 'instanceof', 'true', 'false', 'null', 'undefined', 'Math', 'Array', 'String', 'Number', 'JSON']);
 
-    const kwSet = lang === 'python' ? pyKeywords : lang === 'javascript' ? jsKeywords : cKeywords;
+    const kwSet = lang === 'javascript' ? jsKeywords : pyKeywords;
     const tokenizer = /("(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\/.*$|#.*$|\b\d+\b|\b[a-zA-Z_][a-zA-Z0-9_]*\b|[^"'\w\s]+|\s+)/gm;
 
     const tokens = code.match(tokenizer) || [code];
@@ -197,9 +193,6 @@ const CodeEditor = ({ code, onChange, lang, params = [], minHeight = '380px' }) 
     };
 
     const KEYWORDS_BY_LANG = {
-        c: ['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'if', 'else', 'for', 'while', 'return', 'break', 'continue', 'sizeof', 'const'],
-        cpp: ['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'string', 'vector', 'if', 'else', 'for', 'while', 'return', 'break', 'continue', 'auto', 'const', 'sort', 'swap', 'max', 'min', 'size', 'push_back'],
-        java: ['public', 'private', 'static', 'int', 'long', 'double', 'float', 'char', 'void', 'boolean', 'String', 'new', 'if', 'else', 'for', 'while', 'return', 'break', 'continue', 'Arrays', 'Math', 'length'],
         python: ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'range', 'len', 'min', 'max', 'abs', 'sum', 'sorted', 'append', 'sort', 'print', 'True', 'False', 'None'],
         javascript: ['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'of', 'in', 'break', 'continue', 'new', 'Math', 'Array', 'String', 'JSON', 'push', 'slice', 'map', 'filter', 'reduce', 'length']
     };
@@ -214,7 +207,7 @@ const CodeEditor = ({ code, onChange, lang, params = [], minHeight = '380px' }) 
             return;
         }
         const query = match[1].toLowerCase();
-        const pool = Array.from(new Set([...paramNames, ...(KEYWORDS_BY_LANG[lang] || KEYWORDS_BY_LANG.cpp)]));
+        const pool = Array.from(new Set([...paramNames, ...(KEYWORDS_BY_LANG[lang] || KEYWORDS_BY_LANG.python)]));
         const matches = pool.filter((w) => w.toLowerCase().startsWith(query) && w.toLowerCase() !== query);
         if (matches.length > 0) {
             const lines = textBefore.split('\n');
@@ -465,9 +458,6 @@ const PROBLEMS = [
         ],
         "hint": "Use a nested loop for O(n²) or a Hash Map storing value -> index for O(n).",
         "starter": {
-            "c": "int* solve(int nums[], int n, int target) {\n    // Write your logic here\n    return {0};\n}",
-            "cpp": "vector<int> solve(vector<int> nums, int target) {\n    // Write your logic here\n    return {};\n}",
-            "java": "public int[] solve(int[] nums, int target) {\n    // Write your logic here\n    return new int[]{};\n}",
             "python": "def solve(nums, target):\n    # Write your logic here\n    return []",
             "javascript": "function solve(nums, target) {\n    // Write your logic here\n    return [];\n}"
         },
@@ -536,9 +526,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int* solve(int nums[], int n, int target) {\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return {i, j};\n            }\n        }\n    }\n    return {-1, -1};\n}",
-            "cpp": "vector<int> solve(vector<int> nums, int target) {\n    int n = nums.size();\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return {i, j};\n            }\n        }\n    }\n    return {-1, -1};\n}",
-            "java": "public int[] solve(int[] nums, int target) {\n    int n = nums.length;\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return new int[]{i, j};\n            }\n        }\n    }\n    return new int[]{-1, -1};\n}",
             "python": "def solve(nums, target):\n    n = len(nums)\n    for i in range(n):\n        for j in range(i + 1, n):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return [-1, -1]",
             "javascript": "function solve(nums, target) {\n    for (let i = 0; i < nums.length; i++) {\n        for (let j = i + 1; j < nums.length; j++) {\n            if (nums[i] + nums[j] === target) {\n                return [i, j];\n            }\n        }\n    }\n    return [-1, -1];\n}"
         }
@@ -566,9 +553,6 @@ const PROBLEMS = [
         ],
         "hint": "Reverse the digits of x using modulo 10 and integer division by 10.",
         "starter": {
-            "c": "int solve(int x) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int x) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int x) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(x):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(x) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -603,9 +587,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}",
-            "cpp": "int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}",
-            "java": "public int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}",
             "python": "def solve(x):\n    if x < 0:\n        return 0\n    orig = x\n    rev = 0\n    while x > 0:\n        rev = rev * 10 + (x % 10)\n        x = x // 10\n    return 1 if orig == rev else 0",
             "javascript": "function solve(x) {\n    if (x < 0) return 0;\n    let orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = Math.floor(x / 10);\n    }\n    return orig === rev ? 1 : 0;\n}"
         }
@@ -634,9 +615,6 @@ const PROBLEMS = [
         ],
         "hint": "Initialize maxVal = nums[0] and iterate through the array.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -690,9 +668,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int maxVal = nums[0];\n    for (int i = 1; i < n; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int maxVal = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}",
-            "java": "public int solve(int[] nums) {\n    int maxVal = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}",
             "python": "def solve(nums):\n    max_val = nums[0]\n    for x in nums:\n        if x > max_val:\n            max_val = x\n    return max_val",
             "javascript": "function solve(nums) {\n    let maxVal = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}"
         }
@@ -721,9 +696,6 @@ const PROBLEMS = [
         ],
         "hint": "Check each character against a, e, i, o, u and increment a counter.",
         "starter": {
-            "c": "int solve(string s) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(string s) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(String s) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(s):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(s) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -758,9 +730,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(string s) {\n    int count = 0;\n    for (int i = 0; i < s.length(); i++) {\n        char c = s[i];\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}",
-            "cpp": "int solve(string s) {\n    int count = 0;\n    for (int i = 0; i < s.size(); i++) {\n        char c = s[i];\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}",
-            "java": "public int solve(String s) {\n    int count = 0;\n    for (int i = 0; i < s.length(); i++) {\n        char c = s.charAt(i);\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}",
             "python": "def solve(s):\n    count = 0\n    for c in s:\n        if c in \"aeiou\":\n            count += 1\n    return count",
             "javascript": "function solve(s) {\n    let count = 0;\n    for (let i = 0; i < s.length; i++) {\n        if (\"aeiou\".includes(s[i])) count++;\n    }\n    return count;\n}"
         }
@@ -788,9 +757,6 @@ const PROBLEMS = [
         ],
         "hint": "Way(n) = Way(n-1) + Way(n-2), which follows the Fibonacci progression.",
         "starter": {
-            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(n):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -825,9 +791,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}",
-            "cpp": "int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}",
-            "java": "public int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}",
             "python": "def solve(n):\n    if n <= 2:\n        return n\n    a, b = 1, 2\n    for i in range(3, n + 1):\n        a, b = b, a + b\n    return b",
             "javascript": "function solve(n) {\n    if (n <= 2) return n;\n    let a = 1, b = 2;\n    for (let i = 3; i <= n; i++) {\n        let c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}"
         }
@@ -855,9 +818,6 @@ const PROBLEMS = [
         ],
         "hint": "XOR of a number with itself is 0 (a ^ a = 0), so XORing all elements leaves the unique number.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -910,9 +870,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int ans = 0;\n    for (int i = 0; i < n; i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int ans = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}",
-            "java": "public int solve(int[] nums) {\n    int ans = 0;\n    for (int i = 0; i < nums.length; i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}",
             "python": "def solve(nums):\n    ans = 0\n    for x in nums:\n        ans = ans ^ x\n    return ans",
             "javascript": "function solve(nums) {\n    let ans = 0;\n    for (let i = 0; i < nums.length; i++) {\n        ans ^= nums[i];\n    }\n    return ans;\n}"
         }
@@ -945,9 +902,6 @@ const PROBLEMS = [
         ],
         "hint": "Maintain lo = 0 and hi = n - 1, comparing nums[mid] with target.",
         "starter": {
-            "c": "int solve(int nums[], int n, int target) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums, int target) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums, int target) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums, target):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums, target) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1010,9 +964,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
-            "cpp": "int solve(vector<int> nums, int target) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
-            "java": "public int solve(int[] nums, int target) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
             "python": "def solve(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1",
             "javascript": "function solve(nums, target) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}"
         }
@@ -1040,9 +991,6 @@ const PROBLEMS = [
         ],
         "hint": "Repeatedly add n % 10 to sum and divide n by 10.",
         "starter": {
-            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(n):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1077,9 +1025,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}",
-            "cpp": "int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}",
-            "java": "public int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}",
             "python": "def solve(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n = n // 10\n    return total",
             "javascript": "function solve(n) {\n    let sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = Math.floor(n / 10);\n    }\n    return sum;\n}"
         }
@@ -1107,9 +1052,6 @@ const PROBLEMS = [
         ],
         "hint": "Expected sum is n * (n + 1) / 2. Subtract the actual sum of array elements.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1163,9 +1105,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int n = nums.size();\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}",
-            "java": "public int solve(int[] nums) {\n    int n = nums.length;\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}",
             "python": "def solve(nums):\n    n = len(nums)\n    expected = (n * (n + 1)) // 2\n    return expected - sum(nums)",
             "javascript": "function solve(nums) {\n    const n = nums.length;\n    const expected = (n * (n + 1)) / 2;\n    let actual = 0;\n    for (let i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}"
         }
@@ -1193,9 +1132,6 @@ const PROBLEMS = [
         ],
         "hint": "A positive integer n is a power of 2 if and only if (n & (n - 1)) == 0.",
         "starter": {
-            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(n):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1230,9 +1166,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}",
-            "cpp": "int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}",
-            "java": "public int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}",
             "python": "def solve(n):\n    if n <= 0:\n        return 0\n    return 1 if (n & (n - 1)) == 0 else 0",
             "javascript": "function solve(n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) === 0 ? 1 : 0;\n}"
         }
@@ -1264,9 +1197,6 @@ const PROBLEMS = [
         ],
         "hint": "While b != 0, replace (a, b) with (b, a % b).",
         "starter": {
-            "c": "int solve(int a, int b) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int a, int b) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int a, int b) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(a, b):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(a, b) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1305,9 +1235,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}",
-            "cpp": "int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}",
-            "java": "public int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}",
             "python": "def solve(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a",
             "javascript": "function solve(a, b) {\n    while (b !== 0) {\n        let r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}"
         }
@@ -1335,9 +1262,6 @@ const PROBLEMS = [
         ],
         "hint": "Check nums[i] % 2 == 0 for each element.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1381,9 +1305,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int count = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}",
-            "java": "public int solve(int[] nums) {\n    int count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}",
             "python": "def solve(nums):\n    count = 0\n    for x in nums:\n        if x % 2 == 0:\n            count += 1\n    return count",
             "javascript": "function solve(nums) {\n    let count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (nums[i] % 2 === 0) count++;\n    }\n    return count;\n}"
         }
@@ -1412,9 +1333,6 @@ const PROBLEMS = [
         ],
         "hint": "Maintain cur = max(nums[i], cur + nums[i]) and best = max(best, cur).",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1471,9 +1389,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < n; i++) {\n        cur = (nums[i] > cur + nums[i]) ? nums[i] : cur + nums[i];\n        if (cur > best) best = cur;\n    }\n    return best;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        cur = max(nums[i], cur + nums[i]);\n        best = max(best, cur);\n    }\n    return best;\n}",
-            "java": "public int solve(int[] nums) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        cur = Math.max(nums[i], cur + nums[i]);\n        best = Math.max(best, cur);\n    }\n    return best;\n}",
             "python": "def solve(nums):\n    cur = best = nums[0]\n    for i in range(1, len(nums)):\n        cur = max(nums[i], cur + nums[i])\n        best = max(best, cur)\n    return best",
             "javascript": "function solve(nums) {\n    let cur = nums[0], best = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        cur = Math.max(nums[i], cur + nums[i]);\n        best = Math.max(best, cur);\n    }\n    return best;\n}"
         }
@@ -1502,9 +1417,6 @@ const PROBLEMS = [
         ],
         "hint": "Track the minimum price seen so far and update maxProfit = max(maxProfit, price - minPrice).",
         "starter": {
-            "c": "int solve(int prices[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> prices) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] prices) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(prices):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(prices) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1550,9 +1462,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int prices[], int n) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < n; i++) {\n        if (prices[i] < minP) minP = prices[i];\n        if (prices[i] - minP > profit) profit = prices[i] - minP;\n    }\n    return profit;\n}",
-            "cpp": "int solve(vector<int> prices) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < prices.size(); i++) {\n        minP = min(minP, prices[i]);\n        profit = max(profit, prices[i] - minP);\n    }\n    return profit;\n}",
-            "java": "public int solve(int[] prices) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < prices.length; i++) {\n        minP = Math.min(minP, prices[i]);\n        profit = Math.max(profit, prices[i] - minP);\n    }\n    return profit;\n}",
             "python": "def solve(prices):\n    min_p = prices[0]\n    profit = 0\n    for p in prices:\n        if p < min_p:\n            min_p = p\n        if p - min_p > profit:\n            profit = p - min_p\n    return profit",
             "javascript": "function solve(prices) {\n    let minP = prices[0], profit = 0;\n    for (let i = 1; i < prices.length; i++) {\n        minP = Math.min(minP, prices[i]);\n        profit = Math.max(profit, prices[i] - minP);\n    }\n    return profit;\n}"
         }
@@ -1580,9 +1489,6 @@ const PROBLEMS = [
         ],
         "hint": "Use two pointers l = 0 and r = n - 1, moving the pointer with the smaller height inward.",
         "starter": {
-            "c": "int solve(int height[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> height) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] height) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(height):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(height) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1629,9 +1535,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int height[], int n) {\n    int l = 0, r = n - 1, best = 0;\n    while (l < r) {\n        int h = height[l] < height[r] ? height[l] : height[r];\n        int area = (r - l) * h;\n        if (area > best) best = area;\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}",
-            "cpp": "int solve(vector<int> height) {\n    int l = 0, r = height.size() - 1, best = 0;\n    while (l < r) {\n        best = max(best, (r - l) * min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}",
-            "java": "public int solve(int[] height) {\n    int l = 0, r = height.length - 1, best = 0;\n    while (l < r) {\n        best = Math.max(best, (r - l) * Math.min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}",
             "python": "def solve(height):\n    l, r = 0, len(height) - 1\n    best = 0\n    while l < r:\n        best = max(best, (r - l) * min(height[l], height[r]))\n        if height[l] < height[r]:\n            l += 1\n        else:\n            r -= 1\n    return best",
             "javascript": "function solve(height) {\n    let l = 0, r = height.length - 1, best = 0;\n    while (l < r) {\n        best = Math.max(best, (r - l) * Math.min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}"
         }
@@ -1659,9 +1562,6 @@ const PROBLEMS = [
         ],
         "hint": "Maintain a write pointer pos = 0 for non-zero values, then fill the rest with 0.",
         "starter": {
-            "c": "int* solve(int nums[], int n) {\n    // Write your logic here\n    return {0};\n}",
-            "cpp": "vector<int> solve(vector<int> nums) {\n    // Write your logic here\n    return {};\n}",
-            "java": "public int[] solve(int[] nums) {\n    // Write your logic here\n    return new int[]{};\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return []",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return [];\n}"
         },
@@ -1719,9 +1619,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int* solve(int nums[], int n) {\n    int pos = 0;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < n) nums[pos++] = 0;\n    return nums;\n}",
-            "cpp": "vector<int> solve(vector<int> nums) {\n    int pos = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.size()) nums[pos++] = 0;\n    return nums;\n}",
-            "java": "public int[] solve(int[] nums) {\n    int pos = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.length) nums[pos++] = 0;\n    return nums;\n}",
             "python": "def solve(nums):\n    pos = 0\n    for i in range(len(nums)):\n        if nums[i] != 0:\n            nums[pos] = nums[i]\n            pos += 1\n    while pos < len(nums):\n        nums[pos] = 0\n        pos += 1\n    return nums",
             "javascript": "function solve(nums) {\n    let pos = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (nums[i] !== 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.length) nums[pos++] = 0;\n    return nums;\n}"
         }
@@ -1750,9 +1647,6 @@ const PROBLEMS = [
         ],
         "hint": "At each house i, cur = max(prev1, prev2 + nums[i]).",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1796,9 +1690,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < n; i++) {\n        int take = prev2 + nums[i];\n        int cur = take > prev1 ? take : prev1;\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        int cur = max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}",
-            "java": "public int solve(int[] nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < nums.length; i++) {\n        int cur = Math.max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}",
             "python": "def solve(nums):\n    prev2, prev1 = 0, 0\n    for x in nums:\n        prev2, prev1 = prev1, max(prev1, prev2 + x)\n    return prev1",
             "javascript": "function solve(nums) {\n    let prev2 = 0, prev1 = 0;\n    for (let i = 0; i < nums.length; i++) {\n        let cur = Math.max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}"
         }
@@ -1826,9 +1717,6 @@ const PROBLEMS = [
         ],
         "hint": "Use Boyer-Moore Voting Algorithm: maintain candidate and count.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1872,9 +1760,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < n; i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}",
-            "java": "public int solve(int[] nums) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}",
             "python": "def solve(nums):\n    cand, count = 0, 0\n    for x in nums:\n        if count == 0:\n            cand = x\n        count += 1 if x == cand else -1\n    return cand",
             "javascript": "function solve(nums) {\n    let cand = 0, count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (count === 0) cand = nums[i];\n        count += nums[i] === cand ? 1 : -1;\n    }\n    return cand;\n}"
         }
@@ -1906,9 +1791,6 @@ const PROBLEMS = [
         ],
         "hint": "At least one half (lo..mid or mid..hi) is always sorted. Check if target lies in the sorted half.",
         "starter": {
-            "c": "int solve(int nums[], int n, int target) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums, int target) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums, int target) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums, target):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums, target) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -1969,9 +1851,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}",
-            "cpp": "int solve(vector<int> nums, int target) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}",
-            "java": "public int solve(int[] nums, int target) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}",
             "python": "def solve(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[lo] <= nums[mid]:\n            if nums[lo] <= target < nums[mid]:\n                hi = mid - 1\n            else:\n                lo = mid + 1\n        else:\n            if nums[mid] < target <= nums[hi]:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n    return -1",
             "javascript": "function solve(nums, target) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}"
         }
@@ -1999,9 +1878,6 @@ const PROBLEMS = [
         ],
         "hint": "Binary search: if nums[mid] < nums[mid + 1], a peak must exist on the right side (lo = mid + 1).",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2050,9 +1926,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int lo = 0, hi = n - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
-            "java": "public int solve(int[] nums) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
             "python": "def solve(nums):\n    lo, hi = 0, len(nums) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] < nums[mid + 1]:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo",
             "javascript": "function solve(nums) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo < hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}"
         }
@@ -2080,9 +1953,6 @@ const PROBLEMS = [
         ],
         "hint": "Count factors of 5 by repeatedly dividing n by 5 and adding to count.",
         "starter": {
-            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(n):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2117,9 +1987,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}",
-            "cpp": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}",
-            "java": "public int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}",
             "python": "def solve(n):\n    count = 0\n    while n > 0:\n        n = n // 5\n        count += n\n    return count",
             "javascript": "function solve(n) {\n    let count = 0;\n    while (n > 0) {\n        n = Math.floor(n / 5);\n        count += n;\n    }\n    return count;\n}"
         }
@@ -2151,9 +2018,6 @@ const PROBLEMS = [
         ],
         "hint": "Sort both strings and compare, or count character frequencies.",
         "starter": {
-            "c": "int solve(string s, string t) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(string s, string t) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(String s, String t) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(s, t):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(s, t) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2184,9 +2048,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(string s, string t) {\n    if (s.length() != t.length()) return 0;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t ? 1 : 0;\n}",
-            "cpp": "int solve(string s, string t) {\n    if (s.size() != t.size()) return 0;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t ? 1 : 0;\n}",
-            "java": "public int solve(String s, String t) {\n    if (s.length() != t.length()) return 0;\n    char[] a = s.toCharArray();\n    char[] b = t.toCharArray();\n    Arrays.sort(a);\n    Arrays.sort(b);\n    return Arrays.equals(a, b) ? 1 : 0;\n}",
             "python": "def solve(s, t):\n    return 1 if sorted(s) == sorted(t) else 0",
             "javascript": "function solve(s, t) {\n    if (s.length !== t.length) return 0;\n    return s.split('').sort().join('') === t.split('').sort().join('') ? 1 : 0;\n}"
         }
@@ -2218,9 +2079,6 @@ const PROBLEMS = [
         ],
         "hint": "Compute the sum of the first k elements, then slide the window by adding nums[i] and subtracting nums[i - k].",
         "starter": {
-            "c": "int solve(int nums[], int n, int k) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums, int k) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums, int k) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums, k):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums, k) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2269,9 +2127,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < n; i++) {\n        win += nums[i] - nums[i - k];\n        if (win > best) best = win;\n    }\n    return best;\n}",
-            "cpp": "int solve(vector<int> nums, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < nums.size(); i++) {\n        win += nums[i] - nums[i - k];\n        best = max(best, win);\n    }\n    return best;\n}",
-            "java": "public int solve(int[] nums, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < nums.length; i++) {\n        win += nums[i] - nums[i - k];\n        best = Math.max(best, win);\n    }\n    return best;\n}",
             "python": "def solve(nums, k):\n    win = sum(nums[:k])\n    best = win\n    for i in range(k, len(nums)):\n        win += nums[i] - nums[i - k]\n        if win > best:\n            best = win\n    return best",
             "javascript": "function solve(nums, k) {\n    let win = 0;\n    for (let i = 0; i < k; i++) win += nums[i];\n    let best = win;\n    for (let i = k; i < nums.length; i++) {\n        win += nums[i] - nums[i - k];\n        best = Math.max(best, win);\n    }\n    return best;\n}"
         }
@@ -2299,9 +2154,6 @@ const PROBLEMS = [
         ],
         "hint": "Use Brian Kernighan’s trick: n = n & (n - 1) clears the lowest set bit in each iteration.",
         "starter": {
-            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(n):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2329,9 +2181,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}",
-            "cpp": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}",
-            "java": "public int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}",
             "python": "def solve(n):\n    count = 0\n    while n > 0:\n        n = n & (n - 1)\n        count += 1\n    return count",
             "javascript": "function solve(n) {\n    let count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}"
         }
@@ -2360,9 +2209,6 @@ const PROBLEMS = [
         ],
         "hint": "Use two pointers (l, r) and track lMax and rMax. Add lMax - height[l] or rMax - height[r] at each step.",
         "starter": {
-            "c": "int solve(int height[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> height) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] height) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(height):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(height) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2416,9 +2262,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int height[], int n) {\n    int l = 0, r = n - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            if (height[l] > lMax) lMax = height[l];\n            water += lMax - height[l];\n            l++;\n        } else {\n            if (height[r] > rMax) rMax = height[r];\n            water += rMax - height[r];\n            r--;\n        }\n    }\n    return water;\n}",
-            "cpp": "int solve(vector<int> height) {\n    int l = 0, r = height.size() - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}",
-            "java": "public int solve(int[] height) {\n    int l = 0, r = height.length - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = Math.max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = Math.max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}",
             "python": "def solve(height):\n    l, r = 0, len(height) - 1\n    l_max = r_max = water = 0\n    while l < r:\n        if height[l] < height[r]:\n            l_max = max(l_max, height[l])\n            water += l_max - height[l]\n            l += 1\n        else:\n            r_max = max(r_max, height[r])\n            water += r_max - height[r]\n            r -= 1\n    return water",
             "javascript": "function solve(height) {\n    let l = 0, r = height.length - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = Math.max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = Math.max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}"
         }
@@ -2451,9 +2294,6 @@ const PROBLEMS = [
         ],
         "hint": "Build a DP array of size amount + 1 initialized to amount + 1, with dp[0] = 0.",
         "starter": {
-            "c": "int solve(int coins[], int n, int amount) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> coins, int amount) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] coins, int amount) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(coins, amount):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(coins, amount) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2504,9 +2344,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int coins[], int n, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int j = 0; j < n; j++) {\n            if (coins[j] <= i && dp[i - coins[j]] + 1 < dp[i]) {\n                dp[i] = dp[i - coins[j]] + 1;\n            }\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
-            "cpp": "int solve(vector<int> coins, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (c <= i) dp[i] = min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
-            "java": "public int solve(int[] coins, int amount) {\n    int[] dp = new int[amount + 1];\n    Arrays.fill(dp, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (c <= i) dp[i] = Math.min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
             "python": "def solve(coins, amount):\n    dp = [amount + 1] * (amount + 1)\n    dp[0] = 0\n    for i in range(1, amount + 1):\n        for c in coins:\n            if c <= i:\n                dp[i] = min(dp[i], dp[i - c] + 1)\n    return -1 if dp[amount] > amount else dp[amount]",
             "javascript": "function solve(coins, amount) {\n    const dp = new Array(amount + 1).fill(amount + 1);\n    dp[0] = 0;\n    for (let i = 1; i <= amount; i++) {\n        for (const c of coins) {\n            if (c <= i) dp[i] = Math.min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}"
         }
@@ -2534,9 +2371,6 @@ const PROBLEMS = [
         ],
         "hint": "dp[i] = 1 + max(dp[j]) for all j < i where nums[j] < nums[i].",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2585,9 +2419,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    vector<int> dp(n, 1);\n    int best = 1;\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i] && dp[j] + 1 > dp[i]) dp[i] = dp[j] + 1;\n        }\n        if (dp[i] > best) best = dp[i];\n    }\n    return best;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int n = nums.size(), best = 1;\n    vector<int> dp(n, 1);\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = max(dp[i], dp[j] + 1);\n        }\n        best = max(best, dp[i]);\n    }\n    return best;\n}",
-            "java": "public int solve(int[] nums) {\n    int n = nums.length, best = 1;\n    int[] dp = new int[n];\n    Arrays.fill(dp, 1);\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n        }\n        best = Math.max(best, dp[i]);\n    }\n    return best;\n}",
             "python": "def solve(nums):\n    n = len(nums)\n    dp = [1] * n\n    for i in range(1, n):\n        for j in range(i):\n            if nums[j] < nums[i]:\n                dp[i] = max(dp[i], dp[j] + 1)\n    return max(dp)",
             "javascript": "function solve(nums) {\n    const dp = new Array(nums.length).fill(1);\n    let best = 1;\n    for (let i = 1; i < nums.length; i++) {\n        for (let j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n        }\n        best = Math.max(best, dp[i]);\n    }\n    return best;\n}"
         }
@@ -2615,9 +2446,6 @@ const PROBLEMS = [
         ],
         "hint": "Sort or place each positive number x into index x - 1, then scan for the first mismatch.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2660,9 +2488,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    int target = 1;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] == target) target++;\n    }\n    return target;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    int target = 1;\n    for (int x : nums) {\n        if (x == target) target++;\n    }\n    return target;\n}",
-            "java": "public int solve(int[] nums) {\n    Arrays.sort(nums);\n    int target = 1;\n    for (int x : nums) {\n        if (x == target) target++;\n    }\n    return target;\n}",
             "python": "def solve(nums):\n    nums.sort()\n    target = 1\n    for x in nums:\n        if x == target:\n            target += 1\n    return target",
             "javascript": "function solve(nums) {\n    nums.sort((a, b) => a - b);\n    let target = 1;\n    for (const x of nums) {\n        if (x === target) target++;\n    }\n    return target;\n}"
         }
@@ -2691,9 +2516,6 @@ const PROBLEMS = [
         ],
         "hint": "Track both maxProd and minProd at each step because a negative number flips min and max.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2734,9 +2556,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < n; i++) {\n        if (nums[i] < 0) { int t = maxP; maxP = minP; minP = t; }\n        maxP = max(nums[i], maxP * nums[i]);\n        minP = min(nums[i], minP * nums[i]);\n        ans = max(ans, maxP);\n    }\n    return ans;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] < 0) swap(maxP, minP);\n        maxP = max(nums[i], maxP * nums[i]);\n        minP = min(nums[i], minP * nums[i]);\n        ans = max(ans, maxP);\n    }\n    return ans;\n}",
-            "java": "public int solve(int[] nums) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] < 0) { int t = maxP; maxP = minP; minP = t; }\n        maxP = Math.max(nums[i], maxP * nums[i]);\n        minP = Math.min(nums[i], minP * nums[i]);\n        ans = Math.max(ans, maxP);\n    }\n    return ans;\n}",
             "python": "def solve(nums):\n    max_p = min_p = ans = nums[0]\n    for x in nums[1:]:\n        if x < 0:\n            max_p, min_p = min_p, max_p\n        max_p = max(x, max_p * x)\n        min_p = min(x, min_p * x)\n        ans = max(ans, max_p)\n    return ans",
             "javascript": "function solve(nums) {\n    let maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] < 0) [maxP, minP] = [minP, maxP];\n        maxP = Math.max(nums[i], maxP * nums[i]);\n        minP = Math.min(nums[i], minP * nums[i]);\n        ans = Math.max(ans, maxP);\n    }\n    return ans;\n}"
         }
@@ -2768,9 +2587,6 @@ const PROBLEMS = [
         ],
         "hint": "Check all contiguous subarrays or maintain prefix sums.",
         "starter": {
-            "c": "int solve(int nums[], int n, int k) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums, int k) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums, int k) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums, k):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums, k) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2818,9 +2634,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n, int k) {\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}",
-            "cpp": "int solve(vector<int> nums, int k) {\n    int count = 0, n = nums.size();\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}",
-            "java": "public int solve(int[] nums, int k) {\n    int count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        int sum = 0;\n        for (int j = i; j < nums.length; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}",
             "python": "def solve(nums, k):\n    count = 0\n    n = len(nums)\n    for i in range(n):\n        cur = 0\n        for j in range(i, n):\n            cur += nums[j]\n            if cur == k:\n                count += 1\n    return count",
             "javascript": "function solve(nums, k) {\n    let count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        let sum = 0;\n        for (let j = i; j < nums.length; j++) {\n            sum += nums[j];\n            if (sum === k) count++;\n        }\n    }\n    return count;\n}"
         }
@@ -2848,9 +2661,6 @@ const PROBLEMS = [
         ],
         "hint": "Maintain three pointers: lo = 0, mid = 0, hi = n - 1.",
         "starter": {
-            "c": "int* solve(int nums[], int n) {\n    // Write your logic here\n    return {0};\n}",
-            "cpp": "vector<int> solve(vector<int> nums) {\n    // Write your logic here\n    return {};\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return new int[]{};\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return []",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return [];\n}"
         },
@@ -2912,9 +2722,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int* solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    return nums;\n}",
-            "cpp": "vector<int> solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    return nums;\n}",
-            "java": "public int solve(int[] nums) {\n    Arrays.sort(nums);\n    return nums;\n}",
             "python": "def solve(nums):\n    nums.sort()\n    return nums",
             "javascript": "function solve(nums) {\n    return nums.sort((a, b) => a - b);\n}"
         }
@@ -2942,9 +2749,6 @@ const PROBLEMS = [
         ],
         "hint": "Track the farthest index reachable so far. If i > reach, return 0.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -2986,9 +2790,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    int reach = 0;\n    for (int i = 0; i < n; i++) {\n        if (i > reach) return 0;\n        if (i + nums[i] > reach) reach = i + nums[i];\n    }\n    return 1;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    int reach = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (i > reach) return 0;\n        reach = max(reach, i + nums[i]);\n    }\n    return 1;\n}",
-            "java": "public int solve(int[] nums) {\n    int reach = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (i > reach) return 0;\n        reach = Math.max(reach, i + nums[i]);\n    }\n    return 1;\n}",
             "python": "def solve(nums):\n    reach = 0\n    for i in range(len(nums)):\n        if i > reach:\n            return 0\n        reach = max(reach, i + nums[i])\n    return 1",
             "javascript": "function solve(nums) {\n    let reach = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (i > reach) return 0;\n        reach = Math.max(reach, i + nums[i]);\n    }\n    return 1;\n}"
         }
@@ -3016,9 +2817,6 @@ const PROBLEMS = [
         ],
         "hint": "Use the Sieve of Eratosthenes array of size n.",
         "starter": {
-            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(n):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -3046,9 +2844,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int n) {\n    if (n <= 2) return 0;\n    vector<int> prime(n, 1);\n    prime[0] = 0; prime[1] = 0;\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}",
-            "cpp": "int solve(int n) {\n    if (n <= 2) return 0;\n    vector<int> prime(n, 1);\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}",
-            "java": "public int solve(int n) {\n    if (n <= 2) return 0;\n    int[] prime = new int[n];\n    Arrays.fill(prime, 1);\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p] == 1) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}",
             "python": "def solve(n):\n    if n <= 2:\n        return 0\n    prime = [1] * n\n    prime[0] = prime[1] = 0\n    p = 2\n    while p * p < n:\n        if prime[p]:\n            i = p * p\n            while i < n:\n                prime[i] = 0\n                i += p\n        p += 1\n    return sum(prime)",
             "javascript": "function solve(n) {\n    if (n <= 2) return 0;\n    const prime = new Array(n).fill(1);\n    for (let p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (let i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    let cnt = 0;\n    for (let i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}"
         }
@@ -3076,9 +2871,6 @@ const PROBLEMS = [
         ],
         "hint": "Use Floyd cycle detection or sort a copy to spot adjacent equals.",
         "starter": {
-            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -3123,9 +2915,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    for (int i = 1; i < n; i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}",
-            "cpp": "int solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}",
-            "java": "public int solve(int[] nums) {\n    Arrays.sort(nums);\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}",
             "python": "def solve(nums):\n    nums.sort()\n    for i in range(1, len(nums)):\n        if nums[i] == nums[i - 1]:\n            return nums[i]\n    return -1",
             "javascript": "function solve(nums) {\n    nums.sort((a, b) => a - b);\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] === nums[i - 1]) return nums[i];\n    }\n    return -1;\n}"
         }
@@ -3158,9 +2947,6 @@ const PROBLEMS = [
         ],
         "hint": "Binary search speed k between 1 and max(piles). Hours needed for pile p at speed k is (p + k - 1) / k.",
         "starter": {
-            "c": "int solve(int piles[], int n, int h) {\n    // Write your logic here\n    return 0;\n}",
-            "cpp": "int solve(vector<int> piles, int h) {\n    // Write your logic here\n    return 0;\n}",
-            "java": "public int solve(int[] piles, int h) {\n    // Write your logic here\n    return 0;\n}",
             "python": "def solve(piles, h):\n    # Write your logic here\n    return 0",
             "javascript": "function solve(piles, h) {\n    // Write your logic here\n    return 0;\n}"
         },
@@ -3208,9 +2994,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int solve(int piles[], int n, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int i = 0; i < n; i++) hours += (piles[i] + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
-            "cpp": "int solve(vector<int> piles, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
-            "java": "public int solve(int[] piles, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
             "python": "def solve(piles, h):\n    lo, hi = 1, max(piles)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        hours = 0\n        for p in piles:\n            hours += (p + mid - 1) // mid\n        if hours <= h:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo",
             "javascript": "function solve(piles, h) {\n    let lo = 1, hi = Math.max(...piles);\n    while (lo < hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        let hours = 0;\n        for (const p of piles) hours += Math.ceil(p / mid);\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}"
         }
@@ -3238,9 +3021,6 @@ const PROBLEMS = [
         ],
         "hint": "Make a prefix pass from left to right and a suffix pass from right to left.",
         "starter": {
-            "c": "int* solve(int nums[], int n) {\n    // Write your logic here\n    return {0};\n}",
-            "cpp": "vector<int> solve(vector<int> nums) {\n    // Write your logic here\n    return {};\n}",
-            "java": "public int[] solve(int[] nums) {\n    // Write your logic here\n    return new int[]{};\n}",
             "python": "def solve(nums):\n    # Write your logic here\n    return []",
             "javascript": "function solve(nums) {\n    // Write your logic here\n    return [];\n}"
         },
@@ -3300,9 +3080,6 @@ const PROBLEMS = [
             }
         ],
         "solution": {
-            "c": "int* solve(int nums[], int n) {\n    vector<int> res(n, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}",
-            "cpp": "vector<int> solve(vector<int> nums) {\n    int n = nums.size();\n    vector<int> res(n, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}",
-            "java": "public int[] solve(int[] nums) {\n    int n = nums.length;\n    int[] res = new int[n];\n    Arrays.fill(res, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}",
             "python": "def solve(nums):\n    n = len(nums)\n    res = [1] * n\n    pref = 1\n    for i in range(n):\n        res[i] = pref\n        pref *= nums[i]\n    suff = 1\n    for i in range(n - 1, -1, -1):\n        res[i] *= suff\n        suff *= nums[i]\n    return res",
             "javascript": "function solve(nums) {\n    const n = nums.length;\n    const res = new Array(n).fill(1);\n    let pref = 1;\n    for (let i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    let suff = 1;\n    for (let i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}"
         }
@@ -3541,7 +3318,7 @@ const StudentLockedInLabTab = ({ student }) => {
                             Crack Mass Recruiter Coding Rounds.
                         </h2>
                         <p className="text-slate-500 text-sm leading-relaxed">
-                            Authentic technical interview questions from <strong>TCS NQT</strong>, <strong>Accenture</strong>, <strong>Infosys</strong>, <strong>Wipro</strong>, <strong>Cognizant</strong>, <strong>Capgemini</strong> &amp; <strong>Zoho</strong>. Write code in C, C++, Java, Python or JS and test against real sample &amp; hidden edge cases.
+                            Authentic technical interview questions from <strong>TCS NQT</strong>, <strong>Accenture</strong>, <strong>Infosys</strong>, <strong>Wipro</strong>, <strong>Cognizant</strong>, <strong>Capgemini</strong> &amp; <strong>Zoho</strong>. Write code in Python 3 or JavaScript (ES6) with real-time compilation and test against real sample &amp; hidden edge cases.
                         </p>
                         <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs font-semibold">
                             <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">Easy: {easySolved}/12</span>
@@ -4085,15 +3862,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                                         Python 3.11 (Real CPython WebAssembly Engine)
                                     </span>
-                                ) : selectedLang === 'javascript' ? (
+                                ) : (
                                     <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
                                         <span className="w-2 h-2 rounded-full bg-amber-400"></span>
                                         JavaScript ES6+ (Native Sandboxed Worker)
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1.5 text-sky-400 font-semibold">
-                                        <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-                                        Client DSA Preview Engine
                                     </span>
                                 )}
                                 {engineStatus && (
