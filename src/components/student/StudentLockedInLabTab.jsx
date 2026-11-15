@@ -132,51 +132,51 @@ const getCompanyBadgeStyle = (company) => {
 };
 
 // ============================================================================
-// SYNTAX HIGHLIGHTING ENGINE
+// SYNTAX HIGHLIGHTING ENGINE (SINGLE-PASS TOKENIZER, NO TAG COLLISION)
 // ============================================================================
 const highlightCode = (code, lang) => {
     if (!code) return '';
     const escapeHtml = (str) =>
         str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    const cKeywords = ['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'boolean', 'string', 'String', 'vector', 'if', 'else', 'for', 'while', 'return', 'public', 'private', 'static', 'new', 'class', 'struct', 'switch', 'case', 'break', 'continue', 'default', 'const', 'unsigned', 'signed', 'auto', 'sizeof'];
-    const pyKeywords = ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'range', 'len', 'min', 'max', 'abs', 'sum', 'sorted', 'print', 'import', 'from', 'as', 'class', 'pass', 'break', 'continue', 'lambda', 'True', 'False', 'None', 'and', 'or', 'not', 'is'];
-    const jsKeywords = ['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'of', 'in', 'switch', 'case', 'break', 'continue', 'default', 'new', 'class', 'typeof', 'instanceof', 'true', 'false', 'null', 'undefined', 'Math', 'Array', 'String', 'Number', 'JSON'];
+    const cKeywords = new Set(['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'boolean', 'string', 'String', 'vector', 'if', 'else', 'for', 'while', 'return', 'public', 'private', 'static', 'new', 'class', 'struct', 'switch', 'case', 'break', 'continue', 'default', 'const', 'unsigned', 'signed', 'auto', 'sizeof']);
+    const pyKeywords = new Set(['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'range', 'len', 'min', 'max', 'abs', 'sum', 'sorted', 'print', 'import', 'from', 'as', 'class', 'pass', 'break', 'continue', 'lambda', 'True', 'False', 'None', 'and', 'or', 'not', 'is']);
+    const jsKeywords = new Set(['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'of', 'in', 'switch', 'case', 'break', 'continue', 'default', 'new', 'class', 'typeof', 'instanceof', 'true', 'false', 'null', 'undefined', 'Math', 'Array', 'String', 'Number', 'JSON']);
 
-    const kwList = lang === 'python' ? pyKeywords : lang === 'javascript' ? jsKeywords : cKeywords;
-    const kwRegex = new RegExp(`\\b(${kwList.join('|')})\\b`, 'g');
+    const kwSet = lang === 'python' ? pyKeywords : lang === 'javascript' ? jsKeywords : cKeywords;
+    const tokenizer = /("(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\/.*$|#.*$|\b\d+\b|\b[a-zA-Z_][a-zA-Z0-9_]*\b|[^"'\w\s]+|\s+)/gm;
 
-    const lines = code.split('\n');
-    const highlighted = lines.map((line) => {
-        const l = escapeHtml(line);
-        if (lang === 'python') {
-            const hashIdx = l.indexOf('#');
-            if (hashIdx !== -1) {
-                const pre = l.slice(0, hashIdx);
-                const comm = l.slice(hashIdx);
-                return highlightTokens(pre, kwRegex) + `<span class="text-slate-500 italic">${comm}</span>`;
+    const tokens = code.match(tokenizer) || [code];
+    let html = '';
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        if (!token) continue;
+        const esc = escapeHtml(token);
+
+        if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
+            html += `<span class="text-amber-300">${esc}</span>`;
+        } else if (token.startsWith('//') || (lang === 'python' && token.startsWith('#'))) {
+            html += `<span class="text-slate-500 italic">${esc}</span>`;
+        } else if (/^\d+$/.test(token)) {
+            html += `<span class="text-orange-400 font-semibold">${esc}</span>`;
+        } else if (kwSet.has(token)) {
+            html += `<span class="text-rose-400 font-semibold">${esc}</span>`;
+        } else if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(token)) {
+            let nextIdx = i + 1;
+            while (nextIdx < tokens.length && /^\s+$/.test(tokens[nextIdx])) nextIdx++;
+            if (tokens[nextIdx] && tokens[nextIdx].startsWith('(')) {
+                html += `<span class="text-sky-300">${esc}</span>`;
+            } else {
+                html += esc;
             }
         } else {
-            const slashIdx = l.indexOf('//');
-            if (slashIdx !== -1) {
-                const pre = l.slice(0, slashIdx);
-                const comm = l.slice(slashIdx);
-                return highlightTokens(pre, kwRegex) + `<span class="text-slate-500 italic">${comm}</span>`;
-            }
+            html += esc;
         }
-        return highlightTokens(l, kwRegex);
-    });
+    }
 
-    return highlighted.join('\n');
+    return html;
 };
-
-function highlightTokens(text, kwRegex) {
-    let out = text.replace(/(".*?"|'.*?')(?!span)/g, '<span class="text-amber-300">$1</span>');
-    out = out.replace(/\b(\d+)\b/g, '<span class="text-orange-400 font-semibold">$1</span>');
-    out = out.replace(kwRegex, '<span class="text-rose-400 font-semibold">$1</span>');
-    out = out.replace(/([a-zA-Z0-9_]+)\s*\(/g, '<span class="text-sky-300">$1</span>(');
-    return out;
-}
 
 // ============================================================================
 // INTELLISENSE CODE EDITOR WITH AUTO-BRACKETS & AUTOCOMPLETE
