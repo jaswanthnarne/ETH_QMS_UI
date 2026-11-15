@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Terminal, Play, Send, RotateCcw, CheckCircle2, XCircle, AlertTriangle,
     Clock, Code2, Sparkles, ChevronLeft, ChevronRight, Lightbulb, Eye,
-    Search, Filter, Trophy, Lock, Cpu, Layers, Check
+    Search, Filter, Trophy, Lock, Cpu, Layers, Check, ArrowLeft, Building2,
+    Briefcase, Flame, Award, ExternalLink
 } from 'lucide-react';
 
 // ============================================================================
@@ -36,10 +37,9 @@ export const LockedInCartoonSvg = ({ variant = 'hub', className = 'w-64 h-32' })
                 strokeLinejoin="round"
             />
             <text x="107" y="21" textAnchor="middle" fontSize="8" fontWeight="900" fill="#B45309" letterSpacing="0.3">
-                RESUME SAYS “EXPERT IN DSA”?
-            </text>
+                RESUME: “5-STAR CODER” 🤡</text>
             <text x="107" y="35" textAnchor="middle" fontSize="9" fontWeight="900" fill="#92400E" letterSpacing="0.4">
-                PROVE IT BRO, LOCK IN 🔒⚡
+                CAN YOU CLEAR TCS & ACCENTURE? 💼⚡
             </text>
 
             {/* Cartoon Dual-Window IDE Monitor */}
@@ -103,6 +103,9 @@ const PROBLEMS = [
         id: 'two-sum- array',
         number: 1,
         title: 'Two Sum Indices',
+        company: 'Accenture',
+        companyBadge: 'Accenture 2024',
+        context: 'Asked in Accenture Critical Coding Round',
         difficulty: 'Easy',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -132,6 +135,9 @@ const PROBLEMS = [
         id: 'palindrome-number',
         number: 2,
         title: 'Palindrome Integer Check',
+        company: 'Accenture',
+        companyBadge: 'Accenture 2023',
+        context: 'Asked in Accenture Advanced Coding Round',
         difficulty: 'Easy',
         topic: 'Math & Logic',
         fnName: 'solve',
@@ -158,6 +164,9 @@ const PROBLEMS = [
         id: 'max-element-array',
         number: 3,
         title: 'Find Peak Maximum in Array',
+        company: 'TCS NQT',
+        companyBadge: 'TCS NQT 2024',
+        context: 'Asked in TCS NQT Cognitive & Coding Slot 1',
         difficulty: 'Easy',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -184,6 +193,9 @@ const PROBLEMS = [
         id: 'count-vowels',
         number: 4,
         title: 'Count Vowels in a String',
+        company: 'Accenture',
+        companyBadge: 'Accenture 2024',
+        context: 'Asked in Accenture On-Campus Placement Test',
         difficulty: 'Easy',
         topic: 'Strings',
         fnName: 'solve',
@@ -210,6 +222,9 @@ const PROBLEMS = [
         id: 'climbing-stairs',
         number: 5,
         title: 'Climbing Stairs Ways',
+        company: 'Infosys',
+        companyBadge: 'Infosys 2024',
+        context: 'Asked in Infosys Certification & SP Round',
         difficulty: 'Easy',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -236,6 +251,9 @@ const PROBLEMS = [
         id: 'single-number-xor',
         number: 6,
         title: 'Single Non-Duplicate Number',
+        company: 'Wipro',
+        companyBadge: 'Wipro NLTH 2024',
+        context: 'Asked in Wipro Elite National Talent Hunt',
         difficulty: 'Easy',
         topic: 'Bit Manipulation',
         fnName: 'solve',
@@ -262,6 +280,9 @@ const PROBLEMS = [
         id: 'binary-search-basic',
         number: 7,
         title: 'Binary Search Target Index',
+        company: 'TCS NQT',
+        companyBadge: 'TCS NQT 2024',
+        context: 'Asked in TCS Ninja & Digital Hiring Drive',
         difficulty: 'Easy',
         topic: 'Searching',
         fnName: 'solve',
@@ -291,6 +312,9 @@ const PROBLEMS = [
         id: 'sum-of-digits',
         number: 8,
         title: 'Digital Root / Sum of Digits',
+        company: 'Accenture',
+        companyBadge: 'Accenture 2023',
+        context: 'Asked in Accenture Critical Coding Assessment',
         difficulty: 'Easy',
         topic: 'Math & Logic',
         fnName: 'solve',
@@ -317,6 +341,9 @@ const PROBLEMS = [
         id: 'missing-number-0-n',
         number: 9,
         title: 'Missing Number in [0..n]',
+        company: 'Cognizant',
+        companyBadge: 'Cognizant 2024',
+        context: 'Asked in Cognizant GenC Elevate Assessment',
         difficulty: 'Easy',
         topic: 'Math & Logic',
         fnName: 'solve',
@@ -343,6 +370,9 @@ const PROBLEMS = [
         id: 'power-of-two',
         number: 10,
         title: 'Power of Two Check',
+        company: 'TCS NQT',
+        companyBadge: 'TCS NQT 2024',
+        context: 'Asked in TCS NQT Slot 2 Coding',
         difficulty: 'Easy',
         topic: 'Bit Manipulation',
         fnName: 'solve',
@@ -369,6 +399,9 @@ const PROBLEMS = [
         id: 'gcd-two-numbers',
         number: 11,
         title: 'Greatest Common Divisor (GCD)',
+        company: 'Infosys',
+        companyBadge: 'Infosys 2024',
+        context: 'Asked in Infosys DSE Assessment',
         difficulty: 'Easy',
         topic: 'Math & Logic',
         fnName: 'solve',
@@ -398,6 +431,9 @@ const PROBLEMS = [
         id: 'count-even-numbers',
         number: 12,
         title: 'Count Even Elements in Array',
+        company: 'Wipro',
+        companyBadge: 'Wipro 2023',
+        context: 'Asked in Wipro Elite Coding Round',
         difficulty: 'Easy',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -425,6 +461,9 @@ const PROBLEMS = [
         id: 'kadane-max-subarray',
         number: 13,
         title: 'Maximum Subarray Sum (Kadane)',
+        company: 'Infosys',
+        companyBadge: 'Infosys DSE 2024',
+        context: 'Asked in Infosys Specialist Programmer & DSE',
         difficulty: 'Medium',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -451,6 +490,9 @@ const PROBLEMS = [
         id: 'best-time-stock',
         number: 14,
         title: 'Best Time to Buy & Sell Stock',
+        company: 'TCS NQT',
+        companyBadge: 'TCS Digital 2024',
+        context: 'Asked in TCS Digital High-Package Drive',
         difficulty: 'Medium',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -476,6 +518,9 @@ const PROBLEMS = [
         id: 'container-most-water',
         number: 15,
         title: 'Container With Most Water',
+        company: 'Zoho',
+        companyBadge: 'Zoho Advanced 2024',
+        context: 'Asked in Zoho Round 2 Advanced Programming',
         difficulty: 'Medium',
         topic: 'Two Pointers',
         fnName: 'solve',
@@ -501,6 +546,9 @@ const PROBLEMS = [
         id: 'move-zeroes-end',
         number: 16,
         title: 'Move Zeroes to End',
+        company: 'Infosys',
+        companyBadge: 'Infosys SP 2024',
+        context: 'Asked in Infosys Specialist Programmer Round',
         difficulty: 'Medium',
         topic: 'Two Pointers',
         fnName: 'solve',
@@ -526,6 +574,9 @@ const PROBLEMS = [
         id: 'house-robber-dp',
         number: 17,
         title: 'House Robber Maximum Loot',
+        company: 'Wipro',
+        companyBadge: 'Wipro Turbo 2024',
+        context: 'Asked in Wipro Turbo High-Package Test',
         difficulty: 'Medium',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -551,6 +602,9 @@ const PROBLEMS = [
         id: 'majority-element-boyer',
         number: 18,
         title: 'Majority Element (> n/2)',
+        company: 'Capgemini',
+        companyBadge: 'Capgemini 2024',
+        context: 'Asked in Capgemini Exceller Coding',
         difficulty: 'Medium',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -576,6 +630,9 @@ const PROBLEMS = [
         id: 'search-rotated-sorted',
         number: 19,
         title: 'Search in Rotated Sorted Array',
+        company: 'Zoho',
+        companyBadge: 'Zoho 2023',
+        context: 'Asked in Zoho Level 2 Evaluation',
         difficulty: 'Medium',
         topic: 'Searching',
         fnName: 'solve',
@@ -605,6 +662,9 @@ const PROBLEMS = [
         id: 'find-peak-element',
         number: 20,
         title: 'Find Peak Index in Mountain',
+        company: 'TCS NQT',
+        companyBadge: 'TCS NQT 2024',
+        context: 'Asked in TCS NQT Shift 1',
         difficulty: 'Medium',
         topic: 'Searching',
         fnName: 'solve',
@@ -630,6 +690,9 @@ const PROBLEMS = [
         id: 'factorial-trailing-zeroes',
         number: 21,
         title: 'Factorial Trailing Zeroes',
+        company: 'Tech Mahindra',
+        companyBadge: 'Tech Mahindra 2024',
+        context: 'Asked in Tech Mahindra Coding Assessment',
         difficulty: 'Medium',
         topic: 'Math & Logic',
         fnName: 'solve',
@@ -656,6 +719,9 @@ const PROBLEMS = [
         id: 'valid-anagram-sort',
         number: 22,
         title: 'Valid Anagram Strings',
+        company: 'Accenture',
+        companyBadge: 'Accenture 2024',
+        context: 'Asked in Accenture Advanced Coding Round',
         difficulty: 'Medium',
         topic: 'Strings',
         fnName: 'solve',
@@ -684,6 +750,9 @@ const PROBLEMS = [
         id: 'max-sliding-window-sum-k',
         number: 23,
         title: 'Max Subarray Sum of Size K',
+        company: 'Cognizant',
+        companyBadge: 'Cognizant 2024',
+        context: 'Asked in Cognizant Next Assessment',
         difficulty: 'Medium',
         topic: 'Sliding Window',
         fnName: 'solve',
@@ -712,6 +781,9 @@ const PROBLEMS = [
         id: 'count-set-bits-kernighan',
         number: 24,
         title: 'Hamming Weight (Set Bits Count)',
+        company: 'Zoho',
+        companyBadge: 'Zoho 2024',
+        context: 'Asked in Zoho Technical Round',
         difficulty: 'Medium',
         topic: 'Bit Manipulation',
         fnName: 'solve',
@@ -739,6 +811,9 @@ const PROBLEMS = [
         id: 'trapping-rain-water',
         number: 25,
         title: 'Trapping Rain Water',
+        company: 'Infosys',
+        companyBadge: 'Infosys DSE 2024',
+        context: 'Asked in Infosys DSE Coding Round',
         difficulty: 'Hard',
         topic: 'Two Pointers',
         fnName: 'solve',
@@ -764,6 +839,9 @@ const PROBLEMS = [
         id: 'coin-change-min',
         number: 26,
         title: 'Coin Change Minimum Coins',
+        company: 'TCS NQT',
+        companyBadge: 'TCS Digital 2024',
+        context: 'Asked in TCS Digital Coding Round',
         difficulty: 'Hard',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -793,6 +871,9 @@ const PROBLEMS = [
         id: 'longest-increasing-subseq',
         number: 27,
         title: 'Longest Increasing Subsequence',
+        company: 'Cognizant',
+        companyBadge: 'Cognizant 2024',
+        context: 'Asked in Cognizant GenC Elevate Round',
         difficulty: 'Hard',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -818,6 +899,9 @@ const PROBLEMS = [
         id: 'first-missing-positive',
         number: 28,
         title: 'First Missing Positive Integer',
+        company: 'Accenture',
+        companyBadge: 'Accenture 2024',
+        context: 'Asked in Accenture Critical Coding Round',
         difficulty: 'Hard',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -843,6 +927,9 @@ const PROBLEMS = [
         id: 'max-product-subarray',
         number: 29,
         title: 'Maximum Product Subarray',
+        company: 'Capgemini',
+        companyBadge: 'Capgemini 2024',
+        context: 'Asked in Capgemini Exceller Test',
         difficulty: 'Hard',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -868,6 +955,9 @@ const PROBLEMS = [
         id: 'subarray-sum-equals-k',
         number: 30,
         title: 'Subarray Sum Equals K Count',
+        company: 'TCS NQT',
+        companyBadge: 'TCS Digital 2024',
+        context: 'Asked in TCS Digital Coding',
         difficulty: 'Hard',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -896,6 +986,9 @@ const PROBLEMS = [
         id: 'dutch-national-flag-sort',
         number: 31,
         title: 'Sort Colors (0s, 1s, and 2s)',
+        company: 'Capgemini',
+        companyBadge: 'Capgemini 2024',
+        context: 'Asked in Capgemini Technical Round',
         difficulty: 'Hard',
         topic: 'Two Pointers',
         fnName: 'solve',
@@ -921,6 +1014,9 @@ const PROBLEMS = [
         id: 'jump-game-reach',
         number: 32,
         title: 'Jump Game Reachability',
+        company: 'Infosys',
+        companyBadge: 'Infosys 2024',
+        context: 'Asked in Infosys Specialist Programmer',
         difficulty: 'Hard',
         topic: 'Dynamic Programming',
         fnName: 'solve',
@@ -946,6 +1042,9 @@ const PROBLEMS = [
         id: 'count-primes-sieve',
         number: 33,
         title: 'Count Primes Less Than N (Sieve)',
+        company: 'Tech Mahindra',
+        companyBadge: 'Tech Mahindra 2024',
+        context: 'Asked in Tech Mahindra On-Campus Test',
         difficulty: 'Hard',
         topic: 'Math & Logic',
         fnName: 'solve',
@@ -971,6 +1070,9 @@ const PROBLEMS = [
         id: 'find-duplicate-floyd',
         number: 34,
         title: 'Find the Duplicate Number',
+        company: 'Tech Mahindra',
+        companyBadge: 'Tech Mahindra 2024',
+        context: 'Asked in Tech Mahindra Coding Round',
         difficulty: 'Hard',
         topic: 'Two Pointers',
         fnName: 'solve',
@@ -996,6 +1098,9 @@ const PROBLEMS = [
         id: 'koko-eating-bananas',
         number: 35,
         title: 'Minimum Eating Speed (Binary Answer)',
+        company: 'Zoho',
+        companyBadge: 'Zoho 2024',
+        context: 'Asked in Zoho Round 2 Advanced Coding',
         difficulty: 'Hard',
         topic: 'Searching',
         fnName: 'solve',
@@ -1024,6 +1129,9 @@ const PROBLEMS = [
         id: 'product-except-self',
         number: 36,
         title: 'Product of Array Except Self',
+        company: 'Zoho',
+        companyBadge: 'Zoho Advanced 2024',
+        context: 'Asked in Zoho Level 2 Advanced Programming',
         difficulty: 'Hard',
         topic: 'Arrays & Hashing',
         fnName: 'solve',
@@ -1395,6 +1503,42 @@ const executeInBrowserWorker = (lang, code, testCases) => {
 // ============================================================================
 // MAIN COMPONENT: STUDENT LOCKED IN LAB TAB
 // ============================================================================
+
+const COMPANIES = [
+    'All Companies',
+    'Accenture',
+    'TCS NQT',
+    'Infosys',
+    'Wipro',
+    'Cognizant',
+    'Capgemini',
+    'Zoho',
+    'Tech Mahindra'
+];
+
+const getCompanyBadgeStyle = (company) => {
+    switch (company) {
+        case 'Accenture':
+            return 'bg-purple-50 text-purple-700 border-purple-200';
+        case 'TCS NQT':
+            return 'bg-blue-50 text-blue-700 border-blue-200';
+        case 'Infosys':
+            return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+        case 'Wipro':
+            return 'bg-amber-50 text-amber-700 border-amber-200';
+        case 'Cognizant':
+            return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+        case 'Capgemini':
+            return 'bg-sky-50 text-sky-700 border-sky-200';
+        case 'Zoho':
+            return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        case 'Tech Mahindra':
+            return 'bg-rose-50 text-rose-700 border-rose-200';
+        default:
+            return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+};
+
 const StudentLockedInLabTab = ({ student }) => {
     const storageKey = `eth_locked_in_solved_${student?.usn || 'guest'}`;
     const [solvedIds, setSolvedIds] = useState(() => {
@@ -1406,6 +1550,8 @@ const StudentLockedInLabTab = ({ student }) => {
         }
     });
 
+    const [activeView, setActiveView] = useState('list'); // 'list' | 'solve'
+    const [selectedCompany, setSelectedCompany] = useState('All Companies');
     const [selectedDifficulty, setSelectedDifficulty] = useState('All');
     const [selectedTopic, setSelectedTopic] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
@@ -1429,17 +1575,23 @@ const StudentLockedInLabTab = ({ student }) => {
 
     const filteredProblems = useMemo(() => {
         return PROBLEMS.filter((p) => {
+            if (selectedCompany !== 'All Companies' && p.company !== selectedCompany) return false;
             if (selectedDifficulty !== 'All' && p.difficulty !== selectedDifficulty) return false;
             if (selectedTopic !== 'All' && p.topic !== selectedTopic) return false;
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
-                return p.title.toLowerCase().includes(q) || p.topic.toLowerCase().includes(q);
+                return (
+                    p.title.toLowerCase().includes(q) ||
+                    (p.company && p.company.toLowerCase().includes(q)) ||
+                    (p.context && p.context.toLowerCase().includes(q)) ||
+                    p.topic.toLowerCase().includes(q)
+                );
             }
             return true;
         });
-    }, [selectedDifficulty, selectedTopic, searchQuery]);
+    }, [selectedCompany, selectedDifficulty, selectedTopic, searchQuery]);
 
-    // Sync starter code when problem or language changes
+    // Sync starter code when active problem or selected language changes
     useEffect(() => {
         setCode(activeProblem.starter[selectedLang] || '');
         setRunOutput(null);
@@ -1454,7 +1606,7 @@ const StudentLockedInLabTab = ({ student }) => {
             try {
                 localStorage.setItem(storageKey, JSON.stringify(updated));
             } catch {
-                // ignore storage quota errors
+                // ignore storage quota error
             }
             return updated;
         });
@@ -1513,80 +1665,116 @@ const StudentLockedInLabTab = ({ student }) => {
         return 'bg-rose-50 text-rose-700 border-rose-200';
     };
 
-    return (
-        <div className="space-y-6 font-sans">
-            {/* Top Hub Card with Cartoon SVG & Sarcastic Gen-Z Tagline */}
-            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div className="space-y-2.5 max-w-2xl">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-blue-50 text-[#5899B5] border border-blue-100">
-                            Locked In Lab 🔒⚡
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            Solved: {solvedIds.length} / {PROBLEMS.length} Problems
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
-                            Zero-Latency Browser Compiler (1500+ Ready)
-                        </span>
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">
-                        Time to Lock In & Cook Some Logic.
-                    </h2>
-                    <p className="text-slate-500 text-sm leading-relaxed">
-                        Your resume claims <em>“Proficient in C, C++, Java, Python & DSA”</em> — time to back it up without StackOverflow. Pick a problem, write your solution in any of the 5 languages, and test it against real sample & hidden edge cases right in your browser.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-semibold">
-                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700">Easy: {easySolved}/12</span>
-                        <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700">Medium: {medSolved}/12</span>
-                        <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700">Hard: {hardSolved}/12</span>
-                    </div>
-                </div>
-                <LockedInCartoonSvg variant="hub" className="w-64 h-32 shrink-0 hidden sm:block" />
-            </div>
-
-            {/* Main LeetCode / HackerRank Split Workspace */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                {/* LEFT COLUMN (5 cols): Problem Selector + Problem Description & Examples */}
-                <div className="xl:col-span-5 space-y-5">
-                    {/* Problem Picker & Filter Card */}
-                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-5 space-y-4">
-                        <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                                <Layers size={14} className="text-[#5899B5]" /> Problem Deck ({filteredProblems.length})
+    // =========================================================================
+    // VIEW 1: PROBLEM CATALOG & SERVICE COMPANY CHALLENGES LIST
+    // =========================================================================
+    if (activeView === 'list') {
+        return (
+            <div className="space-y-6 font-sans">
+                {/* Hub Banner Card with Sarcastic Placement Cartoon */}
+                <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                    <div className="space-y-2.5 max-w-2xl">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-blue-50 text-[#5899B5] border border-blue-100 flex items-center gap-1.5">
+                                <Briefcase size={13} /> Service Company Coding Arena
                             </span>
-                            <div className="flex items-center gap-1.5">
-                                {['All', 'Easy', 'Medium', 'Hard'].map((d) => (
-                                    <button
-                                        key={d}
-                                        type="button"
-                                        onClick={() => setSelectedDifficulty(d)}
-                                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer transition ${
-                                            selectedDifficulty === d
-                                                ? 'bg-slate-900 text-white'
-                                                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-                                        }`}
-                                    >
-                                        {d}
-                                    </button>
-                                ))}
-                            </div>
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                Solved: {solvedIds.length} / {PROBLEMS.length} Challenges
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+                                100% In-Browser Compiler (₹0 Cost)
+                            </span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">
+                            Crack Mass Recruiter Coding Rounds.
+                        </h2>
+                        <p className="text-slate-500 text-sm leading-relaxed">
+                            Authentic technical round coding questions from <strong>TCS NQT</strong>, <strong>Accenture</strong>, <strong>Infosys</strong>, <strong>Wipro</strong>, <strong>Cognizant</strong>, <strong>Capgemini</strong> & <strong>Zoho</strong>. Write code in C, C++, Java, Python or JS and test against real sample & hidden edge cases.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs font-semibold">
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">Easy: {easySolved}/12</span>
+                            <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">Medium: {medSolved}/12</span>
+                            <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">Hard: {hardSolved}/12</span>
+                        </div>
+                    </div>
+                    <LockedInCartoonSvg variant="hub" className="w-64 h-32 shrink-0 hidden sm:block" />
+                </div>
+
+                {/* Company Filter Tabs */}
+                <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-5 space-y-4">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                            <Building2 size={14} className="text-[#5899B5]" /> Filter by Company
+                        </span>
+                        <span className="text-xs font-semibold text-slate-500">
+                            Showing {filteredProblems.length} of {PROBLEMS.length} challenges
+                        </span>
+                    </div>
+
+                    {/* Company Pills */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        {COMPANIES.map((comp) => {
+                            const isAll = comp === 'All Companies';
+                            const compTotal = isAll ? PROBLEMS.length : PROBLEMS.filter((p) => p.company === comp).length;
+                            const compSolved = isAll ? solvedIds.length : PROBLEMS.filter((p) => p.company === comp && solvedIds.includes(p.id)).length;
+                            const isSelected = selectedCompany === comp;
+                            return (
+                                <button
+                                    key={comp}
+                                    type="button"
+                                    onClick={() => setSelectedCompany(comp)}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5 border ${
+                                        isSelected
+                                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                                    }`}
+                                >
+                                    <span>{comp}</span>
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                                    }`}>
+                                        {compSolved}/{compTotal}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Difficulty and Search Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-2 border-t border-slate-100 items-center">
+                        <div className="md:col-span-5 relative">
+                            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search by question title, company, topic..."
+                                className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-medium outline-none focus:border-[#5899B5]"
+                            />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            <div className="relative">
-                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search problems..."
-                                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-medium outline-none focus:border-[#5899B5]"
-                                />
-                            </div>
+                        <div className="md:col-span-4 flex items-center gap-1.5">
+                            {['All', 'Easy', 'Medium', 'Hard'].map((d) => (
+                                <button
+                                    key={d}
+                                    type="button"
+                                    onClick={() => setSelectedDifficulty(d)}
+                                    className={`flex-1 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition text-center border ${
+                                        selectedDifficulty === d
+                                            ? 'bg-[#5899B5] text-white border-[#5899B5]'
+                                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                                    }`}
+                                >
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="md:col-span-3">
                             <select
                                 value={selectedTopic}
                                 onChange={(e) => setSelectedTopic(e.target.value)}
-                                className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
                             >
                                 {topics.map((t) => (
                                     <option key={t} value={t}>
@@ -1595,171 +1783,326 @@ const StudentLockedInLabTab = ({ student }) => {
                                 ))}
                             </select>
                         </div>
-
-                        {/* Problem Dropdown + Prev/Next */}
-                        <div className="flex items-center gap-2">
-                            <select
-                                value={activeProblem.id}
-                                onChange={(e) => setActiveProblemId(e.target.value)}
-                                className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs sm:text-sm font-semibold outline-none focus:border-[#5899B5] cursor-pointer"
-                            >
-                                {filteredProblems.map((p) => (
-                                    <option key={p.id} value={p.id}>
-                                        {solvedIds.includes(p.id) ? '✓ ' : ''}#{p.number}. {p.title} ({p.difficulty})
-                                    </option>
-                                ))}
-                            </select>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const idx = filteredProblems.findIndex((p) => p.id === activeProblem.id);
-                                    if (idx > 0) setActiveProblemId(filteredProblems[idx - 1].id);
-                                }}
-                                className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
-                                title="Previous Problem"
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const idx = filteredProblems.findIndex((p) => p.id === activeProblem.id);
-                                    if (idx !== -1 && idx + 1 < filteredProblems.length) {
-                                        setActiveProblemId(filteredProblems[idx + 1].id);
-                                    }
-                                }}
-                                className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
-                                title="Next Problem"
-                            >
-                                <ChevronRight size={16} />
-                            </button>
-                        </div>
                     </div>
+                </div>
 
-                    {/* Problem Statement Card */}
-                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-5">
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getDiffBadge(activeProblem.difficulty)}`}>
-                                        {activeProblem.difficulty}
-                                    </span>
-                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
-                                        {activeProblem.topic}
-                                    </span>
-                                    {solvedIds.includes(activeProblem.id) && (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
-                                            <Check size={12} /> Solved
+                {/* Problem Cards List / Deck */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredProblems.map((p) => {
+                        const isSolved = solvedIds.includes(p.id);
+                        return (
+                            <div
+                                key={p.id}
+                                className="bg-white border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all rounded-3xl p-5 flex flex-col justify-between gap-4 group"
+                            >
+                                <div className="space-y-3">
+                                    {/* Company Badge & Difficulty */}
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1 ${getCompanyBadgeStyle(p.company)}`}>
+                                            <Briefcase size={11} /> {p.companyBadge || p.company}
+                                        </span>
+                                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getDiffBadge(p.difficulty)}`}>
+                                            {p.difficulty}
+                                        </span>
+                                    </div>
+
+                                    {/* Problem Title */}
+                                    <div>
+                                        <h3 className="text-base font-bold text-slate-800 group-hover:text-[#5899B5] transition">
+                                            #{p.number}. {p.title}
+                                        </h3>
+                                        <p className="text-xs text-slate-500 font-medium italic mt-1 line-clamp-1">
+                                            {p.context || `Asked in ${p.company} On-Campus Drive`}
+                                        </p>
+                                    </div>
+
+                                    {/* Topic and Constraint Pill */}
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600">
+                                            {p.topic}
+                                        </span>
+                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-50 text-slate-500 border border-slate-100">
+                                            {p.testCases.length} Test Cases
+                                        </span>
+                                    </div>
+
+                                    {/* Short Description */}
+                                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                                        {p.description}
+                                    </p>
+                                </div>
+
+                                {/* Card Footer: Solved Status & Solve Challenge Button */}
+                                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                    {isSolved ? (
+                                        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                            <CheckCircle2 size={13} /> Solved ✓
+                                        </span>
+                                    ) : (
+                                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-50 text-slate-500 border border-slate-200 flex items-center gap-1">
+                                            <Clock size={12} /> Unsolved
                                         </span>
                                     )}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setActiveProblemId(p.id);
+                                            setActiveView('solve');
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-[#5899B5] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition shadow-sm"
+                                    >
+                                        <span>{isSolved ? 'Solve Again' : 'Solve Challenge'}</span>
+                                        <Flame size={13} />
+                                    </button>
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-800 mt-2">
-                                    #{activeProblem.number}. {activeProblem.title}
-                                </h3>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {filteredProblems.length === 0 && (
+                    <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center space-y-3">
+                        <AlertTriangle size={32} className="mx-auto text-amber-500" />
+                        <h4 className="text-base font-bold text-slate-800">No challenges found</h4>
+                        <p className="text-xs text-slate-500">
+                            Try resetting your company filter, search query, or difficulty level.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedCompany('All Companies');
+                                setSelectedDifficulty('All');
+                                setSelectedTopic('All');
+                                setSearchQuery('');
+                            }}
+                            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer"
+                        >
+                            Reset All Filters
+                        </button>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // =========================================================================
+    // VIEW 2: DEDICATED SEPARATE PROBLEM SOLVER PAGE
+    // =========================================================================
+    return (
+        <div className="space-y-5 font-sans">
+            {/* Top Navigation & Header Bar with Back Button */}
+            <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setActiveView('list');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition"
+                    >
+                        <ArrowLeft size={16} className="text-[#5899B5]" /> Back to Problem Arena
+                    </button>
+                    <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${getCompanyBadgeStyle(activeProblem.company)}`}>
+                        <Briefcase size={12} /> {activeProblem.companyBadge || activeProblem.company}
+                    </span>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getDiffBadge(activeProblem.difficulty)}`}>
+                        {activeProblem.difficulty}
+                    </span>
+                    {solvedIds.includes(activeProblem.id) && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                            <CheckCircle2 size={13} /> Solved ✓
+                        </span>
+                    )}
+                </div>
+
+                {/* Quick Switch Dropdown */}
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <select
+                        value={activeProblem.id}
+                        onChange={(e) => setActiveProblemId(e.target.value)}
+                        className="flex-1 md:flex-initial px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 outline-none cursor-pointer"
+                    >
+                        {PROBLEMS.map((p) => (
+                            <option key={p.id} value={p.id}>
+                                {solvedIds.includes(p.id) ? '✓ ' : ''}#{p.number}. {p.title} ({p.company})
+                            </option>
+                        ))}
+                    </select>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const idx = PROBLEMS.findIndex((p) => p.id === activeProblem.id);
+                            if (idx > 0) setActiveProblemId(PROBLEMS[idx - 1].id);
+                        }}
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                        title="Previous Challenge"
+                    >
+                        <ChevronLeft size={16} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const idx = PROBLEMS.findIndex((p) => p.id === activeProblem.id);
+                            if (idx < PROBLEMS.length - 1) setActiveProblemId(PROBLEMS[idx + 1].id);
+                        }}
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                        title="Next Challenge"
+                    >
+                        <ChevronRight size={16} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Split Workspace Layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                {/* LEFT COLUMN (5 cols): Problem Description, Story, Constraints & Sample Cases */}
+                <div className="xl:col-span-5 space-y-5">
+                    {/* Problem Statement Card */}
+                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-5">
+                        {/* Company Recruitment Context Pill */}
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2.5 text-xs text-slate-700 font-semibold">
+                            <Briefcase size={16} className="text-[#5899B5] shrink-0" />
+                            <span>{activeProblem.context || `Actual technical interview challenge asked in ${activeProblem.company} recruitment drive.`}</span>
+                        </div>
+
+                        <div>
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+                                #{activeProblem.number}. {activeProblem.title}
+                            </h2>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
+                                    Topic: {activeProblem.topic}
+                                </span>
+                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 font-mono">
+                                    fn: {activeProblem.fnName}(...)
+                                </span>
                             </div>
                         </div>
 
-                        <p className="text-sm text-slate-600 leading-relaxed">
-                            {activeProblem.description}
-                        </p>
-
-                        {/* Sample Examples */}
-                        <div className="space-y-3">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                                Sample Test Cases
-                            </span>
-                            {activeProblem.testCases
-                                .filter((tc) => !tc.isHidden)
-                                .map((tc, idx) => (
-                                    <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 font-mono text-xs space-y-1">
-                                        <div className="text-slate-500">
-                                            <strong className="text-slate-700">Input {idx + 1}:</strong>{' '}
-                                            {activeProblem.params
-                                                .map((param, pIdx) => `${param.name} = ${JSON.stringify(tc.args[pIdx])}`)
-                                                .join(', ')}
-                                        </div>
-                                        <div className="text-emerald-700">
-                                            <strong>Expected Output:</strong> {JSON.stringify(tc.expected)}
-                                        </div>
-                                    </div>
-                                ))}
+                        {/* Story / Description */}
+                        <div className="text-sm text-slate-700 leading-relaxed space-y-2">
+                            <p>{activeProblem.description}</p>
                         </div>
 
                         {/* Constraints */}
-                        <div className="space-y-2">
+                        {activeProblem.constraints && activeProblem.constraints.length > 0 && (
+                            <div className="space-y-2 pt-2 border-t border-slate-100">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                                    Constraints
+                                </span>
+                                <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600 font-mono">
+                                    {activeProblem.constraints.map((c, i) => (
+                                        <li key={i}>{c}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Sample Cases */}
+                        <div className="space-y-3 pt-2 border-t border-slate-100">
                             <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                                Constraints
+                                Sample Test Cases
                             </span>
-                            <ul className="list-disc list-inside text-xs font-mono text-slate-600 space-y-1">
-                                {activeProblem.constraints.map((c, i) => (
-                                    <li key={i}>{c}</li>
-                                ))}
-                            </ul>
+                            {activeProblem.testCases.filter((tc) => !tc.isHidden).map((tc, idx) => (
+                                <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
+                                    <div className="font-bold text-slate-500">Example {idx + 1}:</div>
+                                    <div>
+                                        <span className="text-slate-400">Input: </span>
+                                        <span className="text-slate-800 font-semibold">
+                                            {activeProblem.params.map((p, pi) => `${p.name} = ${JSON.stringify(tc.args[pi])}`).join(', ')}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-400">Output: </span>
+                                        <span className="text-emerald-700 font-bold">{JSON.stringify(tc.expected)}</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
-                        {/* Collapsible Hint */}
+                        {/* Recruiter's Hint */}
                         <div className="pt-2 border-t border-slate-100">
                             <button
                                 type="button"
-                                onClick={() => setShowHint((h) => !h)}
-                                className="text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition"
+                                onClick={() => setShowHint(!showHint)}
+                                className="w-full flex items-center justify-between p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 text-xs font-bold cursor-pointer transition hover:bg-amber-100/70"
                             >
-                                <Lightbulb size={14} /> {showHint ? 'Hide Logic Hint' : 'Stuck? Reveal Logic Hint 💡'}
+                                <span className="flex items-center gap-2">
+                                    <Lightbulb size={15} className="text-amber-600" /> Need Recruiter Hint?
+                                </span>
+                                <span>{showHint ? 'Hide Hint' : 'Reveal Hint'}</span>
                             </button>
                             {showHint && (
-                                <p className="mt-2.5 p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 font-medium">
-                                    {activeProblem.hint}
-                                </p>
+                                <div className="mt-2.5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed font-medium">
+                                    💡 <strong>Placement Tip:</strong> {activeProblem.hint}
+                                </div>
                             )}
                         </div>
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN (7 cols): Code Editor + Test Case Console */}
+                {/* RIGHT COLUMN (7 cols): Multi-Language Editor & Compiler Console */}
                 <div className="xl:col-span-7 space-y-5">
-                    {/* IDE Code Editor Card */}
-                    <div className="bg-slate-900 border-2 border-slate-800 rounded-3xl shadow-md overflow-hidden">
-                        {/* Editor Top Bar: Language Selector & Reset */}
-                        <div className="bg-slate-800/90 px-5 py-3.5 border-b border-slate-700 flex flex-wrap items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                {LANGUAGES.map((lang) => {
-                                    const active = selectedLang === lang.id;
-                                    return (
-                                        <button
-                                            key={lang.id}
-                                            type="button"
-                                            onClick={() => setSelectedLang(lang.id)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition ${
-                                                active
-                                                    ? 'bg-[#5899B5] text-white shadow-xs'
-                                                    : 'bg-slate-700/70 hover:bg-slate-700 text-slate-300'
-                                            }`}
-                                        >
-                                            {lang.label}
-                                        </button>
-                                    );
-                                })}
+                    {/* Code Editor Container */}
+                    <div className="bg-[#1E293B] rounded-3xl shadow-sm border border-slate-800 overflow-hidden">
+                        {/* Editor Header Bar */}
+                        <div className="px-5 py-3.5 bg-[#0F172A] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                            {/* Language Pills */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                                {LANGUAGES.map((lang) => (
+                                    <button
+                                        key={lang.id}
+                                        type="button"
+                                        onClick={() => setSelectedLang(lang.id)}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition ${
+                                            selectedLang === lang.id
+                                                ? 'bg-[#5899B5] text-white shadow-sm'
+                                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        {lang.label}
+                                    </button>
+                                ))}
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setCode(activeProblem.starter[selectedLang] || '');
-                                    setRunOutput(null);
-                                }}
-                                className="px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition"
-                            >
-                                <RotateCcw size={13} /> Reset Code
-                            </button>
+                            {/* Editor Actions */}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setCode(activeProblem.starter[selectedLang] || '')}
+                                    className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                                    title="Reset Code Template"
+                                >
+                                    <RotateCcw size={15} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleRunSample}
+                                    disabled={running}
+                                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition"
+                                >
+                                    <Play size={13} className="text-emerald-400" /> Run Samples
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSubmitAll}
+                                    disabled={running}
+                                    className="px-4 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition shadow-sm"
+                                >
+                                    <Send size={13} /> {running ? 'Compiling...' : 'Submit Code'}
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Line-Numbered Code Textarea */}
-                        <div className="flex bg-slate-950 min-h-[300px]">
-                            <div className="py-5 px-3 bg-slate-900/70 text-slate-600 font-mono text-xs sm:text-sm text-right select-none border-r border-slate-800">
-                                {code.split('\n').map((_, idx) => (
-                                    <div key={idx} className="leading-relaxed">
-                                        {idx + 1}
-                                    </div>
+                        {/* Editor Textarea with Line Numbers */}
+                        <div className="relative flex min-h-[360px] max-h-[520px]">
+                            <div className="select-none py-4 px-3 text-right bg-[#0F172A]/40 text-slate-600 font-mono text-xs w-10 border-r border-slate-800">
+                                {code.split('\n').map((_, i) => (
+                                    <div key={i}>{i + 1}</div>
                                 ))}
                             </div>
                             <textarea
@@ -1767,37 +2110,15 @@ const StudentLockedInLabTab = ({ student }) => {
                                 onChange={(e) => setCode(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 spellCheck={false}
-                                autoCapitalize="off"
-                                autoComplete="off"
-                                className="w-full p-5 bg-transparent text-emerald-300 font-mono text-xs sm:text-sm leading-relaxed outline-none resize-y min-h-[300px]"
+                                className="flex-1 p-4 bg-[#1E293B] text-emerald-300 font-mono text-xs sm:text-sm leading-relaxed outline-none resize-none overflow-auto"
+                                style={{ tabSize: 4 }}
                             />
                         </div>
 
-                        {/* Editor Action Bar: Run Sample vs Submit All */}
-                        <div className="bg-slate-900 px-5 py-3.5 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
-                            <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                                <Cpu size={14} className="text-sky-400" />
-                                Isolated Browser Worker • 2000ms TLE Guard
-                            </span>
-
-                            <div className="flex items-center gap-3">
-                                <button
-                                    type="button"
-                                    disabled={running}
-                                    onClick={handleRunSample}
-                                    className="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition disabled:opacity-50"
-                                >
-                                    <Play size={14} /> Run Sample Cases
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={running}
-                                    onClick={handleSubmitAll}
-                                    className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition shadow-sm disabled:opacity-50"
-                                >
-                                    <Send size={14} /> Submit Solution
-                                </button>
-                            </div>
+                        {/* Status Footer */}
+                        <div className="px-5 py-2.5 bg-[#0F172A] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Language: {LANGUAGES.find((l) => l.id === selectedLang)?.label}</span>
+                            <span>Engine: Client-Side Web Worker (0ms Network)</span>
                         </div>
                     </div>
 
@@ -1805,7 +2126,7 @@ const StudentLockedInLabTab = ({ student }) => {
                     <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                                <Terminal size={14} className="text-[#5899B5]" /> Compiler & Test Case Output Console
+                                <Terminal size={14} className="text-[#5899B5]" /> Test Case & Compiler Console
                             </span>
                             {runOutput && (
                                 <span
@@ -1822,7 +2143,7 @@ const StudentLockedInLabTab = ({ student }) => {
 
                         {!runOutput ? (
                             <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs sm:text-sm text-slate-500">
-                                Click <strong>Run Sample Cases</strong> to test your logic or <strong>Submit Solution</strong> to run against all sample + hidden edge cases.
+                                Click <strong>Run Samples</strong> to test your logic or <strong>Submit Code</strong> to run against all sample + hidden test cases.
                             </div>
                         ) : runOutput.error ? (
                             <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 font-mono text-xs space-y-1.5">
@@ -1833,6 +2154,25 @@ const StudentLockedInLabTab = ({ student }) => {
                             </div>
                         ) : (
                             <div className="space-y-4">
+                                {runOutput.verdict === 'Accepted' && (
+                                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center justify-between gap-3 flex-wrap">
+                                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-800">
+                                            <CheckCircle2 size={18} className="text-emerald-600" />
+                                            Accepted! All {runOutput.results.length} Test Cases Passed 🔒⚡
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setActiveView('list');
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer"
+                                        >
+                                            Return to Problem Arena →
+                                        </button>
+                                    </div>
+                                )}
+
                                 {/* Case Tabs */}
                                 <div className="flex flex-wrap gap-2">
                                     {runOutput.results.map((r, idx) => (
