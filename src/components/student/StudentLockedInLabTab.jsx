@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
     Terminal, Play, Send, RotateCcw, CheckCircle2, XCircle, AlertTriangle,
     Clock, Code2, Sparkles, ChevronLeft, ChevronRight, Lightbulb, Eye,
     Search, Filter, Trophy, Lock, Cpu, Layers, Check, ArrowLeft, Building2,
-    Briefcase, Flame, Award, ExternalLink
+    Briefcase, Flame, Award, ExternalLink, Maximize2, Minimize2, History,
+    FileText, CheckSquare, Zap, Copy
 } from 'lucide-react';
 
 // ============================================================================
@@ -23,7 +24,7 @@ export const LockedInCartoonSvg = ({ variant = 'hub', className = 'w-64 h-32' })
         );
     }
 
-    // Default Hub Cartoon SVG: Cartoon Terminal Monitor, Lab Flask, Padlock & Sarcastic Gen-Z Speech Bubble
+    // Default Hub Cartoon SVG: Sarcastic 5-Star Coder Roast with IDE, Flask & Padlock
     return (
         <svg viewBox="0 0 270 132" className={className} aria-hidden="true">
             <ellipse cx="135" cy="120" rx="114" ry="8" fill="#E2E8F0" />
@@ -37,9 +38,10 @@ export const LockedInCartoonSvg = ({ variant = 'hub', className = 'w-64 h-32' })
                 strokeLinejoin="round"
             />
             <text x="107" y="21" textAnchor="middle" fontSize="8" fontWeight="900" fill="#B45309" letterSpacing="0.3">
-                RESUME: “5-STAR CODER” 🤡</text>
+                RESUME: “5-STAR CODER” 🤡
+            </text>
             <text x="107" y="35" textAnchor="middle" fontSize="9" fontWeight="900" fill="#92400E" letterSpacing="0.4">
-                CAN YOU CLEAR TCS & ACCENTURE? 💼⚡
+                CAN YOU CLEAR TCS &amp; ACCENTURE? 💼⚡
             </text>
 
             {/* Cartoon Dual-Window IDE Monitor */}
@@ -84,7 +86,7 @@ export const LockedInCartoonSvg = ({ variant = 'hub', className = 'w-64 h-32' })
 };
 
 // ============================================================================
-// LANGUAGE DEFINITIONS & BOILERPLATE GENERATOR
+// LANGUAGE DEFINITIONS
 // ============================================================================
 const LANGUAGES = [
     { id: 'c', label: 'C (GCC)', ext: '.c', badge: 'bg-slate-100 text-slate-800' },
@@ -94,1071 +96,3220 @@ const LANGUAGES = [
     { id: 'javascript', label: 'JavaScript (ES6)', ext: '.js', badge: 'bg-amber-50 text-amber-800' }
 ];
 
+const COMPANIES = [
+    'All Companies',
+    'Accenture',
+    'TCS NQT',
+    'Infosys',
+    'Wipro',
+    'Cognizant',
+    'Capgemini',
+    'Zoho',
+    'Tech Mahindra'
+];
+
+const getCompanyBadgeStyle = (company) => {
+    switch (company) {
+        case 'Accenture':
+            return 'bg-purple-50 text-purple-700 border-purple-200';
+        case 'TCS NQT':
+            return 'bg-blue-50 text-blue-700 border-blue-200';
+        case 'Infosys':
+            return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+        case 'Wipro':
+            return 'bg-amber-50 text-amber-700 border-amber-200';
+        case 'Cognizant':
+            return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+        case 'Capgemini':
+            return 'bg-sky-50 text-sky-700 border-sky-200';
+        case 'Zoho':
+            return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        case 'Tech Mahindra':
+            return 'bg-rose-50 text-rose-700 border-rose-200';
+        default:
+            return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+};
+
 // ============================================================================
-// 36 CURATED PLACEMENT & LEETCODE-STYLE DSA PROBLEMS (12 EASY, 12 MEDIUM, 12 HARD)
+// SYNTAX HIGHLIGHTING ENGINE
+// ============================================================================
+const highlightCode = (code, lang) => {
+    if (!code) return '';
+    const escapeHtml = (str) =>
+        str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const cKeywords = ['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'boolean', 'string', 'String', 'vector', 'if', 'else', 'for', 'while', 'return', 'public', 'private', 'static', 'new', 'class', 'struct', 'switch', 'case', 'break', 'continue', 'default', 'const', 'unsigned', 'signed', 'auto', 'sizeof'];
+    const pyKeywords = ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'range', 'len', 'min', 'max', 'abs', 'sum', 'sorted', 'print', 'import', 'from', 'as', 'class', 'pass', 'break', 'continue', 'lambda', 'True', 'False', 'None', 'and', 'or', 'not', 'is'];
+    const jsKeywords = ['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'of', 'in', 'switch', 'case', 'break', 'continue', 'default', 'new', 'class', 'typeof', 'instanceof', 'true', 'false', 'null', 'undefined', 'Math', 'Array', 'String', 'Number', 'JSON'];
+
+    const kwList = lang === 'python' ? pyKeywords : lang === 'javascript' ? jsKeywords : cKeywords;
+    const kwRegex = new RegExp(`\\b(${kwList.join('|')})\\b`, 'g');
+
+    const lines = code.split('\n');
+    const highlighted = lines.map((line) => {
+        const l = escapeHtml(line);
+        if (lang === 'python') {
+            const hashIdx = l.indexOf('#');
+            if (hashIdx !== -1) {
+                const pre = l.slice(0, hashIdx);
+                const comm = l.slice(hashIdx);
+                return highlightTokens(pre, kwRegex) + `<span class="text-slate-500 italic">${comm}</span>`;
+            }
+        } else {
+            const slashIdx = l.indexOf('//');
+            if (slashIdx !== -1) {
+                const pre = l.slice(0, slashIdx);
+                const comm = l.slice(slashIdx);
+                return highlightTokens(pre, kwRegex) + `<span class="text-slate-500 italic">${comm}</span>`;
+            }
+        }
+        return highlightTokens(l, kwRegex);
+    });
+
+    return highlighted.join('\n');
+};
+
+function highlightTokens(text, kwRegex) {
+    let out = text.replace(/(".*?"|'.*?')(?!span)/g, '<span class="text-amber-300">$1</span>');
+    out = out.replace(/\b(\d+)\b/g, '<span class="text-orange-400 font-semibold">$1</span>');
+    out = out.replace(kwRegex, '<span class="text-rose-400 font-semibold">$1</span>');
+    out = out.replace(/([a-zA-Z0-9_]+)\s*\(/g, '<span class="text-sky-300">$1</span>(');
+    return out;
+}
+
+// ============================================================================
+// INTELLISENSE CODE EDITOR WITH AUTO-BRACKETS & AUTOCOMPLETE
+// ============================================================================
+const CodeEditor = ({ code, onChange, lang, params = [], minHeight = '380px' }) => {
+    const textareaRef = useRef(null);
+    const preRef = useRef(null);
+    const [suggestions, setSuggestions] = useState([]);
+    const [suggestionPos, setSuggestionPos] = useState({ top: 0, left: 0 });
+    const [selectedSugIdx, setSelectedSugIdx] = useState(0);
+
+    const handleScroll = (e) => {
+        if (preRef.current) {
+            preRef.current.scrollTop = e.target.scrollTop;
+            preRef.current.scrollLeft = e.target.scrollLeft;
+        }
+    };
+
+    const KEYWORDS_BY_LANG = {
+        c: ['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'if', 'else', 'for', 'while', 'return', 'break', 'continue', 'sizeof', 'const'],
+        cpp: ['int', 'long', 'double', 'float', 'char', 'void', 'bool', 'string', 'vector', 'if', 'else', 'for', 'while', 'return', 'break', 'continue', 'auto', 'const', 'sort', 'swap', 'max', 'min', 'size', 'push_back'],
+        java: ['public', 'private', 'static', 'int', 'long', 'double', 'float', 'char', 'void', 'boolean', 'String', 'new', 'if', 'else', 'for', 'while', 'return', 'break', 'continue', 'Arrays', 'Math', 'length'],
+        python: ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'in', 'range', 'len', 'min', 'max', 'abs', 'sum', 'sorted', 'append', 'sort', 'print', 'True', 'False', 'None'],
+        javascript: ['function', 'const', 'let', 'var', 'return', 'if', 'else', 'for', 'while', 'of', 'in', 'break', 'continue', 'new', 'Math', 'Array', 'String', 'JSON', 'push', 'slice', 'map', 'filter', 'reduce', 'length']
+    };
+
+    const paramNames = params.map((p) => p.name);
+
+    const checkSuggestions = (text, cursor) => {
+        const textBefore = text.substring(0, cursor);
+        const match = textBefore.match(/([a-zA-Z0-9_]{2,})$/);
+        if (!match) {
+            setSuggestions([]);
+            return;
+        }
+        const query = match[1].toLowerCase();
+        const pool = Array.from(new Set([...paramNames, ...(KEYWORDS_BY_LANG[lang] || KEYWORDS_BY_LANG.cpp)]));
+        const matches = pool.filter((w) => w.toLowerCase().startsWith(query) && w.toLowerCase() !== query);
+        if (matches.length > 0) {
+            const lines = textBefore.split('\n');
+            const lineIdx = lines.length;
+            const colIdx = lines[lines.length - 1].length;
+            setSuggestionPos({
+                top: Math.min(lineIdx * 21 + 10, 310),
+                left: Math.min(colIdx * 8 + 48, 280)
+            });
+            setSuggestions(matches.slice(0, 5));
+            setSelectedSugIdx(0);
+        } else {
+            setSuggestions([]);
+        }
+    };
+
+    const applySuggestion = (sug) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+        const cursor = textarea.selectionStart;
+        const textBefore = code.substring(0, cursor);
+        const match = textBefore.match(/([a-zA-Z0-9_]{2,})$/);
+        if (!match) return;
+        const wordStart = cursor - match[1].length;
+        const nextCode = code.substring(0, wordStart) + sug + code.substring(cursor);
+        onChange(nextCode);
+        setSuggestions([]);
+        setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = wordStart + sug.length;
+        }, 0);
+    };
+
+    const handleKeyDown = (e) => {
+        if (suggestions.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedSugIdx((prev) => (prev + 1) % suggestions.length);
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedSugIdx((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+                return;
+            }
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                applySuggestion(suggestions[selectedSugIdx]);
+                return;
+            }
+            if (e.key === 'Escape') {
+                setSuggestions([]);
+                return;
+            }
+        }
+
+        // Bracket & quote auto-closing
+        const pairs = { '{': '}', '[': ']', '(': ')', '"': '"', "'": "'" };
+        if (pairs[e.key]) {
+            e.preventDefault();
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            const open = e.key;
+            const close = pairs[open];
+            const next = code.substring(0, start) + open + close + code.substring(end);
+            onChange(next);
+            setTimeout(() => {
+                e.target.selectionStart = e.target.selectionEnd = start + 1;
+                checkSuggestions(next, start + 1);
+            }, 0);
+            return;
+        }
+
+        // Tab indentation (4 spaces)
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            const next = code.substring(0, start) + '    ' + code.substring(end);
+            onChange(next);
+            setTimeout(() => {
+                e.target.selectionStart = e.target.selectionEnd = start + 4;
+                checkSuggestions(next, start + 4);
+            }, 0);
+            return;
+        }
+
+        // Smart Enter indentation
+        if (e.key === 'Enter') {
+            const start = e.target.selectionStart;
+            const lineStart = code.lastIndexOf('\n', start - 1) + 1;
+            const currentLine = code.substring(lineStart, start);
+            const indentMatch = currentLine.match(/^\s*/);
+            const indent = indentMatch ? indentMatch[0] : '';
+            const prevChar = code[start - 1];
+            const nextChar = code[start];
+
+            if (prevChar === '{' && nextChar === '}') {
+                e.preventDefault();
+                const next = code.substring(0, start) + '\n' + indent + '    \n' + indent + code.substring(start);
+                onChange(next);
+                setTimeout(() => {
+                    e.target.selectionStart = e.target.selectionEnd = start + indent.length + 5;
+                }, 0);
+                return;
+            }
+
+            if (prevChar === '{' || prevChar === ':') {
+                e.preventDefault();
+                const next = code.substring(0, start) + '\n' + indent + '    ' + code.substring(start);
+                onChange(next);
+                setTimeout(() => {
+                    e.target.selectionStart = e.target.selectionEnd = start + indent.length + 5;
+                }, 0);
+                return;
+            }
+
+            if (indent.length > 0) {
+                e.preventDefault();
+                const next = code.substring(0, start) + '\n' + indent + code.substring(start);
+                onChange(next);
+                setTimeout(() => {
+                    e.target.selectionStart = e.target.selectionEnd = start + indent.length + 1;
+                }, 0);
+                return;
+            }
+        }
+    };
+
+    const handleTextareaChange = (e) => {
+        const val = e.target.value;
+        onChange(val);
+        checkSuggestions(val, e.target.selectionStart);
+    };
+
+    const highlightedHtml = useMemo(() => {
+        return highlightCode(code, lang);
+    }, [code, lang]);
+
+    const lineCount = useMemo(() => {
+        return Math.max(code.split('\n').length, 12);
+    }, [code]);
+
+    return (
+        <div className="relative font-mono text-xs sm:text-sm leading-relaxed overflow-hidden bg-[#1E293B] rounded-b-3xl">
+            <div className="flex" style={{ minHeight }}>
+                {/* Line numbers gutter */}
+                <div
+                    aria-hidden="true"
+                    className="select-none py-4 px-2.5 text-right bg-[#0F172A]/50 text-slate-500 font-mono text-xs w-10 border-r border-slate-800 shrink-0"
+                >
+                    {Array.from({ length: lineCount }).map((_, i) => (
+                        <div key={i} className="leading-relaxed">{i + 1}</div>
+                    ))}
+                </div>
+
+                {/* Overlaid editor */}
+                <div className="relative flex-1 overflow-hidden">
+                    {/* Pre highlighting layer */}
+                    <pre
+                        ref={preRef}
+                        aria-hidden="true"
+                        className="m-0 p-4 font-mono text-xs sm:text-sm leading-relaxed text-slate-100 overflow-hidden whitespace-pre pointer-events-none select-none absolute inset-0 font-normal"
+                        dangerouslySetInnerHTML={{ __html: highlightedHtml + '\n' }}
+                    />
+                    {/* Active transparent textarea layer */}
+                    <textarea
+                        ref={textareaRef}
+                        value={code}
+                        onChange={handleTextareaChange}
+                        onKeyDown={handleKeyDown}
+                        onScroll={handleScroll}
+                        className="w-full h-full min-h-[380px] p-4 font-mono text-xs sm:text-sm leading-relaxed text-transparent caret-emerald-400 bg-transparent outline-none resize-none relative z-10 whitespace-pre overflow-auto font-normal"
+                        spellCheck={false}
+                        autoCapitalize="off"
+                        autoComplete="off"
+                        autoCorrect="off"
+                    />
+
+                    {/* Autocomplete Suggestions Popup */}
+                    {suggestions.length > 0 && (
+                        <div
+                            className="absolute z-30 bg-[#0F172A] border border-slate-700 shadow-2xl rounded-xl p-1 w-44 font-mono text-xs text-slate-200"
+                            style={{ top: suggestionPos.top, left: suggestionPos.left }}
+                        >
+                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider px-2 py-1 border-b border-slate-800 flex items-center justify-between">
+                                <span>Suggestions</span>
+                                <span className="text-[9px]">Tab/↵</span>
+                            </div>
+                            {suggestions.map((sug, i) => (
+                                <button
+                                    key={sug}
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        applySuggestion(sug);
+                                    }}
+                                    className={`w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between text-xs cursor-pointer transition ${
+                                        selectedSugIdx === i
+                                            ? 'bg-[#5899B5] text-white font-bold'
+                                            : 'hover:bg-slate-800 text-slate-300'
+                                    }`}
+                                >
+                                    <span>{sug}</span>
+                                    <span className="text-[9px] opacity-70 font-sans">
+                                        {paramNames.includes(sug) ? 'param' : 'keyword'}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ============================================================================
+// 36 CURATED SERVICE COMPANY PROBLEMS (WITH STUBS ONLY IN STARTER)
 // ============================================================================
 const PROBLEMS = [
-    // ======================== EASY (1 - 12) ========================
     {
-        id: 'two-sum- array',
-        number: 1,
-        title: 'Two Sum Indices',
-        company: 'Accenture',
-        companyBadge: 'Accenture 2024',
-        context: 'Asked in Accenture Critical Coding Round',
-        difficulty: 'Easy',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [
-            { name: 'nums', type: 'int[]' },
-            { name: 'target', type: 'int' }
+        "id": "two-sum- array",
+        "number": 1,
+        "title": "Two Sum Indices",
+        "company": "Accenture",
+        "companyBadge": "Accenture 2024",
+        "context": "Asked in Accenture Critical Coding Round",
+        "difficulty": "Easy",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            },
+            {
+                "name": "target",
+                "type": "int"
+            }
         ],
-        returnType: 'int[]',
-        description: 'Given an array of integers `nums` and an integer `target`, return the indices `[i, j]` (`i < j`) of the two numbers such that they add up to `target`. Return `[-1, -1]` if no such pair exists.',
-        constraints: ['2 <= nums.length <= 10^4', '-10^9 <= nums[i] <= 10^9', 'Exactly one valid answer exists.'],
-        hint: 'Use a nested loop for O(n²) or a Hash Map storing value -> index for O(n).',
-        starter: {
-            c: `int* solve(int nums[], int n, int target) {\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return {i, j};\n            }\n        }\n    }\n    return {-1, -1};\n}`,
-            cpp: `vector<int> solve(vector<int> nums, int target) {\n    int n = nums.size();\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return {i, j};\n            }\n        }\n    }\n    return {-1, -1};\n}`,
-            java: `public int[] solve(int[] nums, int target) {\n    int n = nums.length;\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return new int[]{i, j};\n            }\n        }\n    }\n    return new int[]{-1, -1};\n}`,
-            python: `def solve(nums, target):\n    n = len(nums)\n    for i in range(n):\n        for j in range(i + 1, n):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return [-1, -1]`,
-            javascript: `function solve(nums, target) {\n    for (let i = 0; i < nums.length; i++) {\n        for (let j = i + 1; j < nums.length; j++) {\n            if (nums[i] + nums[j] === target) {\n                return [i, j];\n            }\n        }\n    }\n    return [-1, -1];\n}`
-        },
-        testCases: [
-            { args: [[2, 7, 11, 15], 9], expected: [0, 1], isHidden: false },
-            { args: [[3, 2, 4], 6], expected: [1, 2], isHidden: false },
-            { args: [[3, 3], 6], expected: [0, 1], isHidden: true },
-            { args: [[1, 5, 8, 12, 20], 20], expected: [2, 3], isHidden: true }
-        ]
-    },
-    {
-        id: 'palindrome-number',
-        number: 2,
-        title: 'Palindrome Integer Check',
-        company: 'Accenture',
-        companyBadge: 'Accenture 2023',
-        context: 'Asked in Accenture Advanced Coding Round',
-        difficulty: 'Easy',
-        topic: 'Math & Logic',
-        fnName: 'solve',
-        params: [{ name: 'x', type: 'int' }],
-        returnType: 'int',
-        description: 'Given an integer `x`, return `1` if `x` is a palindrome integer (reads the same backward as forward), and `0` otherwise. Negative numbers are not palindromes.',
-        constraints: ['-2^31 <= x <= 2^31 - 1'],
-        hint: 'Reverse the digits of x using modulo 10 and integer division by 10.',
-        starter: {
-            c: `int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}`,
-            cpp: `int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}`,
-            java: `public int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}`,
-            python: `def solve(x):\n    if x < 0:\n        return 0\n    orig = x\n    rev = 0\n    while x > 0:\n        rev = rev * 10 + (x % 10)\n        x = x // 10\n    return 1 if orig == rev else 0`,
-            javascript: `function solve(x) {\n    if (x < 0) return 0;\n    let orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = Math.floor(x / 10);\n    }\n    return orig === rev ? 1 : 0;\n}`
-        },
-        testCases: [
-            { args: [121], expected: 1, isHidden: false },
-            { args: [-121], expected: 0, isHidden: false },
-            { args: [10], expected: 0, isHidden: true },
-            { args: [12321], expected: 1, isHidden: true }
-        ]
-    },
-    {
-        id: 'max-element-array',
-        number: 3,
-        title: 'Find Peak Maximum in Array',
-        company: 'TCS NQT',
-        companyBadge: 'TCS NQT 2024',
-        context: 'Asked in TCS NQT Cognitive & Coding Slot 1',
-        difficulty: 'Easy',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given a non-empty array of integers `nums`, find and return the maximum element present in the array.',
-        constraints: ['1 <= nums.length <= 10^5', '-10^6 <= nums[i] <= 10^6'],
-        hint: 'Initialize maxVal = nums[0] and iterate through the array.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int maxVal = nums[0];\n    for (int i = 1; i < n; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int maxVal = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}`,
-            java: `public int solve(int[] nums) {\n    int maxVal = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}`,
-            python: `def solve(nums):\n    max_val = nums[0]\n    for x in nums:\n        if x > max_val:\n            max_val = x\n    return max_val`,
-            javascript: `function solve(nums) {\n    let maxVal = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}`
-        },
-        testCases: [
-            { args: [[3, 1, 9, 4, 2]], expected: 9, isHidden: false },
-            { args: [[-10, -3, -25, -1]], expected: -1, isHidden: false },
-            { args: [[42]], expected: 42, isHidden: true },
-            { args: [[12, 99, 104, 88, 104]], expected: 104, isHidden: true }
-        ]
-    },
-    {
-        id: 'count-vowels',
-        number: 4,
-        title: 'Count Vowels in a String',
-        company: 'Accenture',
-        companyBadge: 'Accenture 2024',
-        context: 'Asked in Accenture On-Campus Placement Test',
-        difficulty: 'Easy',
-        topic: 'Strings',
-        fnName: 'solve',
-        params: [{ name: 's', type: 'string' }],
-        returnType: 'int',
-        description: 'Given a lowercase string `s`, return the total number of vowels (`a`, `e`, `i`, `o`, `u`) present in the string.',
-        constraints: ['1 <= s.length <= 10^4', 's consists of lowercase English letters.'],
-        hint: 'Check each character against a, e, i, o, u and increment a counter.',
-        starter: {
-            c: `int solve(string s) {\n    int count = 0;\n    for (int i = 0; i < s.length(); i++) {\n        char c = s[i];\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}`,
-            cpp: `int solve(string s) {\n    int count = 0;\n    for (int i = 0; i < s.size(); i++) {\n        char c = s[i];\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}`,
-            java: `public int solve(String s) {\n    int count = 0;\n    for (int i = 0; i < s.length(); i++) {\n        char c = s.charAt(i);\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}`,
-            python: `def solve(s):\n    count = 0\n    for c in s:\n        if c in "aeiou":\n            count += 1\n    return count`,
-            javascript: `function solve(s) {\n    let count = 0;\n    for (let i = 0; i < s.length; i++) {\n        if ("aeiou".includes(s[i])) count++;\n    }\n    return count;\n}`
-        },
-        testCases: [
-            { args: ['placement'], expected: 3, isHidden: false },
-            { args: ['education'], expected: 5, isHidden: false },
-            { args: ['rhythm'], expected: 0, isHidden: true },
-            { args: ['aeiou'], expected: 5, isHidden: true }
-        ]
-    },
-    {
-        id: 'climbing-stairs',
-        number: 5,
-        title: 'Climbing Stairs Ways',
-        company: 'Infosys',
-        companyBadge: 'Infosys 2024',
-        context: 'Asked in Infosys Certification & SP Round',
-        difficulty: 'Easy',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'n', type: 'int' }],
-        returnType: 'int',
-        description: 'You are climbing a staircase with `n` steps. Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?',
-        constraints: ['1 <= n <= 40'],
-        hint: 'Way(n) = Way(n-1) + Way(n-2), which follows the Fibonacci progression.',
-        starter: {
-            c: `int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}`,
-            cpp: `int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}`,
-            java: `public int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}`,
-            python: `def solve(n):\n    if n <= 2:\n        return n\n    a, b = 1, 2\n    for i in range(3, n + 1):\n        a, b = b, a + b\n    return b`,
-            javascript: `function solve(n) {\n    if (n <= 2) return n;\n    let a = 1, b = 2;\n    for (let i = 3; i <= n; i++) {\n        let c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}`
-        },
-        testCases: [
-            { args: [2], expected: 2, isHidden: false },
-            { args: [3], expected: 3, isHidden: false },
-            { args: [5], expected: 8, isHidden: true },
-            { args: [10], expected: 89, isHidden: true }
-        ]
-    },
-    {
-        id: 'single-number-xor',
-        number: 6,
-        title: 'Single Non-Duplicate Number',
-        company: 'Wipro',
-        companyBadge: 'Wipro NLTH 2024',
-        context: 'Asked in Wipro Elite National Talent Hunt',
-        difficulty: 'Easy',
-        topic: 'Bit Manipulation',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given a non-empty array of integers `nums`, every element appears twice except for one. Find and return that single unique element in O(n) time and O(1) extra space.',
-        constraints: ['1 <= nums.length <= 3 * 10^4'],
-        hint: 'XOR of a number with itself is 0 (a ^ a = 0), so XORing all elements leaves the unique number.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int ans = 0;\n    for (int i = 0; i < n; i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int ans = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}`,
-            java: `public int solve(int[] nums) {\n    int ans = 0;\n    for (int i = 0; i < nums.length; i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}`,
-            python: `def solve(nums):\n    ans = 0\n    for x in nums:\n        ans = ans ^ x\n    return ans`,
-            javascript: `function solve(nums) {\n    let ans = 0;\n    for (let i = 0; i < nums.length; i++) {\n        ans ^= nums[i];\n    }\n    return ans;\n}`
-        },
-        testCases: [
-            { args: [[2, 2, 1]], expected: 1, isHidden: false },
-            { args: [[4, 1, 2, 1, 2]], expected: 4, isHidden: false },
-            { args: [[99]], expected: 99, isHidden: true },
-            { args: [[7, 3, 5, 3, 7]], expected: 5, isHidden: true }
-        ]
-    },
-    {
-        id: 'binary-search-basic',
-        number: 7,
-        title: 'Binary Search Target Index',
-        company: 'TCS NQT',
-        companyBadge: 'TCS NQT 2024',
-        context: 'Asked in TCS Ninja & Digital Hiring Drive',
-        difficulty: 'Easy',
-        topic: 'Searching',
-        fnName: 'solve',
-        params: [
-            { name: 'nums', type: 'int[]' },
-            { name: 'target', type: 'int' }
+        "returnType": "int[]",
+        "description": "Given an array of integers `nums` and an integer `target`, return the indices `[i, j]` (`i < j`) of the two numbers such that they add up to `target`. Return `[-1, -1]` if no such pair exists.",
+        "constraints": [
+            "2 <= nums.length <= 10^4",
+            "-10^9 <= nums[i] <= 10^9",
+            "Exactly one valid answer exists."
         ],
-        returnType: 'int',
-        description: 'Given an array of integers `nums` sorted in ascending order and an integer `target`, return the index of `target` if it exists, otherwise return `-1`.',
-        constraints: ['1 <= nums.length <= 10^4', 'nums is sorted in strictly increasing order.'],
-        hint: 'Maintain lo = 0 and hi = n - 1, comparing nums[mid] with target.',
-        starter: {
-            c: `int solve(int nums[], int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}`,
-            cpp: `int solve(vector<int> nums, int target) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}`,
-            java: `public int solve(int[] nums, int target) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}`,
-            python: `def solve(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1`,
-            javascript: `function solve(nums, target) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}`
+        "hint": "Use a nested loop for O(n²) or a Hash Map storing value -> index for O(n).",
+        "starter": {
+            "c": "int* solve(int nums[], int n, int target) {\n    // Write your logic here\n    return {0};\n}",
+            "cpp": "vector<int> solve(vector<int> nums, int target) {\n    // Write your logic here\n    return {};\n}",
+            "java": "public int[] solve(int[] nums, int target) {\n    // Write your logic here\n    return new int[]{};\n}",
+            "python": "def solve(nums, target):\n    # Write your logic here\n    return []",
+            "javascript": "function solve(nums, target) {\n    // Write your logic here\n    return [];\n}"
         },
-        testCases: [
-            { args: [[-1, 0, 3, 5, 9, 12], 9], expected: 4, isHidden: false },
-            { args: [[-1, 0, 3, 5, 9, 12], 2], expected: -1, isHidden: false },
-            { args: [[5], 5], expected: 0, isHidden: true },
-            { args: [[2, 4, 6, 8, 10, 12, 14], 14], expected: 6, isHidden: true }
-        ]
-    },
-    {
-        id: 'sum-of-digits',
-        number: 8,
-        title: 'Digital Root / Sum of Digits',
-        company: 'Accenture',
-        companyBadge: 'Accenture 2023',
-        context: 'Asked in Accenture Critical Coding Assessment',
-        difficulty: 'Easy',
-        topic: 'Math & Logic',
-        fnName: 'solve',
-        params: [{ name: 'n', type: 'int' }],
-        returnType: 'int',
-        description: 'Given a non-negative integer `n`, return the sum of all its base-10 digits.',
-        constraints: ['0 <= n <= 10^9'],
-        hint: 'Repeatedly add n % 10 to sum and divide n by 10.',
-        starter: {
-            c: `int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}`,
-            cpp: `int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}`,
-            java: `public int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}`,
-            python: `def solve(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n = n // 10\n    return total`,
-            javascript: `function solve(n) {\n    let sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = Math.floor(n / 10);\n    }\n    return sum;\n}`
-        },
-        testCases: [
-            { args: [9875], expected: 29, isHidden: false },
-            { args: [1001], expected: 2, isHidden: false },
-            { args: [0], expected: 0, isHidden: true },
-            { args: [123456], expected: 21, isHidden: true }
-        ]
-    },
-    {
-        id: 'missing-number-0-n',
-        number: 9,
-        title: 'Missing Number in [0..n]',
-        company: 'Cognizant',
-        companyBadge: 'Cognizant 2024',
-        context: 'Asked in Cognizant GenC Elevate Assessment',
-        difficulty: 'Easy',
-        topic: 'Math & Logic',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an array `nums` containing `n` distinct numbers in the range `[0, n]`, return the only number in the range that is missing from the array.',
-        constraints: ['1 <= n <= 10^4'],
-        hint: 'Expected sum is n * (n + 1) / 2. Subtract the actual sum of array elements.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int n = nums.size();\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}`,
-            java: `public int solve(int[] nums) {\n    int n = nums.length;\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}`,
-            python: `def solve(nums):\n    n = len(nums)\n    expected = (n * (n + 1)) // 2\n    return expected - sum(nums)`,
-            javascript: `function solve(nums) {\n    const n = nums.length;\n    const expected = (n * (n + 1)) / 2;\n    let actual = 0;\n    for (let i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}`
-        },
-        testCases: [
-            { args: [[3, 0, 1]], expected: 2, isHidden: false },
-            { args: [[0, 1]], expected: 2, isHidden: false },
-            { args: [[9, 6, 4, 2, 3, 5, 7, 0, 1]], expected: 8, isHidden: true },
-            { args: [[1]], expected: 0, isHidden: true }
-        ]
-    },
-    {
-        id: 'power-of-two',
-        number: 10,
-        title: 'Power of Two Check',
-        company: 'TCS NQT',
-        companyBadge: 'TCS NQT 2024',
-        context: 'Asked in TCS NQT Slot 2 Coding',
-        difficulty: 'Easy',
-        topic: 'Bit Manipulation',
-        fnName: 'solve',
-        params: [{ name: 'n', type: 'int' }],
-        returnType: 'int',
-        description: 'Given an integer `n`, return `1` if it is a power of two ($2^k$), otherwise return `0`.',
-        constraints: ['-2^31 <= n <= 2^31 - 1'],
-        hint: 'A positive integer n is a power of 2 if and only if (n & (n - 1)) == 0.',
-        starter: {
-            c: `int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}`,
-            cpp: `int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}`,
-            java: `public int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}`,
-            python: `def solve(n):\n    if n <= 0:\n        return 0\n    return 1 if (n & (n - 1)) == 0 else 0`,
-            javascript: `function solve(n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) === 0 ? 1 : 0;\n}`
-        },
-        testCases: [
-            { args: [16], expected: 1, isHidden: false },
-            { args: [18], expected: 0, isHidden: false },
-            { args: [1], expected: 1, isHidden: true },
-            { args: [0], expected: 0, isHidden: true }
-        ]
-    },
-    {
-        id: 'gcd-two-numbers',
-        number: 11,
-        title: 'Greatest Common Divisor (GCD)',
-        company: 'Infosys',
-        companyBadge: 'Infosys 2024',
-        context: 'Asked in Infosys DSE Assessment',
-        difficulty: 'Easy',
-        topic: 'Math & Logic',
-        fnName: 'solve',
-        params: [
-            { name: 'a', type: 'int' },
-            { name: 'b', type: 'int' }
+        "testCases": [
+            {
+                "args": [
+                    [
+                        2,
+                        7,
+                        11,
+                        15
+                    ],
+                    9
+                ],
+                "expected": [
+                    0,
+                    1
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        2,
+                        4
+                    ],
+                    6
+                ],
+                "expected": [
+                    1,
+                    2
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        3
+                    ],
+                    6
+                ],
+                "expected": [
+                    0,
+                    1
+                ],
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        1,
+                        5,
+                        8,
+                        12,
+                        20
+                    ],
+                    20
+                ],
+                "expected": [
+                    2,
+                    3
+                ],
+                "isHidden": true
+            }
         ],
-        returnType: 'int',
-        description: 'Given two positive integers `a` and `b`, return their Greatest Common Divisor (GCD) using Euclid’s algorithm.',
-        constraints: ['1 <= a, b <= 10^9'],
-        hint: 'While b != 0, replace (a, b) with (b, a % b).',
-        starter: {
-            c: `int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}`,
-            cpp: `int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}`,
-            java: `public int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}`,
-            python: `def solve(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a`,
-            javascript: `function solve(a, b) {\n    while (b !== 0) {\n        let r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}`
-        },
-        testCases: [
-            { args: [48, 18], expected: 6, isHidden: false },
-            { args: [101, 10], expected: 1, isHidden: false },
-            { args: [270, 192], expected: 6, isHidden: true },
-            { args: [100, 25], expected: 25, isHidden: true }
-        ]
+        "solution": {
+            "c": "int* solve(int nums[], int n, int target) {\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return {i, j};\n            }\n        }\n    }\n    return {-1, -1};\n}",
+            "cpp": "vector<int> solve(vector<int> nums, int target) {\n    int n = nums.size();\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return {i, j};\n            }\n        }\n    }\n    return {-1, -1};\n}",
+            "java": "public int[] solve(int[] nums, int target) {\n    int n = nums.length;\n    for (int i = 0; i < n; i++) {\n        for (int j = i + 1; j < n; j++) {\n            if (nums[i] + nums[j] == target) {\n                return new int[]{i, j};\n            }\n        }\n    }\n    return new int[]{-1, -1};\n}",
+            "python": "def solve(nums, target):\n    n = len(nums)\n    for i in range(n):\n        for j in range(i + 1, n):\n            if nums[i] + nums[j] == target:\n                return [i, j]\n    return [-1, -1]",
+            "javascript": "function solve(nums, target) {\n    for (let i = 0; i < nums.length; i++) {\n        for (let j = i + 1; j < nums.length; j++) {\n            if (nums[i] + nums[j] === target) {\n                return [i, j];\n            }\n        }\n    }\n    return [-1, -1];\n}"
+        }
     },
     {
-        id: 'count-even-numbers',
-        number: 12,
-        title: 'Count Even Elements in Array',
-        company: 'Wipro',
-        companyBadge: 'Wipro 2023',
-        context: 'Asked in Wipro Elite Coding Round',
-        difficulty: 'Easy',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an integer array `nums`, return the count of elements that are divisible by 2.',
-        constraints: ['1 <= nums.length <= 10^4'],
-        hint: 'Check nums[i] % 2 == 0 for each element.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int count = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}`,
-            java: `public int solve(int[] nums) {\n    int count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}`,
-            python: `def solve(nums):\n    count = 0\n    for x in nums:\n        if x % 2 == 0:\n            count += 1\n    return count`,
-            javascript: `function solve(nums) {\n    let count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (nums[i] % 2 === 0) count++;\n    }\n    return count;\n}`
-        },
-        testCases: [
-            { args: [[1, 2, 3, 4, 5, 6]], expected: 3, isHidden: false },
-            { args: [[7, 9, 11]], expected: 0, isHidden: false },
-            { args: [[0, 2, 4, 8]], expected: 4, isHidden: true }
-        ]
-    },
-
-    // ======================== MEDIUM (13 - 24) ========================
-    {
-        id: 'kadane-max-subarray',
-        number: 13,
-        title: 'Maximum Subarray Sum (Kadane)',
-        company: 'Infosys',
-        companyBadge: 'Infosys DSE 2024',
-        context: 'Asked in Infosys Specialist Programmer & DSE',
-        difficulty: 'Medium',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an integer array `nums`, find the contiguous non-empty subarray which has the largest sum and return its sum.',
-        constraints: ['1 <= nums.length <= 10^5', '-10^4 <= nums[i] <= 10^4'],
-        hint: 'Maintain cur = max(nums[i], cur + nums[i]) and best = max(best, cur).',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < n; i++) {\n        cur = (nums[i] > cur + nums[i]) ? nums[i] : cur + nums[i];\n        if (cur > best) best = cur;\n    }\n    return best;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        cur = max(nums[i], cur + nums[i]);\n        best = max(best, cur);\n    }\n    return best;\n}`,
-            java: `public int solve(int[] nums) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        cur = Math.max(nums[i], cur + nums[i]);\n        best = Math.max(best, cur);\n    }\n    return best;\n}`,
-            python: `def solve(nums):\n    cur = best = nums[0]\n    for i in range(1, len(nums)):\n        cur = max(nums[i], cur + nums[i])\n        best = max(best, cur)\n    return best`,
-            javascript: `function solve(nums) {\n    let cur = nums[0], best = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        cur = Math.max(nums[i], cur + nums[i]);\n        best = Math.max(best, cur);\n    }\n    return best;\n}`
-        },
-        testCases: [
-            { args: [[-2, 1, -3, 4, -1, 2, 1, -5, 4]], expected: 6, isHidden: false },
-            { args: [[5, 4, -1, 7, 8]], expected: 23, isHidden: false },
-            { args: [[-5, -2, -9]], expected: -2, isHidden: true },
-            { args: [[1]], expected: 1, isHidden: true }
-        ]
-    },
-    {
-        id: 'best-time-stock',
-        number: 14,
-        title: 'Best Time to Buy & Sell Stock',
-        company: 'TCS NQT',
-        companyBadge: 'TCS Digital 2024',
-        context: 'Asked in TCS Digital High-Package Drive',
-        difficulty: 'Medium',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'prices', type: 'int[]' }],
-        returnType: 'int',
-        description: 'You are given an array `prices` where `prices[i]` is the price of a stock on day `i`. Maximize your profit by choosing a single day to buy and a future day to sell. Return the maximum profit (or `0` if no profit is possible).',
-        constraints: ['1 <= prices.length <= 10^5', '0 <= prices[i] <= 10^4'],
-        hint: 'Track the minimum price seen so far and update maxProfit = max(maxProfit, price - minPrice).',
-        starter: {
-            c: `int solve(int prices[], int n) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < n; i++) {\n        if (prices[i] < minP) minP = prices[i];\n        if (prices[i] - minP > profit) profit = prices[i] - minP;\n    }\n    return profit;\n}`,
-            cpp: `int solve(vector<int> prices) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < prices.size(); i++) {\n        minP = min(minP, prices[i]);\n        profit = max(profit, prices[i] - minP);\n    }\n    return profit;\n}`,
-            java: `public int solve(int[] prices) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < prices.length; i++) {\n        minP = Math.min(minP, prices[i]);\n        profit = Math.max(profit, prices[i] - minP);\n    }\n    return profit;\n}`,
-            python: `def solve(prices):\n    min_p = prices[0]\n    profit = 0\n    for p in prices:\n        if p < min_p:\n            min_p = p\n        if p - min_p > profit:\n            profit = p - min_p\n    return profit`,
-            javascript: `function solve(prices) {\n    let minP = prices[0], profit = 0;\n    for (let i = 1; i < prices.length; i++) {\n        minP = Math.min(minP, prices[i]);\n        profit = Math.max(profit, prices[i] - minP);\n    }\n    return profit;\n}`
-        },
-        testCases: [
-            { args: [[7, 1, 5, 3, 6, 4]], expected: 5, isHidden: false },
-            { args: [[7, 6, 4, 3, 1]], expected: 0, isHidden: false },
-            { args: [[2, 4, 1, 10]], expected: 9, isHidden: true }
-        ]
-    },
-    {
-        id: 'container-most-water',
-        number: 15,
-        title: 'Container With Most Water',
-        company: 'Zoho',
-        companyBadge: 'Zoho Advanced 2024',
-        context: 'Asked in Zoho Round 2 Advanced Programming',
-        difficulty: 'Medium',
-        topic: 'Two Pointers',
-        fnName: 'solve',
-        params: [{ name: 'height', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given `n` non-negative integers `height` where each represents a vertical line at coordinate `i`, find two lines that together with the x-axis form a container that holds the most water. Return the maximum area.',
-        constraints: ['2 <= height.length <= 10^5'],
-        hint: 'Use two pointers l = 0 and r = n - 1, moving the pointer with the smaller height inward.',
-        starter: {
-            c: `int solve(int height[], int n) {\n    int l = 0, r = n - 1, best = 0;\n    while (l < r) {\n        int h = height[l] < height[r] ? height[l] : height[r];\n        int area = (r - l) * h;\n        if (area > best) best = area;\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}`,
-            cpp: `int solve(vector<int> height) {\n    int l = 0, r = height.size() - 1, best = 0;\n    while (l < r) {\n        best = max(best, (r - l) * min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}`,
-            java: `public int solve(int[] height) {\n    int l = 0, r = height.length - 1, best = 0;\n    while (l < r) {\n        best = Math.max(best, (r - l) * Math.min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}`,
-            python: `def solve(height):\n    l, r = 0, len(height) - 1\n    best = 0\n    while l < r:\n        best = max(best, (r - l) * min(height[l], height[r]))\n        if height[l] < height[r]:\n            l += 1\n        else:\n            r -= 1\n    return best`,
-            javascript: `function solve(height) {\n    let l = 0, r = height.length - 1, best = 0;\n    while (l < r) {\n        best = Math.max(best, (r - l) * Math.min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}`
-        },
-        testCases: [
-            { args: [[1, 8, 6, 2, 5, 4, 8, 3, 7]], expected: 49, isHidden: false },
-            { args: [[1, 1]], expected: 1, isHidden: false },
-            { args: [[4, 3, 2, 1, 4]], expected: 16, isHidden: true }
-        ]
-    },
-    {
-        id: 'move-zeroes-end',
-        number: 16,
-        title: 'Move Zeroes to End',
-        company: 'Infosys',
-        companyBadge: 'Infosys SP 2024',
-        context: 'Asked in Infosys Specialist Programmer Round',
-        difficulty: 'Medium',
-        topic: 'Two Pointers',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int[]',
-        description: 'Given an integer array `nums`, move all `0`s to the end of it while maintaining the relative order of the non-zero elements, and return the modified array.',
-        constraints: ['1 <= nums.length <= 10^4'],
-        hint: 'Maintain a write pointer pos = 0 for non-zero values, then fill the rest with 0.',
-        starter: {
-            c: `int* solve(int nums[], int n) {\n    int pos = 0;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < n) nums[pos++] = 0;\n    return nums;\n}`,
-            cpp: `vector<int> solve(vector<int> nums) {\n    int pos = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.size()) nums[pos++] = 0;\n    return nums;\n}`,
-            java: `public int[] solve(int[] nums) {\n    int pos = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.length) nums[pos++] = 0;\n    return nums;\n}`,
-            python: `def solve(nums):\n    pos = 0\n    for i in range(len(nums)):\n        if nums[i] != 0:\n            nums[pos] = nums[i]\n            pos += 1\n    while pos < len(nums):\n        nums[pos] = 0\n        pos += 1\n    return nums`,
-            javascript: `function solve(nums) {\n    let pos = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (nums[i] !== 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.length) nums[pos++] = 0;\n    return nums;\n}`
-        },
-        testCases: [
-            { args: [[0, 1, 0, 3, 12]], expected: [1, 3, 12, 0, 0], isHidden: false },
-            { args: [[0]], expected: [0], isHidden: false },
-            { args: [[4, 0, 5, 0, 0, 6]], expected: [4, 5, 6, 0, 0, 0], isHidden: true }
-        ]
-    },
-    {
-        id: 'house-robber-dp',
-        number: 17,
-        title: 'House Robber Maximum Loot',
-        company: 'Wipro',
-        companyBadge: 'Wipro Turbo 2024',
-        context: 'Asked in Wipro Turbo High-Package Test',
-        difficulty: 'Medium',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'You are planning to rob houses along a street (`nums[i]` is the cash in house `i`). Adjacent houses have connected security systems. Return the maximum amount of money you can rob without alerting the police.',
-        constraints: ['1 <= nums.length <= 100', '0 <= nums[i] <= 400'],
-        hint: 'At each house i, cur = max(prev1, prev2 + nums[i]).',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < n; i++) {\n        int take = prev2 + nums[i];\n        int cur = take > prev1 ? take : prev1;\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        int cur = max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}`,
-            java: `public int solve(int[] nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < nums.length; i++) {\n        int cur = Math.max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}`,
-            python: `def solve(nums):\n    prev2, prev1 = 0, 0\n    for x in nums:\n        prev2, prev1 = prev1, max(prev1, prev2 + x)\n    return prev1`,
-            javascript: `function solve(nums) {\n    let prev2 = 0, prev1 = 0;\n    for (let i = 0; i < nums.length; i++) {\n        let cur = Math.max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}`
-        },
-        testCases: [
-            { args: [[1, 2, 3, 1]], expected: 4, isHidden: false },
-            { args: [[2, 7, 9, 3, 1]], expected: 12, isHidden: false },
-            { args: [[2, 1, 1, 2]], expected: 4, isHidden: true }
-        ]
-    },
-    {
-        id: 'majority-element-boyer',
-        number: 18,
-        title: 'Majority Element (> n/2)',
-        company: 'Capgemini',
-        companyBadge: 'Capgemini 2024',
-        context: 'Asked in Capgemini Exceller Coding',
-        difficulty: 'Medium',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an array `nums` of size `n`, return the majority element that appears more than `⌊n / 2⌋` times.',
-        constraints: ['1 <= nums.length <= 5 * 10^4'],
-        hint: 'Use Boyer-Moore Voting Algorithm: maintain candidate and count.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < n; i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}`,
-            java: `public int solve(int[] nums) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}`,
-            python: `def solve(nums):\n    cand, count = 0, 0\n    for x in nums:\n        if count == 0:\n            cand = x\n        count += 1 if x == cand else -1\n    return cand`,
-            javascript: `function solve(nums) {\n    let cand = 0, count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (count === 0) cand = nums[i];\n        count += nums[i] === cand ? 1 : -1;\n    }\n    return cand;\n}`
-        },
-        testCases: [
-            { args: [[3, 2, 3]], expected: 3, isHidden: false },
-            { args: [[2, 2, 1, 1, 1, 2, 2]], expected: 2, isHidden: false },
-            { args: [[6, 5, 5]], expected: 5, isHidden: true }
-        ]
-    },
-    {
-        id: 'search-rotated-sorted',
-        number: 19,
-        title: 'Search in Rotated Sorted Array',
-        company: 'Zoho',
-        companyBadge: 'Zoho 2023',
-        context: 'Asked in Zoho Level 2 Evaluation',
-        difficulty: 'Medium',
-        topic: 'Searching',
-        fnName: 'solve',
-        params: [
-            { name: 'nums', type: 'int[]' },
-            { name: 'target', type: 'int' }
+        "id": "palindrome-number",
+        "number": 2,
+        "title": "Palindrome Integer Check",
+        "company": "Accenture",
+        "companyBadge": "Accenture 2023",
+        "context": "Asked in Accenture Advanced Coding Round",
+        "difficulty": "Easy",
+        "topic": "Math & Logic",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "x",
+                "type": "int"
+            }
         ],
-        returnType: 'int',
-        description: 'Given a sorted array `nums` of distinct integers that has been rotated at an unknown pivot, return the index of `target` in $O(\\log n)$ time, or `-1` if not found.',
-        constraints: ['1 <= nums.length <= 5000'],
-        hint: 'At least one half (lo..mid or mid..hi) is always sorted. Check if target lies in the sorted half.',
-        starter: {
-            c: `int solve(int nums[], int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}`,
-            cpp: `int solve(vector<int> nums, int target) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}`,
-            java: `public int solve(int[] nums, int target) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}`,
-            python: `def solve(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[lo] <= nums[mid]:\n            if nums[lo] <= target < nums[mid]:\n                hi = mid - 1\n            else:\n                lo = mid + 1\n        else:\n            if nums[mid] < target <= nums[hi]:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n    return -1`,
-            javascript: `function solve(nums, target) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}`
-        },
-        testCases: [
-            { args: [[4, 5, 6, 7, 0, 1, 2], 0], expected: 4, isHidden: false },
-            { args: [[4, 5, 6, 7, 0, 1, 2], 3], expected: -1, isHidden: false },
-            { args: [[1], 0], expected: -1, isHidden: true },
-            { args: [[5, 1, 3], 3], expected: 2, isHidden: true }
-        ]
-    },
-    {
-        id: 'find-peak-element',
-        number: 20,
-        title: 'Find Peak Index in Mountain',
-        company: 'TCS NQT',
-        companyBadge: 'TCS NQT 2024',
-        context: 'Asked in TCS NQT Shift 1',
-        difficulty: 'Medium',
-        topic: 'Searching',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'A peak element is strictly greater than its neighbors. Given an array `nums`, find a peak element and return its index in $O(\\log n)$ time.',
-        constraints: ['1 <= nums.length <= 1000'],
-        hint: 'Binary search: if nums[mid] < nums[mid + 1], a peak must exist on the right side (lo = mid + 1).',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int lo = 0, hi = n - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}`,
-            java: `public int solve(int[] nums) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}`,
-            python: `def solve(nums):\n    lo, hi = 0, len(nums) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] < nums[mid + 1]:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo`,
-            javascript: `function solve(nums) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo < hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}`
-        },
-        testCases: [
-            { args: [[1, 2, 3, 1]], expected: 2, isHidden: false },
-            { args: [[1, 2, 1, 3, 5, 6, 4]], expected: 5, isHidden: false },
-            { args: [[10, 20, 15, 2, 23, 90, 67]], expected: 5, isHidden: true }
-        ]
-    },
-    {
-        id: 'factorial-trailing-zeroes',
-        number: 21,
-        title: 'Factorial Trailing Zeroes',
-        company: 'Tech Mahindra',
-        companyBadge: 'Tech Mahindra 2024',
-        context: 'Asked in Tech Mahindra Coding Assessment',
-        difficulty: 'Medium',
-        topic: 'Math & Logic',
-        fnName: 'solve',
-        params: [{ name: 'n', type: 'int' }],
-        returnType: 'int',
-        description: 'Given an integer `n`, return the number of trailing zeroes in `n!` ($n$ factorial) in $O(\\log_5 n)$ time.',
-        constraints: ['0 <= n <= 10^4'],
-        hint: 'Count factors of 5 by repeatedly dividing n by 5 and adding to count.',
-        starter: {
-            c: `int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}`,
-            cpp: `int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}`,
-            java: `public int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}`,
-            python: `def solve(n):\n    count = 0\n    while n > 0:\n        n = n // 5\n        count += n\n    return count`,
-            javascript: `function solve(n) {\n    let count = 0;\n    while (n > 0) {\n        n = Math.floor(n / 5);\n        count += n;\n    }\n    return count;\n}`
-        },
-        testCases: [
-            { args: [5], expected: 1, isHidden: false },
-            { args: [25], expected: 6, isHidden: false },
-            { args: [100], expected: 24, isHidden: true },
-            { args: [3], expected: 0, isHidden: true }
-        ]
-    },
-    {
-        id: 'valid-anagram-sort',
-        number: 22,
-        title: 'Valid Anagram Strings',
-        company: 'Accenture',
-        companyBadge: 'Accenture 2024',
-        context: 'Asked in Accenture Advanced Coding Round',
-        difficulty: 'Medium',
-        topic: 'Strings',
-        fnName: 'solve',
-        params: [
-            { name: 's', type: 'string' },
-            { name: 't', type: 'string' }
+        "returnType": "int",
+        "description": "Given an integer `x`, return `1` if `x` is a palindrome integer (reads the same backward as forward), and `0` otherwise. Negative numbers are not palindromes.",
+        "constraints": [
+            "-2^31 <= x <= 2^31 - 1"
         ],
-        returnType: 'int',
-        description: 'Given two lowercase strings `s` and `t`, return `1` if `t` is an anagram of `s`, and `0` otherwise.',
-        constraints: ['1 <= s.length, t.length <= 5 * 10^4'],
-        hint: 'Sort both strings and compare, or count character frequencies.',
-        starter: {
-            c: `int solve(string s, string t) {\n    if (s.length() != t.length()) return 0;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t ? 1 : 0;\n}`,
-            cpp: `int solve(string s, string t) {\n    if (s.size() != t.size()) return 0;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t ? 1 : 0;\n}`,
-            java: `public int solve(String s, String t) {\n    if (s.length() != t.length()) return 0;\n    char[] a = s.toCharArray();\n    char[] b = t.toCharArray();\n    Arrays.sort(a);\n    Arrays.sort(b);\n    return Arrays.equals(a, b) ? 1 : 0;\n}`,
-            python: `def solve(s, t):\n    return 1 if sorted(s) == sorted(t) else 0`,
-            javascript: `function solve(s, t) {\n    if (s.length !== t.length) return 0;\n    return s.split('').sort().join('') === t.split('').sort().join('') ? 1 : 0;\n}`
+        "hint": "Reverse the digits of x using modulo 10 and integer division by 10.",
+        "starter": {
+            "c": "int solve(int x) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int x) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int x) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(x):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(x) {\n    // Write your logic here\n    return 0;\n}"
         },
-        testCases: [
-            { args: ['anagram', 'nagaram'], expected: 1, isHidden: false },
-            { args: ['rat', 'car'], expected: 0, isHidden: false },
-            { args: ['listen', 'silent'], expected: 1, isHidden: true }
-        ]
-    },
-    {
-        id: 'max-sliding-window-sum-k',
-        number: 23,
-        title: 'Max Subarray Sum of Size K',
-        company: 'Cognizant',
-        companyBadge: 'Cognizant 2024',
-        context: 'Asked in Cognizant Next Assessment',
-        difficulty: 'Medium',
-        topic: 'Sliding Window',
-        fnName: 'solve',
-        params: [
-            { name: 'nums', type: 'int[]' },
-            { name: 'k', type: 'int' }
+        "testCases": [
+            {
+                "args": [
+                    121
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    -121
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    10
+                ],
+                "expected": 0,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    12321
+                ],
+                "expected": 1,
+                "isHidden": true
+            }
         ],
-        returnType: 'int',
-        description: 'Given an array of integers `nums` and a window size `k`, return the maximum sum of any contiguous subarray of length `k`.',
-        constraints: ['1 <= k <= nums.length <= 10^5'],
-        hint: 'Compute the sum of the first k elements, then slide the window by adding nums[i] and subtracting nums[i - k].',
-        starter: {
-            c: `int solve(int nums[], int n, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < n; i++) {\n        win += nums[i] - nums[i - k];\n        if (win > best) best = win;\n    }\n    return best;\n}`,
-            cpp: `int solve(vector<int> nums, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < nums.size(); i++) {\n        win += nums[i] - nums[i - k];\n        best = max(best, win);\n    }\n    return best;\n}`,
-            java: `public int solve(int[] nums, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < nums.length; i++) {\n        win += nums[i] - nums[i - k];\n        best = Math.max(best, win);\n    }\n    return best;\n}`,
-            python: `def solve(nums, k):\n    win = sum(nums[:k])\n    best = win\n    for i in range(k, len(nums)):\n        win += nums[i] - nums[i - k]\n        if win > best:\n            best = win\n    return best`,
-            javascript: `function solve(nums, k) {\n    let win = 0;\n    for (let i = 0; i < k; i++) win += nums[i];\n    let best = win;\n    for (let i = k; i < nums.length; i++) {\n        win += nums[i] - nums[i - k];\n        best = Math.max(best, win);\n    }\n    return best;\n}`
-        },
-        testCases: [
-            { args: [[2, 1, 5, 1, 3, 2], 3], expected: 9, isHidden: false },
-            { args: [[2, 3, 4, 1, 5], 2], expected: 7, isHidden: false },
-            { args: [[10, 20, 30, 40], 2], expected: 70, isHidden: true }
-        ]
+        "solution": {
+            "c": "int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}",
+            "cpp": "int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}",
+            "java": "public int solve(int x) {\n    if (x < 0) return 0;\n    int orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = x / 10;\n    }\n    return orig == rev ? 1 : 0;\n}",
+            "python": "def solve(x):\n    if x < 0:\n        return 0\n    orig = x\n    rev = 0\n    while x > 0:\n        rev = rev * 10 + (x % 10)\n        x = x // 10\n    return 1 if orig == rev else 0",
+            "javascript": "function solve(x) {\n    if (x < 0) return 0;\n    let orig = x, rev = 0;\n    while (x > 0) {\n        rev = rev * 10 + (x % 10);\n        x = Math.floor(x / 10);\n    }\n    return orig === rev ? 1 : 0;\n}"
+        }
     },
     {
-        id: 'count-set-bits-kernighan',
-        number: 24,
-        title: 'Hamming Weight (Set Bits Count)',
-        company: 'Zoho',
-        companyBadge: 'Zoho 2024',
-        context: 'Asked in Zoho Technical Round',
-        difficulty: 'Medium',
-        topic: 'Bit Manipulation',
-        fnName: 'solve',
-        params: [{ name: 'n', type: 'int' }],
-        returnType: 'int',
-        description: 'Given a positive integer `n`, return the number of `1` bits in its binary representation (also known as the Hamming weight).',
-        constraints: ['1 <= n <= 10^9'],
-        hint: 'Use Brian Kernighan’s trick: n = n & (n - 1) clears the lowest set bit in each iteration.',
-        starter: {
-            c: `int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}`,
-            cpp: `int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}`,
-            java: `public int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}`,
-            python: `def solve(n):\n    count = 0\n    while n > 0:\n        n = n & (n - 1)\n        count += 1\n    return count`,
-            javascript: `function solve(n) {\n    let count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}`
-        },
-        testCases: [
-            { args: [11], expected: 3, isHidden: false },
-            { args: [128], expected: 1, isHidden: false },
-            { args: [255], expected: 8, isHidden: true }
-        ]
-    },
-
-    // ======================== HARD (25 - 36) ========================
-    {
-        id: 'trapping-rain-water',
-        number: 25,
-        title: 'Trapping Rain Water',
-        company: 'Infosys',
-        companyBadge: 'Infosys DSE 2024',
-        context: 'Asked in Infosys DSE Coding Round',
-        difficulty: 'Hard',
-        topic: 'Two Pointers',
-        fnName: 'solve',
-        params: [{ name: 'height', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given `n` non-negative integers representing an elevation map where the width of each bar is `1`, compute how much rainwater can be trapped after raining.',
-        constraints: ['1 <= height.length <= 2 * 10^4', '0 <= height[i] <= 10^5'],
-        hint: 'Use two pointers (l, r) and track lMax and rMax. Add lMax - height[l] or rMax - height[r] at each step.',
-        starter: {
-            c: `int solve(int height[], int n) {\n    int l = 0, r = n - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            if (height[l] > lMax) lMax = height[l];\n            water += lMax - height[l];\n            l++;\n        } else {\n            if (height[r] > rMax) rMax = height[r];\n            water += rMax - height[r];\n            r--;\n        }\n    }\n    return water;\n}`,
-            cpp: `int solve(vector<int> height) {\n    int l = 0, r = height.size() - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}`,
-            java: `public int solve(int[] height) {\n    int l = 0, r = height.length - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = Math.max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = Math.max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}`,
-            python: `def solve(height):\n    l, r = 0, len(height) - 1\n    l_max = r_max = water = 0\n    while l < r:\n        if height[l] < height[r]:\n            l_max = max(l_max, height[l])\n            water += l_max - height[l]\n            l += 1\n        else:\n            r_max = max(r_max, height[r])\n            water += r_max - height[r]\n            r -= 1\n    return water`,
-            javascript: `function solve(height) {\n    let l = 0, r = height.length - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = Math.max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = Math.max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}`
-        },
-        testCases: [
-            { args: [[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]], expected: 6, isHidden: false },
-            { args: [[4, 2, 0, 3, 2, 5]], expected: 9, isHidden: false },
-            { args: [[3, 0, 2, 0, 4]], expected: 7, isHidden: true }
-        ]
-    },
-    {
-        id: 'coin-change-min',
-        number: 26,
-        title: 'Coin Change Minimum Coins',
-        company: 'TCS NQT',
-        companyBadge: 'TCS Digital 2024',
-        context: 'Asked in TCS Digital Coding Round',
-        difficulty: 'Hard',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [
-            { name: 'coins', type: 'int[]' },
-            { name: 'amount', type: 'int' }
+        "id": "max-element-array",
+        "number": 3,
+        "title": "Find Peak Maximum in Array",
+        "company": "TCS NQT",
+        "companyBadge": "TCS NQT 2024",
+        "context": "Asked in TCS NQT Cognitive & Coding Slot 1",
+        "difficulty": "Easy",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
         ],
-        returnType: 'int',
-        description: 'Given an integer array `coins` representing coin denominations and an integer `amount`, return the fewest number of coins needed to make up that amount, or `-1` if it cannot be made.',
-        constraints: ['1 <= coins.length <= 12', '0 <= amount <= 10^4'],
-        hint: 'Build a DP array of size amount + 1 initialized to amount + 1, with dp[0] = 0.',
-        starter: {
-            c: `int solve(int coins[], int n, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int j = 0; j < n; j++) {\n            if (coins[j] <= i && dp[i - coins[j]] + 1 < dp[i]) {\n                dp[i] = dp[i - coins[j]] + 1;\n            }\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}`,
-            cpp: `int solve(vector<int> coins, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (c <= i) dp[i] = min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}`,
-            java: `public int solve(int[] coins, int amount) {\n    int[] dp = new int[amount + 1];\n    Arrays.fill(dp, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (c <= i) dp[i] = Math.min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}`,
-            python: `def solve(coins, amount):\n    dp = [amount + 1] * (amount + 1)\n    dp[0] = 0\n    for i in range(1, amount + 1):\n        for c in coins:\n            if c <= i:\n                dp[i] = min(dp[i], dp[i - c] + 1)\n    return -1 if dp[amount] > amount else dp[amount]`,
-            javascript: `function solve(coins, amount) {\n    const dp = new Array(amount + 1).fill(amount + 1);\n    dp[0] = 0;\n    for (let i = 1; i <= amount; i++) {\n        for (const c of coins) {\n            if (c <= i) dp[i] = Math.min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}`
-        },
-        testCases: [
-            { args: [[1, 2, 5], 11], expected: 3, isHidden: false },
-            { args: [[2], 3], expected: -1, isHidden: false },
-            { args: [[1], 0], expected: 0, isHidden: true },
-            { args: [[1, 3, 4], 6], expected: 2, isHidden: true }
-        ]
-    },
-    {
-        id: 'longest-increasing-subseq',
-        number: 27,
-        title: 'Longest Increasing Subsequence',
-        company: 'Cognizant',
-        companyBadge: 'Cognizant 2024',
-        context: 'Asked in Cognizant GenC Elevate Round',
-        difficulty: 'Hard',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an integer array `nums`, return the length of the longest strictly increasing subsequence.',
-        constraints: ['1 <= nums.length <= 2500'],
-        hint: 'dp[i] = 1 + max(dp[j]) for all j < i where nums[j] < nums[i].',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    vector<int> dp(n, 1);\n    int best = 1;\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i] && dp[j] + 1 > dp[i]) dp[i] = dp[j] + 1;\n        }\n        if (dp[i] > best) best = dp[i];\n    }\n    return best;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int n = nums.size(), best = 1;\n    vector<int> dp(n, 1);\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = max(dp[i], dp[j] + 1);\n        }\n        best = max(best, dp[i]);\n    }\n    return best;\n}`,
-            java: `public int solve(int[] nums) {\n    int n = nums.length, best = 1;\n    int[] dp = new int[n];\n    Arrays.fill(dp, 1);\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n        }\n        best = Math.max(best, dp[i]);\n    }\n    return best;\n}`,
-            python: `def solve(nums):\n    n = len(nums)\n    dp = [1] * n\n    for i in range(1, n):\n        for j in range(i):\n            if nums[j] < nums[i]:\n                dp[i] = max(dp[i], dp[j] + 1)\n    return max(dp)`,
-            javascript: `function solve(nums) {\n    const dp = new Array(nums.length).fill(1);\n    let best = 1;\n    for (let i = 1; i < nums.length; i++) {\n        for (let j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n        }\n        best = Math.max(best, dp[i]);\n    }\n    return best;\n}`
-        },
-        testCases: [
-            { args: [[10, 9, 2, 5, 3, 7, 101, 18]], expected: 4, isHidden: false },
-            { args: [[0, 1, 0, 3, 2, 3]], expected: 4, isHidden: false },
-            { args: [[7, 7, 7, 7]], expected: 1, isHidden: true }
-        ]
-    },
-    {
-        id: 'first-missing-positive',
-        number: 28,
-        title: 'First Missing Positive Integer',
-        company: 'Accenture',
-        companyBadge: 'Accenture 2024',
-        context: 'Asked in Accenture Critical Coding Round',
-        difficulty: 'Hard',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an unsorted integer array `nums`, return the smallest positive integer ($\\ge 1$) that is not present in `nums`.',
-        constraints: ['1 <= nums.length <= 10^5'],
-        hint: 'Sort or place each positive number x into index x - 1, then scan for the first mismatch.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    int target = 1;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] == target) target++;\n    }\n    return target;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    int target = 1;\n    for (int x : nums) {\n        if (x == target) target++;\n    }\n    return target;\n}`,
-            java: `public int solve(int[] nums) {\n    Arrays.sort(nums);\n    int target = 1;\n    for (int x : nums) {\n        if (x == target) target++;\n    }\n    return target;\n}`,
-            python: `def solve(nums):\n    nums.sort()\n    target = 1\n    for x in nums:\n        if x == target:\n            target += 1\n    return target`,
-            javascript: `function solve(nums) {\n    nums.sort((a, b) => a - b);\n    let target = 1;\n    for (const x of nums) {\n        if (x === target) target++;\n    }\n    return target;\n}`
-        },
-        testCases: [
-            { args: [[1, 2, 0]], expected: 3, isHidden: false },
-            { args: [[3, 4, -1, 1]], expected: 2, isHidden: false },
-            { args: [[7, 8, 9, 11, 12]], expected: 1, isHidden: true }
-        ]
-    },
-    {
-        id: 'max-product-subarray',
-        number: 29,
-        title: 'Maximum Product Subarray',
-        company: 'Capgemini',
-        companyBadge: 'Capgemini 2024',
-        context: 'Asked in Capgemini Exceller Test',
-        difficulty: 'Hard',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an integer array `nums`, find a contiguous non-empty subarray that has the largest product, and return the product.',
-        constraints: ['1 <= nums.length <= 2 * 10^4', '-10 <= nums[i] <= 10'],
-        hint: 'Track both maxProd and minProd at each step because a negative number flips min and max.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < n; i++) {\n        if (nums[i] < 0) { int t = maxP; maxP = minP; minP = t; }\n        maxP = max(nums[i], maxP * nums[i]);\n        minP = min(nums[i], minP * nums[i]);\n        ans = max(ans, maxP);\n    }\n    return ans;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] < 0) swap(maxP, minP);\n        maxP = max(nums[i], maxP * nums[i]);\n        minP = min(nums[i], minP * nums[i]);\n        ans = max(ans, maxP);\n    }\n    return ans;\n}`,
-            java: `public int solve(int[] nums) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] < 0) { int t = maxP; maxP = minP; minP = t; }\n        maxP = Math.max(nums[i], maxP * nums[i]);\n        minP = Math.min(nums[i], minP * nums[i]);\n        ans = Math.max(ans, maxP);\n    }\n    return ans;\n}`,
-            python: `def solve(nums):\n    max_p = min_p = ans = nums[0]\n    for x in nums[1:]:\n        if x < 0:\n            max_p, min_p = min_p, max_p\n        max_p = max(x, max_p * x)\n        min_p = min(x, min_p * x)\n        ans = max(ans, max_p)\n    return ans`,
-            javascript: `function solve(nums) {\n    let maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] < 0) [maxP, minP] = [minP, maxP];\n        maxP = Math.max(nums[i], maxP * nums[i]);\n        minP = Math.min(nums[i], minP * nums[i]);\n        ans = Math.max(ans, maxP);\n    }\n    return ans;\n}`
-        },
-        testCases: [
-            { args: [[2, 3, -2, 4]], expected: 6, isHidden: false },
-            { args: [[-2, 0, -1]], expected: 0, isHidden: false },
-            { args: [[-2, 3, -4]], expected: 24, isHidden: true }
-        ]
-    },
-    {
-        id: 'subarray-sum-equals-k',
-        number: 30,
-        title: 'Subarray Sum Equals K Count',
-        company: 'TCS NQT',
-        companyBadge: 'TCS Digital 2024',
-        context: 'Asked in TCS Digital Coding',
-        difficulty: 'Hard',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [
-            { name: 'nums', type: 'int[]' },
-            { name: 'k', type: 'int' }
+        "returnType": "int",
+        "description": "Given a non-empty array of integers `nums`, find and return the maximum element present in the array.",
+        "constraints": [
+            "1 <= nums.length <= 10^5",
+            "-10^6 <= nums[i] <= 10^6"
         ],
-        returnType: 'int',
-        description: 'Given an array of integers `nums` and an integer `k`, return the total number of contiguous subarrays whose sum equals `k`.',
-        constraints: ['1 <= nums.length <= 2 * 10^4'],
-        hint: 'Check all contiguous subarrays or maintain prefix sums.',
-        starter: {
-            c: `int solve(int nums[], int n, int k) {\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}`,
-            cpp: `int solve(vector<int> nums, int k) {\n    int count = 0, n = nums.size();\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}`,
-            java: `public int solve(int[] nums, int k) {\n    int count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        int sum = 0;\n        for (int j = i; j < nums.length; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}`,
-            python: `def solve(nums, k):\n    count = 0\n    n = len(nums)\n    for i in range(n):\n        cur = 0\n        for j in range(i, n):\n            cur += nums[j]\n            if cur == k:\n                count += 1\n    return count`,
-            javascript: `function solve(nums, k) {\n    let count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        let sum = 0;\n        for (let j = i; j < nums.length; j++) {\n            sum += nums[j];\n            if (sum === k) count++;\n        }\n    }\n    return count;\n}`
+        "hint": "Initialize maxVal = nums[0] and iterate through the array.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
         },
-        testCases: [
-            { args: [[1, 1, 1], 2], expected: 2, isHidden: false },
-            { args: [[1, 2, 3], 3], expected: 2, isHidden: false },
-            { args: [[3, 4, 7, 2, -3, 1, 4, 2], 7], expected: 4, isHidden: true }
-        ]
-    },
-    {
-        id: 'dutch-national-flag-sort',
-        number: 31,
-        title: 'Sort Colors (0s, 1s, and 2s)',
-        company: 'Capgemini',
-        companyBadge: 'Capgemini 2024',
-        context: 'Asked in Capgemini Technical Round',
-        difficulty: 'Hard',
-        topic: 'Two Pointers',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int[]',
-        description: 'Given an array `nums` with `n` objects colored `0`, `1`, or `2`, sort them in-place in a single pass using the Dutch National Flag algorithm.',
-        constraints: ['1 <= nums.length <= 300'],
-        hint: 'Maintain three pointers: lo = 0, mid = 0, hi = n - 1.',
-        starter: {
-            c: `int* solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    return nums;\n}`,
-            cpp: `vector<int> solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    return nums;\n}`,
-            java: `public int solve(int[] nums) {\n    Arrays.sort(nums);\n    return nums;\n}`,
-            python: `def solve(nums):\n    nums.sort()\n    return nums`,
-            javascript: `function solve(nums) {\n    return nums.sort((a, b) => a - b);\n}`
-        },
-        testCases: [
-            { args: [[2, 0, 2, 1, 1, 0]], expected: [0, 0, 1, 1, 2, 2], isHidden: false },
-            { args: [[2, 0, 1]], expected: [0, 1, 2], isHidden: false },
-            { args: [[1, 0, 0, 2, 1]], expected: [0, 0, 1, 1, 2], isHidden: true }
-        ]
-    },
-    {
-        id: 'jump-game-reach',
-        number: 32,
-        title: 'Jump Game Reachability',
-        company: 'Infosys',
-        companyBadge: 'Infosys 2024',
-        context: 'Asked in Infosys Specialist Programmer',
-        difficulty: 'Hard',
-        topic: 'Dynamic Programming',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'You are given an integer array `nums` where `nums[i]` is your maximum jump length at position `i`. Return `1` if you can reach the last index, or `0` otherwise.',
-        constraints: ['1 <= nums.length <= 10^4'],
-        hint: 'Track the farthest index reachable so far. If i > reach, return 0.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    int reach = 0;\n    for (int i = 0; i < n; i++) {\n        if (i > reach) return 0;\n        if (i + nums[i] > reach) reach = i + nums[i];\n    }\n    return 1;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    int reach = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (i > reach) return 0;\n        reach = max(reach, i + nums[i]);\n    }\n    return 1;\n}`,
-            java: `public int solve(int[] nums) {\n    int reach = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (i > reach) return 0;\n        reach = Math.max(reach, i + nums[i]);\n    }\n    return 1;\n}`,
-            python: `def solve(nums):\n    reach = 0\n    for i in range(len(nums)):\n        if i > reach:\n            return 0\n        reach = max(reach, i + nums[i])\n    return 1`,
-            javascript: `function solve(nums) {\n    let reach = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (i > reach) return 0;\n        reach = Math.max(reach, i + nums[i]);\n    }\n    return 1;\n}`
-        },
-        testCases: [
-            { args: [[2, 3, 1, 1, 4]], expected: 1, isHidden: false },
-            { args: [[3, 2, 1, 0, 4]], expected: 0, isHidden: false },
-            { args: [[0]], expected: 1, isHidden: true }
-        ]
-    },
-    {
-        id: 'count-primes-sieve',
-        number: 33,
-        title: 'Count Primes Less Than N (Sieve)',
-        company: 'Tech Mahindra',
-        companyBadge: 'Tech Mahindra 2024',
-        context: 'Asked in Tech Mahindra On-Campus Test',
-        difficulty: 'Hard',
-        topic: 'Math & Logic',
-        fnName: 'solve',
-        params: [{ name: 'n', type: 'int' }],
-        returnType: 'int',
-        description: 'Given an integer `n`, return the number of prime numbers that are strictly less than `n`.',
-        constraints: ['0 <= n <= 5 * 10^4'],
-        hint: 'Use the Sieve of Eratosthenes array of size n.',
-        starter: {
-            c: `int solve(int n) {\n    if (n <= 2) return 0;\n    vector<int> prime(n, 1);\n    prime[0] = 0; prime[1] = 0;\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}`,
-            cpp: `int solve(int n) {\n    if (n <= 2) return 0;\n    vector<int> prime(n, 1);\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}`,
-            java: `public int solve(int n) {\n    if (n <= 2) return 0;\n    int[] prime = new int[n];\n    Arrays.fill(prime, 1);\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p] == 1) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}`,
-            python: `def solve(n):\n    if n <= 2:\n        return 0\n    prime = [1] * n\n    prime[0] = prime[1] = 0\n    p = 2\n    while p * p < n:\n        if prime[p]:\n            i = p * p\n            while i < n:\n                prime[i] = 0\n                i += p\n        p += 1\n    return sum(prime)`,
-            javascript: `function solve(n) {\n    if (n <= 2) return 0;\n    const prime = new Array(n).fill(1);\n    for (let p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (let i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    let cnt = 0;\n    for (let i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}`
-        },
-        testCases: [
-            { args: [10], expected: 4, isHidden: false },
-            { args: [0], expected: 0, isHidden: false },
-            { args: [100], expected: 25, isHidden: true }
-        ]
-    },
-    {
-        id: 'find-duplicate-floyd',
-        number: 34,
-        title: 'Find the Duplicate Number',
-        company: 'Tech Mahindra',
-        companyBadge: 'Tech Mahindra 2024',
-        context: 'Asked in Tech Mahindra Coding Round',
-        difficulty: 'Hard',
-        topic: 'Two Pointers',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int',
-        description: 'Given an array of integers `nums` containing `n + 1` integers where each integer is in `[1, n]` inclusive, find and return the repeated number.',
-        constraints: ['2 <= nums.length <= 10^5'],
-        hint: 'Use Floyd cycle detection or sort a copy to spot adjacent equals.',
-        starter: {
-            c: `int solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    for (int i = 1; i < n; i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}`,
-            cpp: `int solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}`,
-            java: `public int solve(int[] nums) {\n    Arrays.sort(nums);\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}`,
-            python: `def solve(nums):\n    nums.sort()\n    for i in range(1, len(nums)):\n        if nums[i] == nums[i - 1]:\n            return nums[i]\n    return -1`,
-            javascript: `function solve(nums) {\n    nums.sort((a, b) => a - b);\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] === nums[i - 1]) return nums[i];\n    }\n    return -1;\n}`
-        },
-        testCases: [
-            { args: [[1, 3, 4, 2, 2]], expected: 2, isHidden: false },
-            { args: [[3, 1, 3, 4, 2]], expected: 3, isHidden: false },
-            { args: [[3, 3, 3, 3]], expected: 3, isHidden: true }
-        ]
-    },
-    {
-        id: 'koko-eating-bananas',
-        number: 35,
-        title: 'Minimum Eating Speed (Binary Answer)',
-        company: 'Zoho',
-        companyBadge: 'Zoho 2024',
-        context: 'Asked in Zoho Round 2 Advanced Coding',
-        difficulty: 'Hard',
-        topic: 'Searching',
-        fnName: 'solve',
-        params: [
-            { name: 'piles', type: 'int[]' },
-            { name: 'h', type: 'int' }
+        "testCases": [
+            {
+                "args": [
+                    [
+                        3,
+                        1,
+                        9,
+                        4,
+                        2
+                    ]
+                ],
+                "expected": 9,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        -10,
+                        -3,
+                        -25,
+                        -1
+                    ]
+                ],
+                "expected": -1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        42
+                    ]
+                ],
+                "expected": 42,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        12,
+                        99,
+                        104,
+                        88,
+                        104
+                    ]
+                ],
+                "expected": 104,
+                "isHidden": true
+            }
         ],
-        returnType: 'int',
-        description: 'Given `piles` of bananas and `h` hours before guards return, find the minimum integer eating speed `k` (bananas/hour) such that all bananas can be eaten within `h` hours.',
-        constraints: ['1 <= piles.length <= 10^4', 'piles.length <= h <= 10^9'],
-        hint: 'Binary search speed k between 1 and max(piles). Hours needed for pile p at speed k is (p + k - 1) / k.',
-        starter: {
-            c: `int solve(int piles[], int n, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int i = 0; i < n; i++) hours += (piles[i] + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}`,
-            cpp: `int solve(vector<int> piles, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}`,
-            java: `public int solve(int[] piles, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}`,
-            python: `def solve(piles, h):\n    lo, hi = 1, max(piles)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        hours = 0\n        for p in piles:\n            hours += (p + mid - 1) // mid\n        if hours <= h:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo`,
-            javascript: `function solve(piles, h) {\n    let lo = 1, hi = Math.max(...piles);\n    while (lo < hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        let hours = 0;\n        for (const p of piles) hours += Math.ceil(p / mid);\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}`
-        },
-        testCases: [
-            { args: [[3, 6, 7, 11], 8], expected: 4, isHidden: false },
-            { args: [[30, 11, 23, 4, 20], 5], expected: 30, isHidden: false },
-            { args: [[30, 11, 23, 4, 20], 6], expected: 23, isHidden: true }
-        ]
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int maxVal = nums[0];\n    for (int i = 1; i < n; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int maxVal = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}",
+            "java": "public int solve(int[] nums) {\n    int maxVal = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}",
+            "python": "def solve(nums):\n    max_val = nums[0]\n    for x in nums:\n        if x > max_val:\n            max_val = x\n    return max_val",
+            "javascript": "function solve(nums) {\n    let maxVal = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] > maxVal) maxVal = nums[i];\n    }\n    return maxVal;\n}"
+        }
     },
     {
-        id: 'product-except-self',
-        number: 36,
-        title: 'Product of Array Except Self',
-        company: 'Zoho',
-        companyBadge: 'Zoho Advanced 2024',
-        context: 'Asked in Zoho Level 2 Advanced Programming',
-        difficulty: 'Hard',
-        topic: 'Arrays & Hashing',
-        fnName: 'solve',
-        params: [{ name: 'nums', type: 'int[]' }],
-        returnType: 'int[]',
-        description: 'Given an integer array `nums`, return an array `answer` such that `answer[i]` is equal to the product of all the elements of `nums` except `nums[i]`, without using division.',
-        constraints: ['2 <= nums.length <= 10^5'],
-        hint: 'Make a prefix pass from left to right and a suffix pass from right to left.',
-        starter: {
-            c: `int* solve(int nums[], int n) {\n    vector<int> res(n, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}`,
-            cpp: `vector<int> solve(vector<int> nums) {\n    int n = nums.size();\n    vector<int> res(n, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}`,
-            java: `public int[] solve(int[] nums) {\n    int n = nums.length;\n    int[] res = new int[n];\n    Arrays.fill(res, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}`,
-            python: `def solve(nums):\n    n = len(nums)\n    res = [1] * n\n    pref = 1\n    for i in range(n):\n        res[i] = pref\n        pref *= nums[i]\n    suff = 1\n    for i in range(n - 1, -1, -1):\n        res[i] *= suff\n        suff *= nums[i]\n    return res`,
-            javascript: `function solve(nums) {\n    const n = nums.length;\n    const res = new Array(n).fill(1);\n    let pref = 1;\n    for (let i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    let suff = 1;\n    for (let i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}`
+        "id": "count-vowels",
+        "number": 4,
+        "title": "Count Vowels in a String",
+        "company": "Accenture",
+        "companyBadge": "Accenture 2024",
+        "context": "Asked in Accenture On-Campus Placement Test",
+        "difficulty": "Easy",
+        "topic": "Strings",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "s",
+                "type": "string"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given a lowercase string `s`, return the total number of vowels (`a`, `e`, `i`, `o`, `u`) present in the string.",
+        "constraints": [
+            "1 <= s.length <= 10^4",
+            "s consists of lowercase English letters."
+        ],
+        "hint": "Check each character against a, e, i, o, u and increment a counter.",
+        "starter": {
+            "c": "int solve(string s) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(string s) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(String s) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(s):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(s) {\n    // Write your logic here\n    return 0;\n}"
         },
-        testCases: [
-            { args: [[1, 2, 3, 4]], expected: [24, 12, 8, 6], isHidden: false },
-            { args: [[-1, 1, 0, -3, 3]], expected: [0, 0, 9, 0, 0], isHidden: false },
-            { args: [[2, 3, 4, 5]], expected: [60, 40, 30, 24], isHidden: true }
-        ]
+        "testCases": [
+            {
+                "args": [
+                    "placement"
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    "education"
+                ],
+                "expected": 5,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    "rhythm"
+                ],
+                "expected": 0,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    "aeiou"
+                ],
+                "expected": 5,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(string s) {\n    int count = 0;\n    for (int i = 0; i < s.length(); i++) {\n        char c = s[i];\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}",
+            "cpp": "int solve(string s) {\n    int count = 0;\n    for (int i = 0; i < s.size(); i++) {\n        char c = s[i];\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}",
+            "java": "public int solve(String s) {\n    int count = 0;\n    for (int i = 0; i < s.length(); i++) {\n        char c = s.charAt(i);\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') count++;\n    }\n    return count;\n}",
+            "python": "def solve(s):\n    count = 0\n    for c in s:\n        if c in \"aeiou\":\n            count += 1\n    return count",
+            "javascript": "function solve(s) {\n    let count = 0;\n    for (let i = 0; i < s.length; i++) {\n        if (\"aeiou\".includes(s[i])) count++;\n    }\n    return count;\n}"
+        }
+    },
+    {
+        "id": "climbing-stairs",
+        "number": 5,
+        "title": "Climbing Stairs Ways",
+        "company": "Infosys",
+        "companyBadge": "Infosys 2024",
+        "context": "Asked in Infosys Certification & SP Round",
+        "difficulty": "Easy",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "n",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "You are climbing a staircase with `n` steps. Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?",
+        "constraints": [
+            "1 <= n <= 40"
+        ],
+        "hint": "Way(n) = Way(n-1) + Way(n-2), which follows the Fibonacci progression.",
+        "starter": {
+            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(n):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    2
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    3
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    5
+                ],
+                "expected": 8,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    10
+                ],
+                "expected": 89,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}",
+            "cpp": "int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}",
+            "java": "public int solve(int n) {\n    if (n <= 2) return n;\n    int a = 1, b = 2;\n    for (int i = 3; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}",
+            "python": "def solve(n):\n    if n <= 2:\n        return n\n    a, b = 1, 2\n    for i in range(3, n + 1):\n        a, b = b, a + b\n    return b",
+            "javascript": "function solve(n) {\n    if (n <= 2) return n;\n    let a = 1, b = 2;\n    for (let i = 3; i <= n; i++) {\n        let c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}"
+        }
+    },
+    {
+        "id": "single-number-xor",
+        "number": 6,
+        "title": "Single Non-Duplicate Number",
+        "company": "Wipro",
+        "companyBadge": "Wipro NLTH 2024",
+        "context": "Asked in Wipro Elite National Talent Hunt",
+        "difficulty": "Easy",
+        "topic": "Bit Manipulation",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given a non-empty array of integers `nums`, every element appears twice except for one. Find and return that single unique element in O(n) time and O(1) extra space.",
+        "constraints": [
+            "1 <= nums.length <= 3 * 10^4"
+        ],
+        "hint": "XOR of a number with itself is 0 (a ^ a = 0), so XORing all elements leaves the unique number.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        2,
+                        2,
+                        1
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        4,
+                        1,
+                        2,
+                        1,
+                        2
+                    ]
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        99
+                    ]
+                ],
+                "expected": 99,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        7,
+                        3,
+                        5,
+                        3,
+                        7
+                    ]
+                ],
+                "expected": 5,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int ans = 0;\n    for (int i = 0; i < n; i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int ans = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}",
+            "java": "public int solve(int[] nums) {\n    int ans = 0;\n    for (int i = 0; i < nums.length; i++) {\n        ans = ans ^ nums[i];\n    }\n    return ans;\n}",
+            "python": "def solve(nums):\n    ans = 0\n    for x in nums:\n        ans = ans ^ x\n    return ans",
+            "javascript": "function solve(nums) {\n    let ans = 0;\n    for (let i = 0; i < nums.length; i++) {\n        ans ^= nums[i];\n    }\n    return ans;\n}"
+        }
+    },
+    {
+        "id": "binary-search-basic",
+        "number": 7,
+        "title": "Binary Search Target Index",
+        "company": "TCS NQT",
+        "companyBadge": "TCS NQT 2024",
+        "context": "Asked in TCS Ninja & Digital Hiring Drive",
+        "difficulty": "Easy",
+        "topic": "Searching",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            },
+            {
+                "name": "target",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an array of integers `nums` sorted in ascending order and an integer `target`, return the index of `target` if it exists, otherwise return `-1`.",
+        "constraints": [
+            "1 <= nums.length <= 10^4",
+            "nums is sorted in strictly increasing order."
+        ],
+        "hint": "Maintain lo = 0 and hi = n - 1, comparing nums[mid] with target.",
+        "starter": {
+            "c": "int solve(int nums[], int n, int target) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums, int target) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums, int target) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums, target):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums, target) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        -1,
+                        0,
+                        3,
+                        5,
+                        9,
+                        12
+                    ],
+                    9
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        -1,
+                        0,
+                        3,
+                        5,
+                        9,
+                        12
+                    ],
+                    2
+                ],
+                "expected": -1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        5
+                    ],
+                    5
+                ],
+                "expected": 0,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        4,
+                        6,
+                        8,
+                        10,
+                        12,
+                        14
+                    ],
+                    14
+                ],
+                "expected": 6,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
+            "cpp": "int solve(vector<int> nums, int target) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
+            "java": "public int solve(int[] nums, int target) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}",
+            "python": "def solve(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        elif nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1",
+            "javascript": "function solve(nums, target) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}"
+        }
+    },
+    {
+        "id": "sum-of-digits",
+        "number": 8,
+        "title": "Digital Root / Sum of Digits",
+        "company": "Accenture",
+        "companyBadge": "Accenture 2023",
+        "context": "Asked in Accenture Critical Coding Assessment",
+        "difficulty": "Easy",
+        "topic": "Math & Logic",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "n",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given a non-negative integer `n`, return the sum of all its base-10 digits.",
+        "constraints": [
+            "0 <= n <= 10^9"
+        ],
+        "hint": "Repeatedly add n % 10 to sum and divide n by 10.",
+        "starter": {
+            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(n):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    9875
+                ],
+                "expected": 29,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    1001
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    0
+                ],
+                "expected": 0,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    123456
+                ],
+                "expected": 21,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}",
+            "cpp": "int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}",
+            "java": "public int solve(int n) {\n    int sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = n / 10;\n    }\n    return sum;\n}",
+            "python": "def solve(n):\n    total = 0\n    while n > 0:\n        total += n % 10\n        n = n // 10\n    return total",
+            "javascript": "function solve(n) {\n    let sum = 0;\n    while (n > 0) {\n        sum += n % 10;\n        n = Math.floor(n / 10);\n    }\n    return sum;\n}"
+        }
+    },
+    {
+        "id": "missing-number-0-n",
+        "number": 9,
+        "title": "Missing Number in [0..n]",
+        "company": "Cognizant",
+        "companyBadge": "Cognizant 2024",
+        "context": "Asked in Cognizant GenC Elevate Assessment",
+        "difficulty": "Easy",
+        "topic": "Math & Logic",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an array `nums` containing `n` distinct numbers in the range `[0, n]`, return the only number in the range that is missing from the array.",
+        "constraints": [
+            "1 <= n <= 10^4"
+        ],
+        "hint": "Expected sum is n * (n + 1) / 2. Subtract the actual sum of array elements.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        3,
+                        0,
+                        1
+                    ]
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        0,
+                        1
+                    ]
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        9,
+                        6,
+                        4,
+                        2,
+                        3,
+                        5,
+                        7,
+                        0,
+                        1
+                    ]
+                ],
+                "expected": 8,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        1
+                    ]
+                ],
+                "expected": 0,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int n = nums.size();\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}",
+            "java": "public int solve(int[] nums) {\n    int n = nums.length;\n    int expected = (n * (n + 1)) / 2;\n    int actual = 0;\n    for (int i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}",
+            "python": "def solve(nums):\n    n = len(nums)\n    expected = (n * (n + 1)) // 2\n    return expected - sum(nums)",
+            "javascript": "function solve(nums) {\n    const n = nums.length;\n    const expected = (n * (n + 1)) / 2;\n    let actual = 0;\n    for (let i = 0; i < n; i++) actual += nums[i];\n    return expected - actual;\n}"
+        }
+    },
+    {
+        "id": "power-of-two",
+        "number": 10,
+        "title": "Power of Two Check",
+        "company": "TCS NQT",
+        "companyBadge": "TCS NQT 2024",
+        "context": "Asked in TCS NQT Slot 2 Coding",
+        "difficulty": "Easy",
+        "topic": "Bit Manipulation",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "n",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer `n`, return `1` if it is a power of two ($2^k$), otherwise return `0`.",
+        "constraints": [
+            "-2^31 <= n <= 2^31 - 1"
+        ],
+        "hint": "A positive integer n is a power of 2 if and only if (n & (n - 1)) == 0.",
+        "starter": {
+            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(n):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    16
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    18
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    1
+                ],
+                "expected": 1,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    0
+                ],
+                "expected": 0,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}",
+            "cpp": "int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}",
+            "java": "public int solve(int n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) == 0 ? 1 : 0;\n}",
+            "python": "def solve(n):\n    if n <= 0:\n        return 0\n    return 1 if (n & (n - 1)) == 0 else 0",
+            "javascript": "function solve(n) {\n    if (n <= 0) return 0;\n    return (n & (n - 1)) === 0 ? 1 : 0;\n}"
+        }
+    },
+    {
+        "id": "gcd-two-numbers",
+        "number": 11,
+        "title": "Greatest Common Divisor (GCD)",
+        "company": "Infosys",
+        "companyBadge": "Infosys 2024",
+        "context": "Asked in Infosys DSE Assessment",
+        "difficulty": "Easy",
+        "topic": "Math & Logic",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "a",
+                "type": "int"
+            },
+            {
+                "name": "b",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given two positive integers `a` and `b`, return their Greatest Common Divisor (GCD) using Euclid’s algorithm.",
+        "constraints": [
+            "1 <= a, b <= 10^9"
+        ],
+        "hint": "While b != 0, replace (a, b) with (b, a % b).",
+        "starter": {
+            "c": "int solve(int a, int b) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int a, int b) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int a, int b) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(a, b):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(a, b) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    48,
+                    18
+                ],
+                "expected": 6,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    101,
+                    10
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    270,
+                    192
+                ],
+                "expected": 6,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    100,
+                    25
+                ],
+                "expected": 25,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}",
+            "cpp": "int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}",
+            "java": "public int solve(int a, int b) {\n    while (b != 0) {\n        int r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}",
+            "python": "def solve(a, b):\n    while b != 0:\n        a, b = b, a % b\n    return a",
+            "javascript": "function solve(a, b) {\n    while (b !== 0) {\n        let r = a % b;\n        a = b;\n        b = r;\n    }\n    return a;\n}"
+        }
+    },
+    {
+        "id": "count-even-numbers",
+        "number": 12,
+        "title": "Count Even Elements in Array",
+        "company": "Wipro",
+        "companyBadge": "Wipro 2023",
+        "context": "Asked in Wipro Elite Coding Round",
+        "difficulty": "Easy",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer array `nums`, return the count of elements that are divisible by 2.",
+        "constraints": [
+            "1 <= nums.length <= 10^4"
+        ],
+        "hint": "Check nums[i] % 2 == 0 for each element.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ]
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        7,
+                        9,
+                        11
+                    ]
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        0,
+                        2,
+                        4,
+                        8
+                    ]
+                ],
+                "expected": 4,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int count = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}",
+            "java": "public int solve(int[] nums) {\n    int count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (nums[i] % 2 == 0) count++;\n    }\n    return count;\n}",
+            "python": "def solve(nums):\n    count = 0\n    for x in nums:\n        if x % 2 == 0:\n            count += 1\n    return count",
+            "javascript": "function solve(nums) {\n    let count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (nums[i] % 2 === 0) count++;\n    }\n    return count;\n}"
+        }
+    },
+    {
+        "id": "kadane-max-subarray",
+        "number": 13,
+        "title": "Maximum Subarray Sum (Kadane)",
+        "company": "Infosys",
+        "companyBadge": "Infosys DSE 2024",
+        "context": "Asked in Infosys Specialist Programmer & DSE",
+        "difficulty": "Medium",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer array `nums`, find the contiguous non-empty subarray which has the largest sum and return its sum.",
+        "constraints": [
+            "1 <= nums.length <= 10^5",
+            "-10^4 <= nums[i] <= 10^4"
+        ],
+        "hint": "Maintain cur = max(nums[i], cur + nums[i]) and best = max(best, cur).",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        -2,
+                        1,
+                        -3,
+                        4,
+                        -1,
+                        2,
+                        1,
+                        -5,
+                        4
+                    ]
+                ],
+                "expected": 6,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        5,
+                        4,
+                        -1,
+                        7,
+                        8
+                    ]
+                ],
+                "expected": 23,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        -5,
+                        -2,
+                        -9
+                    ]
+                ],
+                "expected": -2,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        1
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < n; i++) {\n        cur = (nums[i] > cur + nums[i]) ? nums[i] : cur + nums[i];\n        if (cur > best) best = cur;\n    }\n    return best;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        cur = max(nums[i], cur + nums[i]);\n        best = max(best, cur);\n    }\n    return best;\n}",
+            "java": "public int solve(int[] nums) {\n    int cur = nums[0], best = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        cur = Math.max(nums[i], cur + nums[i]);\n        best = Math.max(best, cur);\n    }\n    return best;\n}",
+            "python": "def solve(nums):\n    cur = best = nums[0]\n    for i in range(1, len(nums)):\n        cur = max(nums[i], cur + nums[i])\n        best = max(best, cur)\n    return best",
+            "javascript": "function solve(nums) {\n    let cur = nums[0], best = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        cur = Math.max(nums[i], cur + nums[i]);\n        best = Math.max(best, cur);\n    }\n    return best;\n}"
+        }
+    },
+    {
+        "id": "best-time-stock",
+        "number": 14,
+        "title": "Best Time to Buy & Sell Stock",
+        "company": "TCS NQT",
+        "companyBadge": "TCS Digital 2024",
+        "context": "Asked in TCS Digital High-Package Drive",
+        "difficulty": "Medium",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "prices",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "You are given an array `prices` where `prices[i]` is the price of a stock on day `i`. Maximize your profit by choosing a single day to buy and a future day to sell. Return the maximum profit (or `0` if no profit is possible).",
+        "constraints": [
+            "1 <= prices.length <= 10^5",
+            "0 <= prices[i] <= 10^4"
+        ],
+        "hint": "Track the minimum price seen so far and update maxProfit = max(maxProfit, price - minPrice).",
+        "starter": {
+            "c": "int solve(int prices[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> prices) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] prices) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(prices):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(prices) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        7,
+                        1,
+                        5,
+                        3,
+                        6,
+                        4
+                    ]
+                ],
+                "expected": 5,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        7,
+                        6,
+                        4,
+                        3,
+                        1
+                    ]
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        4,
+                        1,
+                        10
+                    ]
+                ],
+                "expected": 9,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int prices[], int n) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < n; i++) {\n        if (prices[i] < minP) minP = prices[i];\n        if (prices[i] - minP > profit) profit = prices[i] - minP;\n    }\n    return profit;\n}",
+            "cpp": "int solve(vector<int> prices) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < prices.size(); i++) {\n        minP = min(minP, prices[i]);\n        profit = max(profit, prices[i] - minP);\n    }\n    return profit;\n}",
+            "java": "public int solve(int[] prices) {\n    int minP = prices[0], profit = 0;\n    for (int i = 1; i < prices.length; i++) {\n        minP = Math.min(minP, prices[i]);\n        profit = Math.max(profit, prices[i] - minP);\n    }\n    return profit;\n}",
+            "python": "def solve(prices):\n    min_p = prices[0]\n    profit = 0\n    for p in prices:\n        if p < min_p:\n            min_p = p\n        if p - min_p > profit:\n            profit = p - min_p\n    return profit",
+            "javascript": "function solve(prices) {\n    let minP = prices[0], profit = 0;\n    for (let i = 1; i < prices.length; i++) {\n        minP = Math.min(minP, prices[i]);\n        profit = Math.max(profit, prices[i] - minP);\n    }\n    return profit;\n}"
+        }
+    },
+    {
+        "id": "container-most-water",
+        "number": 15,
+        "title": "Container With Most Water",
+        "company": "Zoho",
+        "companyBadge": "Zoho Advanced 2024",
+        "context": "Asked in Zoho Round 2 Advanced Programming",
+        "difficulty": "Medium",
+        "topic": "Two Pointers",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "height",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given `n` non-negative integers `height` where each represents a vertical line at coordinate `i`, find two lines that together with the x-axis form a container that holds the most water. Return the maximum area.",
+        "constraints": [
+            "2 <= height.length <= 10^5"
+        ],
+        "hint": "Use two pointers l = 0 and r = n - 1, moving the pointer with the smaller height inward.",
+        "starter": {
+            "c": "int solve(int height[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> height) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] height) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(height):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(height) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        8,
+                        6,
+                        2,
+                        5,
+                        4,
+                        8,
+                        3,
+                        7
+                    ]
+                ],
+                "expected": 49,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        1,
+                        1
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        4,
+                        3,
+                        2,
+                        1,
+                        4
+                    ]
+                ],
+                "expected": 16,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int height[], int n) {\n    int l = 0, r = n - 1, best = 0;\n    while (l < r) {\n        int h = height[l] < height[r] ? height[l] : height[r];\n        int area = (r - l) * h;\n        if (area > best) best = area;\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}",
+            "cpp": "int solve(vector<int> height) {\n    int l = 0, r = height.size() - 1, best = 0;\n    while (l < r) {\n        best = max(best, (r - l) * min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}",
+            "java": "public int solve(int[] height) {\n    int l = 0, r = height.length - 1, best = 0;\n    while (l < r) {\n        best = Math.max(best, (r - l) * Math.min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}",
+            "python": "def solve(height):\n    l, r = 0, len(height) - 1\n    best = 0\n    while l < r:\n        best = max(best, (r - l) * min(height[l], height[r]))\n        if height[l] < height[r]:\n            l += 1\n        else:\n            r -= 1\n    return best",
+            "javascript": "function solve(height) {\n    let l = 0, r = height.length - 1, best = 0;\n    while (l < r) {\n        best = Math.max(best, (r - l) * Math.min(height[l], height[r]));\n        if (height[l] < height[r]) l++;\n        else r--;\n    }\n    return best;\n}"
+        }
+    },
+    {
+        "id": "move-zeroes-end",
+        "number": 16,
+        "title": "Move Zeroes to End",
+        "company": "Infosys",
+        "companyBadge": "Infosys SP 2024",
+        "context": "Asked in Infosys Specialist Programmer Round",
+        "difficulty": "Medium",
+        "topic": "Two Pointers",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int[]",
+        "description": "Given an integer array `nums`, move all `0`s to the end of it while maintaining the relative order of the non-zero elements, and return the modified array.",
+        "constraints": [
+            "1 <= nums.length <= 10^4"
+        ],
+        "hint": "Maintain a write pointer pos = 0 for non-zero values, then fill the rest with 0.",
+        "starter": {
+            "c": "int* solve(int nums[], int n) {\n    // Write your logic here\n    return {0};\n}",
+            "cpp": "vector<int> solve(vector<int> nums) {\n    // Write your logic here\n    return {};\n}",
+            "java": "public int[] solve(int[] nums) {\n    // Write your logic here\n    return new int[]{};\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return []",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return [];\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        0,
+                        1,
+                        0,
+                        3,
+                        12
+                    ]
+                ],
+                "expected": [
+                    1,
+                    3,
+                    12,
+                    0,
+                    0
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        0
+                    ]
+                ],
+                "expected": [
+                    0
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        4,
+                        0,
+                        5,
+                        0,
+                        0,
+                        6
+                    ]
+                ],
+                "expected": [
+                    4,
+                    5,
+                    6,
+                    0,
+                    0,
+                    0
+                ],
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int* solve(int nums[], int n) {\n    int pos = 0;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < n) nums[pos++] = 0;\n    return nums;\n}",
+            "cpp": "vector<int> solve(vector<int> nums) {\n    int pos = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.size()) nums[pos++] = 0;\n    return nums;\n}",
+            "java": "public int[] solve(int[] nums) {\n    int pos = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (nums[i] != 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.length) nums[pos++] = 0;\n    return nums;\n}",
+            "python": "def solve(nums):\n    pos = 0\n    for i in range(len(nums)):\n        if nums[i] != 0:\n            nums[pos] = nums[i]\n            pos += 1\n    while pos < len(nums):\n        nums[pos] = 0\n        pos += 1\n    return nums",
+            "javascript": "function solve(nums) {\n    let pos = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (nums[i] !== 0) nums[pos++] = nums[i];\n    }\n    while (pos < nums.length) nums[pos++] = 0;\n    return nums;\n}"
+        }
+    },
+    {
+        "id": "house-robber-dp",
+        "number": 17,
+        "title": "House Robber Maximum Loot",
+        "company": "Wipro",
+        "companyBadge": "Wipro Turbo 2024",
+        "context": "Asked in Wipro Turbo High-Package Test",
+        "difficulty": "Medium",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "You are planning to rob houses along a street (`nums[i]` is the cash in house `i`). Adjacent houses have connected security systems. Return the maximum amount of money you can rob without alerting the police.",
+        "constraints": [
+            "1 <= nums.length <= 100",
+            "0 <= nums[i] <= 400"
+        ],
+        "hint": "At each house i, cur = max(prev1, prev2 + nums[i]).",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        3,
+                        1
+                    ]
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        7,
+                        9,
+                        3,
+                        1
+                    ]
+                ],
+                "expected": 12,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        1,
+                        1,
+                        2
+                    ]
+                ],
+                "expected": 4,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < n; i++) {\n        int take = prev2 + nums[i];\n        int cur = take > prev1 ? take : prev1;\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        int cur = max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}",
+            "java": "public int solve(int[] nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int i = 0; i < nums.length; i++) {\n        int cur = Math.max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}",
+            "python": "def solve(nums):\n    prev2, prev1 = 0, 0\n    for x in nums:\n        prev2, prev1 = prev1, max(prev1, prev2 + x)\n    return prev1",
+            "javascript": "function solve(nums) {\n    let prev2 = 0, prev1 = 0;\n    for (let i = 0; i < nums.length; i++) {\n        let cur = Math.max(prev1, prev2 + nums[i]);\n        prev2 = prev1;\n        prev1 = cur;\n    }\n    return prev1;\n}"
+        }
+    },
+    {
+        "id": "majority-element-boyer",
+        "number": 18,
+        "title": "Majority Element (> n/2)",
+        "company": "Capgemini",
+        "companyBadge": "Capgemini 2024",
+        "context": "Asked in Capgemini Exceller Coding",
+        "difficulty": "Medium",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an array `nums` of size `n`, return the majority element that appears more than `⌊n / 2⌋` times.",
+        "constraints": [
+            "1 <= nums.length <= 5 * 10^4"
+        ],
+        "hint": "Use Boyer-Moore Voting Algorithm: maintain candidate and count.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        3,
+                        2,
+                        3
+                    ]
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        2,
+                        1,
+                        1,
+                        1,
+                        2,
+                        2
+                    ]
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        6,
+                        5,
+                        5
+                    ]
+                ],
+                "expected": 5,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < n; i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}",
+            "java": "public int solve(int[] nums) {\n    int cand = 0, count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (count == 0) cand = nums[i];\n        count += (nums[i] == cand) ? 1 : -1;\n    }\n    return cand;\n}",
+            "python": "def solve(nums):\n    cand, count = 0, 0\n    for x in nums:\n        if count == 0:\n            cand = x\n        count += 1 if x == cand else -1\n    return cand",
+            "javascript": "function solve(nums) {\n    let cand = 0, count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (count === 0) cand = nums[i];\n        count += nums[i] === cand ? 1 : -1;\n    }\n    return cand;\n}"
+        }
+    },
+    {
+        "id": "search-rotated-sorted",
+        "number": 19,
+        "title": "Search in Rotated Sorted Array",
+        "company": "Zoho",
+        "companyBadge": "Zoho 2023",
+        "context": "Asked in Zoho Level 2 Evaluation",
+        "difficulty": "Medium",
+        "topic": "Searching",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            },
+            {
+                "name": "target",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given a sorted array `nums` of distinct integers that has been rotated at an unknown pivot, return the index of `target` in $O(\\log n)$ time, or `-1` if not found.",
+        "constraints": [
+            "1 <= nums.length <= 5000"
+        ],
+        "hint": "At least one half (lo..mid or mid..hi) is always sorted. Check if target lies in the sorted half.",
+        "starter": {
+            "c": "int solve(int nums[], int n, int target) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums, int target) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums, int target) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums, target):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums, target) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        4,
+                        5,
+                        6,
+                        7,
+                        0,
+                        1,
+                        2
+                    ],
+                    0
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        4,
+                        5,
+                        6,
+                        7,
+                        0,
+                        1,
+                        2
+                    ],
+                    3
+                ],
+                "expected": -1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        1
+                    ],
+                    0
+                ],
+                "expected": -1,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        5,
+                        1,
+                        3
+                    ],
+                    3
+                ],
+                "expected": 2,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n, int target) {\n    int lo = 0, hi = n - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}",
+            "cpp": "int solve(vector<int> nums, int target) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}",
+            "java": "public int solve(int[] nums, int target) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] == target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}",
+            "python": "def solve(nums, target):\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[lo] <= nums[mid]:\n            if nums[lo] <= target < nums[mid]:\n                hi = mid - 1\n            else:\n                lo = mid + 1\n        else:\n            if nums[mid] < target <= nums[hi]:\n                lo = mid + 1\n            else:\n                hi = mid - 1\n    return -1",
+            "javascript": "function solve(nums, target) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo <= hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] === target) return mid;\n        if (nums[lo] <= nums[mid]) {\n            if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n            else lo = mid + 1;\n        } else {\n            if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return -1;\n}"
+        }
+    },
+    {
+        "id": "find-peak-element",
+        "number": 20,
+        "title": "Find Peak Index in Mountain",
+        "company": "TCS NQT",
+        "companyBadge": "TCS NQT 2024",
+        "context": "Asked in TCS NQT Shift 1",
+        "difficulty": "Medium",
+        "topic": "Searching",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "A peak element is strictly greater than its neighbors. Given an array `nums`, find a peak element and return its index in $O(\\log n)$ time.",
+        "constraints": [
+            "1 <= nums.length <= 1000"
+        ],
+        "hint": "Binary search: if nums[mid] < nums[mid + 1], a peak must exist on the right side (lo = mid + 1).",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        3,
+                        1
+                    ]
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        1,
+                        3,
+                        5,
+                        6,
+                        4
+                    ]
+                ],
+                "expected": 5,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        10,
+                        20,
+                        15,
+                        2,
+                        23,
+                        90,
+                        67
+                    ]
+                ],
+                "expected": 5,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int lo = 0, hi = n - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int lo = 0, hi = nums.size() - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
+            "java": "public int solve(int[] nums) {\n    int lo = 0, hi = nums.length - 1;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}",
+            "python": "def solve(nums):\n    lo, hi = 0, len(nums) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] < nums[mid + 1]:\n            lo = mid + 1\n        else:\n            hi = mid\n    return lo",
+            "javascript": "function solve(nums) {\n    let lo = 0, hi = nums.length - 1;\n    while (lo < hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        if (nums[mid] < nums[mid + 1]) lo = mid + 1;\n        else hi = mid;\n    }\n    return lo;\n}"
+        }
+    },
+    {
+        "id": "factorial-trailing-zeroes",
+        "number": 21,
+        "title": "Factorial Trailing Zeroes",
+        "company": "Tech Mahindra",
+        "companyBadge": "Tech Mahindra 2024",
+        "context": "Asked in Tech Mahindra Coding Assessment",
+        "difficulty": "Medium",
+        "topic": "Math & Logic",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "n",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer `n`, return the number of trailing zeroes in `n!` ($n$ factorial) in $O(\\log_5 n)$ time.",
+        "constraints": [
+            "0 <= n <= 10^4"
+        ],
+        "hint": "Count factors of 5 by repeatedly dividing n by 5 and adding to count.",
+        "starter": {
+            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(n):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    5
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    25
+                ],
+                "expected": 6,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    100
+                ],
+                "expected": 24,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    3
+                ],
+                "expected": 0,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}",
+            "cpp": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}",
+            "java": "public int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n / 5;\n        count += n;\n    }\n    return count;\n}",
+            "python": "def solve(n):\n    count = 0\n    while n > 0:\n        n = n // 5\n        count += n\n    return count",
+            "javascript": "function solve(n) {\n    let count = 0;\n    while (n > 0) {\n        n = Math.floor(n / 5);\n        count += n;\n    }\n    return count;\n}"
+        }
+    },
+    {
+        "id": "valid-anagram-sort",
+        "number": 22,
+        "title": "Valid Anagram Strings",
+        "company": "Accenture",
+        "companyBadge": "Accenture 2024",
+        "context": "Asked in Accenture Advanced Coding Round",
+        "difficulty": "Medium",
+        "topic": "Strings",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "s",
+                "type": "string"
+            },
+            {
+                "name": "t",
+                "type": "string"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given two lowercase strings `s` and `t`, return `1` if `t` is an anagram of `s`, and `0` otherwise.",
+        "constraints": [
+            "1 <= s.length, t.length <= 5 * 10^4"
+        ],
+        "hint": "Sort both strings and compare, or count character frequencies.",
+        "starter": {
+            "c": "int solve(string s, string t) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(string s, string t) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(String s, String t) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(s, t):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(s, t) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    "anagram",
+                    "nagaram"
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    "rat",
+                    "car"
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    "listen",
+                    "silent"
+                ],
+                "expected": 1,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(string s, string t) {\n    if (s.length() != t.length()) return 0;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t ? 1 : 0;\n}",
+            "cpp": "int solve(string s, string t) {\n    if (s.size() != t.size()) return 0;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t ? 1 : 0;\n}",
+            "java": "public int solve(String s, String t) {\n    if (s.length() != t.length()) return 0;\n    char[] a = s.toCharArray();\n    char[] b = t.toCharArray();\n    Arrays.sort(a);\n    Arrays.sort(b);\n    return Arrays.equals(a, b) ? 1 : 0;\n}",
+            "python": "def solve(s, t):\n    return 1 if sorted(s) == sorted(t) else 0",
+            "javascript": "function solve(s, t) {\n    if (s.length !== t.length) return 0;\n    return s.split('').sort().join('') === t.split('').sort().join('') ? 1 : 0;\n}"
+        }
+    },
+    {
+        "id": "max-sliding-window-sum-k",
+        "number": 23,
+        "title": "Max Subarray Sum of Size K",
+        "company": "Cognizant",
+        "companyBadge": "Cognizant 2024",
+        "context": "Asked in Cognizant Next Assessment",
+        "difficulty": "Medium",
+        "topic": "Sliding Window",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            },
+            {
+                "name": "k",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an array of integers `nums` and a window size `k`, return the maximum sum of any contiguous subarray of length `k`.",
+        "constraints": [
+            "1 <= k <= nums.length <= 10^5"
+        ],
+        "hint": "Compute the sum of the first k elements, then slide the window by adding nums[i] and subtracting nums[i - k].",
+        "starter": {
+            "c": "int solve(int nums[], int n, int k) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums, int k) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums, int k) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums, k):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums, k) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        2,
+                        1,
+                        5,
+                        1,
+                        3,
+                        2
+                    ],
+                    3
+                ],
+                "expected": 9,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        3,
+                        4,
+                        1,
+                        5
+                    ],
+                    2
+                ],
+                "expected": 7,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        10,
+                        20,
+                        30,
+                        40
+                    ],
+                    2
+                ],
+                "expected": 70,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < n; i++) {\n        win += nums[i] - nums[i - k];\n        if (win > best) best = win;\n    }\n    return best;\n}",
+            "cpp": "int solve(vector<int> nums, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < nums.size(); i++) {\n        win += nums[i] - nums[i - k];\n        best = max(best, win);\n    }\n    return best;\n}",
+            "java": "public int solve(int[] nums, int k) {\n    int win = 0;\n    for (int i = 0; i < k; i++) win += nums[i];\n    int best = win;\n    for (int i = k; i < nums.length; i++) {\n        win += nums[i] - nums[i - k];\n        best = Math.max(best, win);\n    }\n    return best;\n}",
+            "python": "def solve(nums, k):\n    win = sum(nums[:k])\n    best = win\n    for i in range(k, len(nums)):\n        win += nums[i] - nums[i - k]\n        if win > best:\n            best = win\n    return best",
+            "javascript": "function solve(nums, k) {\n    let win = 0;\n    for (let i = 0; i < k; i++) win += nums[i];\n    let best = win;\n    for (let i = k; i < nums.length; i++) {\n        win += nums[i] - nums[i - k];\n        best = Math.max(best, win);\n    }\n    return best;\n}"
+        }
+    },
+    {
+        "id": "count-set-bits-kernighan",
+        "number": 24,
+        "title": "Hamming Weight (Set Bits Count)",
+        "company": "Zoho",
+        "companyBadge": "Zoho 2024",
+        "context": "Asked in Zoho Technical Round",
+        "difficulty": "Medium",
+        "topic": "Bit Manipulation",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "n",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given a positive integer `n`, return the number of `1` bits in its binary representation (also known as the Hamming weight).",
+        "constraints": [
+            "1 <= n <= 10^9"
+        ],
+        "hint": "Use Brian Kernighan’s trick: n = n & (n - 1) clears the lowest set bit in each iteration.",
+        "starter": {
+            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(n):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    11
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    128
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    255
+                ],
+                "expected": 8,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}",
+            "cpp": "int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}",
+            "java": "public int solve(int n) {\n    int count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}",
+            "python": "def solve(n):\n    count = 0\n    while n > 0:\n        n = n & (n - 1)\n        count += 1\n    return count",
+            "javascript": "function solve(n) {\n    let count = 0;\n    while (n > 0) {\n        n = n & (n - 1);\n        count++;\n    }\n    return count;\n}"
+        }
+    },
+    {
+        "id": "trapping-rain-water",
+        "number": 25,
+        "title": "Trapping Rain Water",
+        "company": "Infosys",
+        "companyBadge": "Infosys DSE 2024",
+        "context": "Asked in Infosys DSE Coding Round",
+        "difficulty": "Hard",
+        "topic": "Two Pointers",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "height",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given `n` non-negative integers representing an elevation map where the width of each bar is `1`, compute how much rainwater can be trapped after raining.",
+        "constraints": [
+            "1 <= height.length <= 2 * 10^4",
+            "0 <= height[i] <= 10^5"
+        ],
+        "hint": "Use two pointers (l, r) and track lMax and rMax. Add lMax - height[l] or rMax - height[r] at each step.",
+        "starter": {
+            "c": "int solve(int height[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> height) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] height) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(height):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(height) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        0,
+                        1,
+                        0,
+                        2,
+                        1,
+                        0,
+                        1,
+                        3,
+                        2,
+                        1,
+                        2,
+                        1
+                    ]
+                ],
+                "expected": 6,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        4,
+                        2,
+                        0,
+                        3,
+                        2,
+                        5
+                    ]
+                ],
+                "expected": 9,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        0,
+                        2,
+                        0,
+                        4
+                    ]
+                ],
+                "expected": 7,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int height[], int n) {\n    int l = 0, r = n - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            if (height[l] > lMax) lMax = height[l];\n            water += lMax - height[l];\n            l++;\n        } else {\n            if (height[r] > rMax) rMax = height[r];\n            water += rMax - height[r];\n            r--;\n        }\n    }\n    return water;\n}",
+            "cpp": "int solve(vector<int> height) {\n    int l = 0, r = height.size() - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}",
+            "java": "public int solve(int[] height) {\n    int l = 0, r = height.length - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = Math.max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = Math.max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}",
+            "python": "def solve(height):\n    l, r = 0, len(height) - 1\n    l_max = r_max = water = 0\n    while l < r:\n        if height[l] < height[r]:\n            l_max = max(l_max, height[l])\n            water += l_max - height[l]\n            l += 1\n        else:\n            r_max = max(r_max, height[r])\n            water += r_max - height[r]\n            r -= 1\n    return water",
+            "javascript": "function solve(height) {\n    let l = 0, r = height.length - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) {\n            lMax = Math.max(lMax, height[l]);\n            water += lMax - height[l++];\n        } else {\n            rMax = Math.max(rMax, height[r]);\n            water += rMax - height[r--];\n        }\n    }\n    return water;\n}"
+        }
+    },
+    {
+        "id": "coin-change-min",
+        "number": 26,
+        "title": "Coin Change Minimum Coins",
+        "company": "TCS NQT",
+        "companyBadge": "TCS Digital 2024",
+        "context": "Asked in TCS Digital Coding Round",
+        "difficulty": "Hard",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "coins",
+                "type": "int[]"
+            },
+            {
+                "name": "amount",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer array `coins` representing coin denominations and an integer `amount`, return the fewest number of coins needed to make up that amount, or `-1` if it cannot be made.",
+        "constraints": [
+            "1 <= coins.length <= 12",
+            "0 <= amount <= 10^4"
+        ],
+        "hint": "Build a DP array of size amount + 1 initialized to amount + 1, with dp[0] = 0.",
+        "starter": {
+            "c": "int solve(int coins[], int n, int amount) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> coins, int amount) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] coins, int amount) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(coins, amount):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(coins, amount) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        5
+                    ],
+                    11
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2
+                    ],
+                    3
+                ],
+                "expected": -1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        1
+                    ],
+                    0
+                ],
+                "expected": 0,
+                "isHidden": true
+            },
+            {
+                "args": [
+                    [
+                        1,
+                        3,
+                        4
+                    ],
+                    6
+                ],
+                "expected": 2,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int coins[], int n, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int j = 0; j < n; j++) {\n            if (coins[j] <= i && dp[i - coins[j]] + 1 < dp[i]) {\n                dp[i] = dp[i - coins[j]] + 1;\n            }\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
+            "cpp": "int solve(vector<int> coins, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (c <= i) dp[i] = min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
+            "java": "public int solve(int[] coins, int amount) {\n    int[] dp = new int[amount + 1];\n    Arrays.fill(dp, amount + 1);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (c <= i) dp[i] = Math.min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}",
+            "python": "def solve(coins, amount):\n    dp = [amount + 1] * (amount + 1)\n    dp[0] = 0\n    for i in range(1, amount + 1):\n        for c in coins:\n            if c <= i:\n                dp[i] = min(dp[i], dp[i - c] + 1)\n    return -1 if dp[amount] > amount else dp[amount]",
+            "javascript": "function solve(coins, amount) {\n    const dp = new Array(amount + 1).fill(amount + 1);\n    dp[0] = 0;\n    for (let i = 1; i <= amount; i++) {\n        for (const c of coins) {\n            if (c <= i) dp[i] = Math.min(dp[i], dp[i - c] + 1);\n        }\n    }\n    return dp[amount] > amount ? -1 : dp[amount];\n}"
+        }
+    },
+    {
+        "id": "longest-increasing-subseq",
+        "number": 27,
+        "title": "Longest Increasing Subsequence",
+        "company": "Cognizant",
+        "companyBadge": "Cognizant 2024",
+        "context": "Asked in Cognizant GenC Elevate Round",
+        "difficulty": "Hard",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer array `nums`, return the length of the longest strictly increasing subsequence.",
+        "constraints": [
+            "1 <= nums.length <= 2500"
+        ],
+        "hint": "dp[i] = 1 + max(dp[j]) for all j < i where nums[j] < nums[i].",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        10,
+                        9,
+                        2,
+                        5,
+                        3,
+                        7,
+                        101,
+                        18
+                    ]
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        0,
+                        1,
+                        0,
+                        3,
+                        2,
+                        3
+                    ]
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        7,
+                        7,
+                        7,
+                        7
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    vector<int> dp(n, 1);\n    int best = 1;\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i] && dp[j] + 1 > dp[i]) dp[i] = dp[j] + 1;\n        }\n        if (dp[i] > best) best = dp[i];\n    }\n    return best;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int n = nums.size(), best = 1;\n    vector<int> dp(n, 1);\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = max(dp[i], dp[j] + 1);\n        }\n        best = max(best, dp[i]);\n    }\n    return best;\n}",
+            "java": "public int solve(int[] nums) {\n    int n = nums.length, best = 1;\n    int[] dp = new int[n];\n    Arrays.fill(dp, 1);\n    for (int i = 1; i < n; i++) {\n        for (int j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n        }\n        best = Math.max(best, dp[i]);\n    }\n    return best;\n}",
+            "python": "def solve(nums):\n    n = len(nums)\n    dp = [1] * n\n    for i in range(1, n):\n        for j in range(i):\n            if nums[j] < nums[i]:\n                dp[i] = max(dp[i], dp[j] + 1)\n    return max(dp)",
+            "javascript": "function solve(nums) {\n    const dp = new Array(nums.length).fill(1);\n    let best = 1;\n    for (let i = 1; i < nums.length; i++) {\n        for (let j = 0; j < i; j++) {\n            if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);\n        }\n        best = Math.max(best, dp[i]);\n    }\n    return best;\n}"
+        }
+    },
+    {
+        "id": "first-missing-positive",
+        "number": 28,
+        "title": "First Missing Positive Integer",
+        "company": "Accenture",
+        "companyBadge": "Accenture 2024",
+        "context": "Asked in Accenture Critical Coding Round",
+        "difficulty": "Hard",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an unsorted integer array `nums`, return the smallest positive integer ($\\ge 1$) that is not present in `nums`.",
+        "constraints": [
+            "1 <= nums.length <= 10^5"
+        ],
+        "hint": "Sort or place each positive number x into index x - 1, then scan for the first mismatch.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        0
+                    ]
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        4,
+                        -1,
+                        1
+                    ]
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        7,
+                        8,
+                        9,
+                        11,
+                        12
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    int target = 1;\n    for (int i = 0; i < n; i++) {\n        if (nums[i] == target) target++;\n    }\n    return target;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    int target = 1;\n    for (int x : nums) {\n        if (x == target) target++;\n    }\n    return target;\n}",
+            "java": "public int solve(int[] nums) {\n    Arrays.sort(nums);\n    int target = 1;\n    for (int x : nums) {\n        if (x == target) target++;\n    }\n    return target;\n}",
+            "python": "def solve(nums):\n    nums.sort()\n    target = 1\n    for x in nums:\n        if x == target:\n            target += 1\n    return target",
+            "javascript": "function solve(nums) {\n    nums.sort((a, b) => a - b);\n    let target = 1;\n    for (const x of nums) {\n        if (x === target) target++;\n    }\n    return target;\n}"
+        }
+    },
+    {
+        "id": "max-product-subarray",
+        "number": 29,
+        "title": "Maximum Product Subarray",
+        "company": "Capgemini",
+        "companyBadge": "Capgemini 2024",
+        "context": "Asked in Capgemini Exceller Test",
+        "difficulty": "Hard",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer array `nums`, find a contiguous non-empty subarray that has the largest product, and return the product.",
+        "constraints": [
+            "1 <= nums.length <= 2 * 10^4",
+            "-10 <= nums[i] <= 10"
+        ],
+        "hint": "Track both maxProd and minProd at each step because a negative number flips min and max.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        2,
+                        3,
+                        -2,
+                        4
+                    ]
+                ],
+                "expected": 6,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        -2,
+                        0,
+                        -1
+                    ]
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        -2,
+                        3,
+                        -4
+                    ]
+                ],
+                "expected": 24,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < n; i++) {\n        if (nums[i] < 0) { int t = maxP; maxP = minP; minP = t; }\n        maxP = max(nums[i], maxP * nums[i]);\n        minP = min(nums[i], minP * nums[i]);\n        ans = max(ans, maxP);\n    }\n    return ans;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] < 0) swap(maxP, minP);\n        maxP = max(nums[i], maxP * nums[i]);\n        minP = min(nums[i], minP * nums[i]);\n        ans = max(ans, maxP);\n    }\n    return ans;\n}",
+            "java": "public int solve(int[] nums) {\n    int maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] < 0) { int t = maxP; maxP = minP; minP = t; }\n        maxP = Math.max(nums[i], maxP * nums[i]);\n        minP = Math.min(nums[i], minP * nums[i]);\n        ans = Math.max(ans, maxP);\n    }\n    return ans;\n}",
+            "python": "def solve(nums):\n    max_p = min_p = ans = nums[0]\n    for x in nums[1:]:\n        if x < 0:\n            max_p, min_p = min_p, max_p\n        max_p = max(x, max_p * x)\n        min_p = min(x, min_p * x)\n        ans = max(ans, max_p)\n    return ans",
+            "javascript": "function solve(nums) {\n    let maxP = nums[0], minP = nums[0], ans = nums[0];\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] < 0) [maxP, minP] = [minP, maxP];\n        maxP = Math.max(nums[i], maxP * nums[i]);\n        minP = Math.min(nums[i], minP * nums[i]);\n        ans = Math.max(ans, maxP);\n    }\n    return ans;\n}"
+        }
+    },
+    {
+        "id": "subarray-sum-equals-k",
+        "number": 30,
+        "title": "Subarray Sum Equals K Count",
+        "company": "TCS NQT",
+        "companyBadge": "TCS Digital 2024",
+        "context": "Asked in TCS Digital Coding",
+        "difficulty": "Hard",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            },
+            {
+                "name": "k",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an array of integers `nums` and an integer `k`, return the total number of contiguous subarrays whose sum equals `k`.",
+        "constraints": [
+            "1 <= nums.length <= 2 * 10^4"
+        ],
+        "hint": "Check all contiguous subarrays or maintain prefix sums.",
+        "starter": {
+            "c": "int solve(int nums[], int n, int k) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums, int k) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums, int k) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums, k):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums, k) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        1,
+                        1
+                    ],
+                    2
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        3
+                    ],
+                    3
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        4,
+                        7,
+                        2,
+                        -3,
+                        1,
+                        4,
+                        2
+                    ],
+                    7
+                ],
+                "expected": 4,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n, int k) {\n    int count = 0;\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}",
+            "cpp": "int solve(vector<int> nums, int k) {\n    int count = 0, n = nums.size();\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}",
+            "java": "public int solve(int[] nums, int k) {\n    int count = 0;\n    for (int i = 0; i < nums.length; i++) {\n        int sum = 0;\n        for (int j = i; j < nums.length; j++) {\n            sum += nums[j];\n            if (sum == k) count++;\n        }\n    }\n    return count;\n}",
+            "python": "def solve(nums, k):\n    count = 0\n    n = len(nums)\n    for i in range(n):\n        cur = 0\n        for j in range(i, n):\n            cur += nums[j]\n            if cur == k:\n                count += 1\n    return count",
+            "javascript": "function solve(nums, k) {\n    let count = 0;\n    for (let i = 0; i < nums.length; i++) {\n        let sum = 0;\n        for (let j = i; j < nums.length; j++) {\n            sum += nums[j];\n            if (sum === k) count++;\n        }\n    }\n    return count;\n}"
+        }
+    },
+    {
+        "id": "dutch-national-flag-sort",
+        "number": 31,
+        "title": "Sort Colors (0s, 1s, and 2s)",
+        "company": "Capgemini",
+        "companyBadge": "Capgemini 2024",
+        "context": "Asked in Capgemini Technical Round",
+        "difficulty": "Hard",
+        "topic": "Two Pointers",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int[]",
+        "description": "Given an array `nums` with `n` objects colored `0`, `1`, or `2`, sort them in-place in a single pass using the Dutch National Flag algorithm.",
+        "constraints": [
+            "1 <= nums.length <= 300"
+        ],
+        "hint": "Maintain three pointers: lo = 0, mid = 0, hi = n - 1.",
+        "starter": {
+            "c": "int* solve(int nums[], int n) {\n    // Write your logic here\n    return {0};\n}",
+            "cpp": "vector<int> solve(vector<int> nums) {\n    // Write your logic here\n    return {};\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return new int[]{};\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return []",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return [];\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        2,
+                        0,
+                        2,
+                        1,
+                        1,
+                        0
+                    ]
+                ],
+                "expected": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    2,
+                    2
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        0,
+                        1
+                    ]
+                ],
+                "expected": [
+                    0,
+                    1,
+                    2
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        1,
+                        0,
+                        0,
+                        2,
+                        1
+                    ]
+                ],
+                "expected": [
+                    0,
+                    0,
+                    1,
+                    1,
+                    2
+                ],
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int* solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    return nums;\n}",
+            "cpp": "vector<int> solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    return nums;\n}",
+            "java": "public int solve(int[] nums) {\n    Arrays.sort(nums);\n    return nums;\n}",
+            "python": "def solve(nums):\n    nums.sort()\n    return nums",
+            "javascript": "function solve(nums) {\n    return nums.sort((a, b) => a - b);\n}"
+        }
+    },
+    {
+        "id": "jump-game-reach",
+        "number": 32,
+        "title": "Jump Game Reachability",
+        "company": "Infosys",
+        "companyBadge": "Infosys 2024",
+        "context": "Asked in Infosys Specialist Programmer",
+        "difficulty": "Hard",
+        "topic": "Dynamic Programming",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "You are given an integer array `nums` where `nums[i]` is your maximum jump length at position `i`. Return `1` if you can reach the last index, or `0` otherwise.",
+        "constraints": [
+            "1 <= nums.length <= 10^4"
+        ],
+        "hint": "Track the farthest index reachable so far. If i > reach, return 0.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        2,
+                        3,
+                        1,
+                        1,
+                        4
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        2,
+                        1,
+                        0,
+                        4
+                    ]
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        0
+                    ]
+                ],
+                "expected": 1,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    int reach = 0;\n    for (int i = 0; i < n; i++) {\n        if (i > reach) return 0;\n        if (i + nums[i] > reach) reach = i + nums[i];\n    }\n    return 1;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    int reach = 0;\n    for (int i = 0; i < nums.size(); i++) {\n        if (i > reach) return 0;\n        reach = max(reach, i + nums[i]);\n    }\n    return 1;\n}",
+            "java": "public int solve(int[] nums) {\n    int reach = 0;\n    for (int i = 0; i < nums.length; i++) {\n        if (i > reach) return 0;\n        reach = Math.max(reach, i + nums[i]);\n    }\n    return 1;\n}",
+            "python": "def solve(nums):\n    reach = 0\n    for i in range(len(nums)):\n        if i > reach:\n            return 0\n        reach = max(reach, i + nums[i])\n    return 1",
+            "javascript": "function solve(nums) {\n    let reach = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (i > reach) return 0;\n        reach = Math.max(reach, i + nums[i]);\n    }\n    return 1;\n}"
+        }
+    },
+    {
+        "id": "count-primes-sieve",
+        "number": 33,
+        "title": "Count Primes Less Than N (Sieve)",
+        "company": "Tech Mahindra",
+        "companyBadge": "Tech Mahindra 2024",
+        "context": "Asked in Tech Mahindra On-Campus Test",
+        "difficulty": "Hard",
+        "topic": "Math & Logic",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "n",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an integer `n`, return the number of prime numbers that are strictly less than `n`.",
+        "constraints": [
+            "0 <= n <= 5 * 10^4"
+        ],
+        "hint": "Use the Sieve of Eratosthenes array of size n.",
+        "starter": {
+            "c": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int n) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(n):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(n) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    10
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    0
+                ],
+                "expected": 0,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    100
+                ],
+                "expected": 25,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int n) {\n    if (n <= 2) return 0;\n    vector<int> prime(n, 1);\n    prime[0] = 0; prime[1] = 0;\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}",
+            "cpp": "int solve(int n) {\n    if (n <= 2) return 0;\n    vector<int> prime(n, 1);\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}",
+            "java": "public int solve(int n) {\n    if (n <= 2) return 0;\n    int[] prime = new int[n];\n    Arrays.fill(prime, 1);\n    for (int p = 2; p * p < n; p++) {\n        if (prime[p] == 1) {\n            for (int i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    int cnt = 0;\n    for (int i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}",
+            "python": "def solve(n):\n    if n <= 2:\n        return 0\n    prime = [1] * n\n    prime[0] = prime[1] = 0\n    p = 2\n    while p * p < n:\n        if prime[p]:\n            i = p * p\n            while i < n:\n                prime[i] = 0\n                i += p\n        p += 1\n    return sum(prime)",
+            "javascript": "function solve(n) {\n    if (n <= 2) return 0;\n    const prime = new Array(n).fill(1);\n    for (let p = 2; p * p < n; p++) {\n        if (prime[p]) {\n            for (let i = p * p; i < n; i += p) prime[i] = 0;\n        }\n    }\n    let cnt = 0;\n    for (let i = 2; i < n; i++) cnt += prime[i];\n    return cnt;\n}"
+        }
+    },
+    {
+        "id": "find-duplicate-floyd",
+        "number": 34,
+        "title": "Find the Duplicate Number",
+        "company": "Tech Mahindra",
+        "companyBadge": "Tech Mahindra 2024",
+        "context": "Asked in Tech Mahindra Coding Round",
+        "difficulty": "Hard",
+        "topic": "Two Pointers",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given an array of integers `nums` containing `n + 1` integers where each integer is in `[1, n]` inclusive, find and return the repeated number.",
+        "constraints": [
+            "2 <= nums.length <= 10^5"
+        ],
+        "hint": "Use Floyd cycle detection or sort a copy to spot adjacent equals.",
+        "starter": {
+            "c": "int solve(int nums[], int n) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] nums) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        3,
+                        4,
+                        2,
+                        2
+                    ]
+                ],
+                "expected": 2,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        1,
+                        3,
+                        4,
+                        2
+                    ]
+                ],
+                "expected": 3,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        3,
+                        3,
+                        3,
+                        3
+                    ]
+                ],
+                "expected": 3,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int nums[], int n) {\n    sort(nums.begin(), nums.end());\n    for (int i = 1; i < n; i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}",
+            "cpp": "int solve(vector<int> nums) {\n    sort(nums.begin(), nums.end());\n    for (int i = 1; i < nums.size(); i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}",
+            "java": "public int solve(int[] nums) {\n    Arrays.sort(nums);\n    for (int i = 1; i < nums.length; i++) {\n        if (nums[i] == nums[i - 1]) return nums[i];\n    }\n    return -1;\n}",
+            "python": "def solve(nums):\n    nums.sort()\n    for i in range(1, len(nums)):\n        if nums[i] == nums[i - 1]:\n            return nums[i]\n    return -1",
+            "javascript": "function solve(nums) {\n    nums.sort((a, b) => a - b);\n    for (let i = 1; i < nums.length; i++) {\n        if (nums[i] === nums[i - 1]) return nums[i];\n    }\n    return -1;\n}"
+        }
+    },
+    {
+        "id": "koko-eating-bananas",
+        "number": 35,
+        "title": "Minimum Eating Speed (Binary Answer)",
+        "company": "Zoho",
+        "companyBadge": "Zoho 2024",
+        "context": "Asked in Zoho Round 2 Advanced Coding",
+        "difficulty": "Hard",
+        "topic": "Searching",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "piles",
+                "type": "int[]"
+            },
+            {
+                "name": "h",
+                "type": "int"
+            }
+        ],
+        "returnType": "int",
+        "description": "Given `piles` of bananas and `h` hours before guards return, find the minimum integer eating speed `k` (bananas/hour) such that all bananas can be eaten within `h` hours.",
+        "constraints": [
+            "1 <= piles.length <= 10^4",
+            "piles.length <= h <= 10^9"
+        ],
+        "hint": "Binary search speed k between 1 and max(piles). Hours needed for pile p at speed k is (p + k - 1) / k.",
+        "starter": {
+            "c": "int solve(int piles[], int n, int h) {\n    // Write your logic here\n    return 0;\n}",
+            "cpp": "int solve(vector<int> piles, int h) {\n    // Write your logic here\n    return 0;\n}",
+            "java": "public int solve(int[] piles, int h) {\n    // Write your logic here\n    return 0;\n}",
+            "python": "def solve(piles, h):\n    # Write your logic here\n    return 0",
+            "javascript": "function solve(piles, h) {\n    // Write your logic here\n    return 0;\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        3,
+                        6,
+                        7,
+                        11
+                    ],
+                    8
+                ],
+                "expected": 4,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        30,
+                        11,
+                        23,
+                        4,
+                        20
+                    ],
+                    5
+                ],
+                "expected": 30,
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        30,
+                        11,
+                        23,
+                        4,
+                        20
+                    ],
+                    6
+                ],
+                "expected": 23,
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int solve(int piles[], int n, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int i = 0; i < n; i++) hours += (piles[i] + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
+            "cpp": "int solve(vector<int> piles, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
+            "java": "public int solve(int[] piles, int h) {\n    int lo = 1, hi = 1000000;\n    while (lo < hi) {\n        int mid = (lo + hi) / 2;\n        int hours = 0;\n        for (int p : piles) hours += (p + mid - 1) / mid;\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}",
+            "python": "def solve(piles, h):\n    lo, hi = 1, max(piles)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        hours = 0\n        for p in piles:\n            hours += (p + mid - 1) // mid\n        if hours <= h:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo",
+            "javascript": "function solve(piles, h) {\n    let lo = 1, hi = Math.max(...piles);\n    while (lo < hi) {\n        let mid = Math.floor((lo + hi) / 2);\n        let hours = 0;\n        for (const p of piles) hours += Math.ceil(p / mid);\n        if (hours <= h) hi = mid;\n        else lo = mid + 1;\n    }\n    return lo;\n}"
+        }
+    },
+    {
+        "id": "product-except-self",
+        "number": 36,
+        "title": "Product of Array Except Self",
+        "company": "Zoho",
+        "companyBadge": "Zoho Advanced 2024",
+        "context": "Asked in Zoho Level 2 Advanced Programming",
+        "difficulty": "Hard",
+        "topic": "Arrays & Hashing",
+        "fnName": "solve",
+        "params": [
+            {
+                "name": "nums",
+                "type": "int[]"
+            }
+        ],
+        "returnType": "int[]",
+        "description": "Given an integer array `nums`, return an array `answer` such that `answer[i]` is equal to the product of all the elements of `nums` except `nums[i]`, without using division.",
+        "constraints": [
+            "2 <= nums.length <= 10^5"
+        ],
+        "hint": "Make a prefix pass from left to right and a suffix pass from right to left.",
+        "starter": {
+            "c": "int* solve(int nums[], int n) {\n    // Write your logic here\n    return {0};\n}",
+            "cpp": "vector<int> solve(vector<int> nums) {\n    // Write your logic here\n    return {};\n}",
+            "java": "public int[] solve(int[] nums) {\n    // Write your logic here\n    return new int[]{};\n}",
+            "python": "def solve(nums):\n    # Write your logic here\n    return []",
+            "javascript": "function solve(nums) {\n    // Write your logic here\n    return [];\n}"
+        },
+        "testCases": [
+            {
+                "args": [
+                    [
+                        1,
+                        2,
+                        3,
+                        4
+                    ]
+                ],
+                "expected": [
+                    24,
+                    12,
+                    8,
+                    6
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        -1,
+                        1,
+                        0,
+                        -3,
+                        3
+                    ]
+                ],
+                "expected": [
+                    0,
+                    0,
+                    9,
+                    0,
+                    0
+                ],
+                "isHidden": false
+            },
+            {
+                "args": [
+                    [
+                        2,
+                        3,
+                        4,
+                        5
+                    ]
+                ],
+                "expected": [
+                    60,
+                    40,
+                    30,
+                    24
+                ],
+                "isHidden": true
+            }
+        ],
+        "solution": {
+            "c": "int* solve(int nums[], int n) {\n    vector<int> res(n, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}",
+            "cpp": "vector<int> solve(vector<int> nums) {\n    int n = nums.size();\n    vector<int> res(n, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}",
+            "java": "public int[] solve(int[] nums) {\n    int n = nums.length;\n    int[] res = new int[n];\n    Arrays.fill(res, 1);\n    int pref = 1;\n    for (int i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    int suff = 1;\n    for (int i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}",
+            "python": "def solve(nums):\n    n = len(nums)\n    res = [1] * n\n    pref = 1\n    for i in range(n):\n        res[i] = pref\n        pref *= nums[i]\n    suff = 1\n    for i in range(n - 1, -1, -1):\n        res[i] *= suff\n        suff *= nums[i]\n    return res",
+            "javascript": "function solve(nums) {\n    const n = nums.length;\n    const res = new Array(n).fill(1);\n    let pref = 1;\n    for (let i = 0; i < n; i++) { res[i] = pref; pref *= nums[i]; }\n    let suff = 1;\n    for (let i = n - 1; i >= 0; i--) { res[i] *= suff; suff *= nums[i]; }\n    return res;\n}"
+        }
     }
 ];
 
 // ============================================================================
 // 100% CLIENT-SIDE MULTI-LANGUAGE COMPILER & TRANSPILER ENGINE
-// Runs inside an isolated Web Worker so 1,500+ concurrent students cause
-// 0% server load and 0 API rate limits!
 // ============================================================================
 const checkBalancedDelimiters = (code) => {
     const stack = [];
@@ -1370,7 +3521,7 @@ const transpileToExecutableJs = (lang, rawCode) => {
     src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)\s*\(\s*([^)]+)\)/g, 'let $1 = new Array($2).fill(0)');
     src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)/g, 'let $1');
 
-    // Java Arrays helpers (use ("" + a) so \bString\b -> let won't mangle it)
+    // Java Arrays helpers
     src = src.replace(/Arrays\.fill\s*\(\s*([a-zA-Z0-9_]+)\s*,\s*([^)]+)\)/g, '$1.fill($2)');
     src = src.replace(/Arrays\.sort\s*\(\s*([a-zA-Z0-9_]+)\s*\)/g, '$1.sort((a,b)=>(typeof a==="number"?a-b:("" + a).localeCompare("" + b)))');
     src = src.replace(/Arrays\.equals\s*\(\s*([a-zA-Z0-9_]+)\s*,\s*([a-zA-Z0-9_]+)\s*\)/g, '(JSON.stringify($1) === JSON.stringify($2))');
@@ -1390,7 +3541,7 @@ const transpileToExecutableJs = (lang, rawCode) => {
 
     // Transform returns
     src = src.replace(/new\s+let\s*\[\s*\]\s*\{([^}]*)\}/g, '[$1]');
-    src = src.replace(/new\s+int\s*\[\s*\]\s*\{([^}]*)\}/g, '[$1]');
+    src = src.replace(/new\s+int\s*\[\s*\]\s*\{([^}]*)}/g, '[$1]');
     src = src.replace(/return\s+\{([^}]*)\}\s*;/g, 'return [$1];');
 
     // Transform .size() and .length()
@@ -1401,7 +3552,6 @@ const transpileToExecutableJs = (lang, rawCode) => {
     src = src.replace(/\(([^)]+)\)\s*\/\s*(\d+|[a-zA-Z0-9_]+)/g, 'Math.trunc(($1) / $2)');
     src = src.replace(/([a-zA-Z0-9_]+)\s*\/\s*(\d+)/g, 'Math.trunc($1 / $2)');
 
-    // Provide max, min, abs helpers
     const helperHeader = `
         const max = Math.max;
         const min = Math.min;
@@ -1503,47 +3653,22 @@ const executeInBrowserWorker = (lang, code, testCases) => {
 // ============================================================================
 // MAIN COMPONENT: STUDENT LOCKED IN LAB TAB
 // ============================================================================
-
-const COMPANIES = [
-    'All Companies',
-    'Accenture',
-    'TCS NQT',
-    'Infosys',
-    'Wipro',
-    'Cognizant',
-    'Capgemini',
-    'Zoho',
-    'Tech Mahindra'
-];
-
-const getCompanyBadgeStyle = (company) => {
-    switch (company) {
-        case 'Accenture':
-            return 'bg-purple-50 text-purple-700 border-purple-200';
-        case 'TCS NQT':
-            return 'bg-blue-50 text-blue-700 border-blue-200';
-        case 'Infosys':
-            return 'bg-indigo-50 text-indigo-700 border-indigo-200';
-        case 'Wipro':
-            return 'bg-amber-50 text-amber-700 border-amber-200';
-        case 'Cognizant':
-            return 'bg-cyan-50 text-cyan-700 border-cyan-200';
-        case 'Capgemini':
-            return 'bg-sky-50 text-sky-700 border-sky-200';
-        case 'Zoho':
-            return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-        case 'Tech Mahindra':
-            return 'bg-rose-50 text-rose-700 border-rose-200';
-        default:
-            return 'bg-slate-100 text-slate-700 border-slate-200';
-    }
-};
-
 const StudentLockedInLabTab = ({ student }) => {
-    const storageKey = `eth_locked_in_solved_${student?.usn || 'guest'}`;
+    const solvedStorageKey = `eth_locked_in_solved_${student?.usn || 'guest'}`;
+    const subStorageKey = `eth_locked_in_submissions_${student?.usn || 'guest'}`;
+
     const [solvedIds, setSolvedIds] = useState(() => {
         try {
-            const raw = localStorage.getItem(storageKey);
+            const raw = localStorage.getItem(solvedStorageKey);
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    });
+
+    const [submissions, setSubmissions] = useState(() => {
+        try {
+            const raw = localStorage.getItem(subStorageKey);
             return raw ? JSON.parse(raw) : [];
         } catch {
             return [];
@@ -1551,6 +3676,8 @@ const StudentLockedInLabTab = ({ student }) => {
     });
 
     const [activeView, setActiveView] = useState('list'); // 'list' | 'solve'
+    const [leftPanelTab, setLeftPanelTab] = useState('description'); // 'description' | 'submissions'
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState('All Companies');
     const [selectedDifficulty, setSelectedDifficulty] = useState('All');
     const [selectedTopic, setSelectedTopic] = useState('All');
@@ -1559,13 +3686,24 @@ const StudentLockedInLabTab = ({ student }) => {
     const [selectedLang, setSelectedLang] = useState('cpp');
     const [code, setCode] = useState(PROBLEMS[0].starter.cpp);
     const [showHint, setShowHint] = useState(false);
+    const [showSolution, setShowSolution] = useState(false);
     const [running, setRunning] = useState(false);
     const [runOutput, setRunOutput] = useState(null);
     const [activeSampleIdx, setActiveSampleIdx] = useState(0);
 
-    const activeProblem = useMemo(
-        () => PROBLEMS.find((p) => p.id === activeProblemId) || PROBLEMS[0],
+    const activeIndex = useMemo(
+        () => PROBLEMS.findIndex((p) => p.id === activeProblemId),
         [activeProblemId]
+    );
+
+    const activeProblem = useMemo(
+        () => (activeIndex !== -1 ? PROBLEMS[activeIndex] : PROBLEMS[0]),
+        [activeIndex]
+    );
+
+    const problemSubmissions = useMemo(
+        () => submissions.filter((s) => s.problemId === activeProblem.id),
+        [submissions, activeProblem.id]
     );
 
     const topics = useMemo(() => {
@@ -1596,21 +3734,46 @@ const StudentLockedInLabTab = ({ student }) => {
         setCode(activeProblem.starter[selectedLang] || '');
         setRunOutput(null);
         setShowHint(false);
+        setShowSolution(false);
         setActiveSampleIdx(0);
+        setLeftPanelTab('description');
     }, [activeProblem, selectedLang]);
+
+    // Handle Escape key to exit fullscreen
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isFullscreen) {
+                setIsFullscreen(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isFullscreen]);
 
     const markProblemSolved = useCallback((probId) => {
         setSolvedIds((prev) => {
             if (prev.includes(probId)) return prev;
             const updated = [...prev, probId];
             try {
-                localStorage.setItem(storageKey, JSON.stringify(updated));
+                localStorage.setItem(solvedStorageKey, JSON.stringify(updated));
             } catch {
-                // ignore storage quota error
+                // ignore
             }
             return updated;
         });
-    }, [storageKey]);
+    }, [solvedStorageKey]);
+
+    const saveSubmission = useCallback((newSub) => {
+        setSubmissions((prev) => {
+            const updated = [newSub, ...prev];
+            try {
+                localStorage.setItem(subStorageKey, JSON.stringify(updated));
+            } catch {
+                // ignore
+            }
+            return updated;
+        });
+    }, [subStorageKey]);
 
     const handleRunSample = async () => {
         setRunning(true);
@@ -1630,9 +3793,28 @@ const StudentLockedInLabTab = ({ student }) => {
         setRunning(true);
         const res = await executeInBrowserWorker(selectedLang, code, activeProblem.testCases);
         const allPassed = res.status === 'OK' && res.results.length > 0 && res.results.every((r) => r.pass);
+        const passedCount = res.results ? res.results.filter((r) => r.pass).length : 0;
+        const totalCount = activeProblem.testCases.length;
+        const maxTime = res.results && res.results.length > 0 ? Math.max(...res.results.map((r) => r.timeMs || 1)) : 1;
+
         if (allPassed) {
             markProblemSolved(activeProblem.id);
         }
+
+        // Save submission record
+        const submissionRecord = {
+            id: Date.now(),
+            problemId: activeProblem.id,
+            lang: selectedLang,
+            code,
+            verdict: allPassed ? 'Accepted' : (res.status === 'OK' ? 'Wrong Answer' : res.status),
+            passedCount,
+            totalCount,
+            timeMs: maxTime,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' • ' + new Date().toLocaleDateString([], { month: 'short', day: 'numeric' })
+        };
+        saveSubmission(submissionRecord);
+
         setRunOutput({
             mode: 'submit',
             verdict: res.status === 'OK' ? (allPassed ? 'Accepted' : 'Wrong Answer') : res.status,
@@ -1642,16 +3824,17 @@ const StudentLockedInLabTab = ({ student }) => {
         setRunning(false);
     };
 
-    const handleKeyDown = (e) => {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            const next = code.substring(0, start) + '    ' + code.substring(end);
-            setCode(next);
-            setTimeout(() => {
-                e.target.selectionStart = e.target.selectionEnd = start + 4;
-            }, 0);
+    const handleNextProblem = () => {
+        if (activeIndex < PROBLEMS.length - 1) {
+            setActiveProblemId(PROBLEMS[activeIndex + 1].id);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const handlePrevProblem = () => {
+        if (activeIndex > 0) {
+            setActiveProblemId(PROBLEMS[activeIndex - 1].id);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -1689,7 +3872,7 @@ const StudentLockedInLabTab = ({ student }) => {
                             Crack Mass Recruiter Coding Rounds.
                         </h2>
                         <p className="text-slate-500 text-sm leading-relaxed">
-                            Authentic technical round coding questions from <strong>TCS NQT</strong>, <strong>Accenture</strong>, <strong>Infosys</strong>, <strong>Wipro</strong>, <strong>Cognizant</strong>, <strong>Capgemini</strong> & <strong>Zoho</strong>. Write code in C, C++, Java, Python or JS and test against real sample & hidden edge cases.
+                            Authentic technical interview questions from <strong>TCS NQT</strong>, <strong>Accenture</strong>, <strong>Infosys</strong>, <strong>Wipro</strong>, <strong>Cognizant</strong>, <strong>Capgemini</strong> &amp; <strong>Zoho</strong>. Write code in C, C++, Java, Python or JS and test against real sample &amp; hidden edge cases.
                         </p>
                         <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs font-semibold">
                             <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">Easy: {easySolved}/12</span>
@@ -1888,16 +4071,17 @@ const StudentLockedInLabTab = ({ student }) => {
     }
 
     // =========================================================================
-    // VIEW 2: DEDICATED SEPARATE PROBLEM SOLVER PAGE
+    // VIEW 2: DEDICATED SEPARATE PROBLEM SOLVER PAGE (WITH FULLSCREEN SUPPORT)
     // =========================================================================
     return (
-        <div className="space-y-5 font-sans">
-            {/* Top Navigation & Header Bar with Back Button */}
+        <div className={`space-y-5 font-sans ${isFullscreen ? 'fixed inset-0 z-50 bg-[#0F172A] p-4 sm:p-6 overflow-y-auto' : ''}`}>
+            {/* Top Navigation & Header Bar with Back Button, Prev/Next & Fullscreen */}
             <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-wrap">
                     <button
                         type="button"
                         onClick={() => {
+                            if (isFullscreen) setIsFullscreen(false);
                             setActiveView('list');
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
@@ -1919,7 +4103,7 @@ const StudentLockedInLabTab = ({ student }) => {
                     )}
                 </div>
 
-                {/* Quick Switch Dropdown */}
+                {/* Right controls: Prev, Next, Dropdown & Fullscreen */}
                 <div className="flex items-center gap-2 w-full md:w-auto">
                     <select
                         value={activeProblem.id}
@@ -1934,124 +4118,239 @@ const StudentLockedInLabTab = ({ student }) => {
                     </select>
                     <button
                         type="button"
-                        onClick={() => {
-                            const idx = PROBLEMS.findIndex((p) => p.id === activeProblem.id);
-                            if (idx > 0) setActiveProblemId(PROBLEMS[idx - 1].id);
-                        }}
-                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                        onClick={handlePrevProblem}
+                        disabled={activeIndex === 0}
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer disabled:opacity-40"
                         title="Previous Challenge"
                     >
                         <ChevronLeft size={16} />
                     </button>
                     <button
                         type="button"
-                        onClick={() => {
-                            const idx = PROBLEMS.findIndex((p) => p.id === activeProblem.id);
-                            if (idx < PROBLEMS.length - 1) setActiveProblemId(PROBLEMS[idx + 1].id);
-                        }}
-                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                        onClick={handleNextProblem}
+                        disabled={activeIndex === PROBLEMS.length - 1}
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer disabled:opacity-40"
                         title="Next Challenge"
                     >
                         <ChevronRight size={16} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                        title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen'}
+                    >
+                        {isFullscreen ? <Minimize2 size={16} className="text-[#5899B5]" /> : <Maximize2 size={16} />}
                     </button>
                 </div>
             </div>
 
             {/* Split Workspace Layout */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                {/* LEFT COLUMN (5 cols): Problem Description, Story, Constraints & Sample Cases */}
-                <div className="xl:col-span-5 space-y-5">
-                    {/* Problem Statement Card */}
-                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-5">
-                        {/* Company Recruitment Context Pill */}
-                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2.5 text-xs text-slate-700 font-semibold">
-                            <Briefcase size={16} className="text-[#5899B5] shrink-0" />
-                            <span>{activeProblem.context || `Actual technical interview challenge asked in ${activeProblem.company} recruitment drive.`}</span>
-                        </div>
+                {/* LEFT COLUMN (5 cols): Description / Submissions Tabs */}
+                <div className="xl:col-span-5 space-y-4">
+                    {/* Tab Navigation (Description vs Submissions History) */}
+                    <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-2 flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setLeftPanelTab('description')}
+                            className={`flex-1 py-2 px-3 rounded-2xl text-xs font-bold cursor-pointer transition flex items-center justify-center gap-1.5 ${
+                                leftPanelTab === 'description'
+                                    ? 'bg-slate-900 text-white shadow-sm'
+                                    : 'text-slate-600 hover:bg-slate-100'
+                            }`}
+                        >
+                            <FileText size={14} /> Description
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLeftPanelTab('submissions')}
+                            className={`flex-1 py-2 px-3 rounded-2xl text-xs font-bold cursor-pointer transition flex items-center justify-center gap-1.5 ${
+                                leftPanelTab === 'submissions'
+                                    ? 'bg-slate-900 text-white shadow-sm'
+                                    : 'text-slate-600 hover:bg-slate-100'
+                            }`}
+                        >
+                            <History size={14} /> Submissions ({problemSubmissions.length})
+                        </button>
+                    </div>
 
-                        <div>
-                            <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
-                                #{activeProblem.number}. {activeProblem.title}
-                            </h2>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
-                                    Topic: {activeProblem.topic}
-                                </span>
-                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 font-mono">
-                                    fn: {activeProblem.fnName}(...)
-                                </span>
+                    {/* TAB 1: Problem Description */}
+                    {leftPanelTab === 'description' && (
+                        <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-5">
+                            {/* Company Recruitment Context Pill */}
+                            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2.5 text-xs text-slate-700 font-semibold">
+                                <Briefcase size={16} className="text-[#5899B5] shrink-0" />
+                                <span>{activeProblem.context || `Actual technical interview challenge asked in ${activeProblem.company} recruitment drive.`}</span>
                             </div>
-                        </div>
 
-                        {/* Story / Description */}
-                        <div className="text-sm text-slate-700 leading-relaxed space-y-2">
-                            <p>{activeProblem.description}</p>
-                        </div>
-
-                        {/* Constraints */}
-                        {activeProblem.constraints && activeProblem.constraints.length > 0 && (
-                            <div className="space-y-2 pt-2 border-t border-slate-100">
-                                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                                    Constraints
-                                </span>
-                                <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600 font-mono">
-                                    {activeProblem.constraints.map((c, i) => (
-                                        <li key={i}>{c}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {/* Sample Cases */}
-                        <div className="space-y-3 pt-2 border-t border-slate-100">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                                Sample Test Cases
-                            </span>
-                            {activeProblem.testCases.filter((tc) => !tc.isHidden).map((tc, idx) => (
-                                <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
-                                    <div className="font-bold text-slate-500">Example {idx + 1}:</div>
-                                    <div>
-                                        <span className="text-slate-400">Input: </span>
-                                        <span className="text-slate-800 font-semibold">
-                                            {activeProblem.params.map((p, pi) => `${p.name} = ${JSON.stringify(tc.args[pi])}`).join(', ')}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span className="text-slate-400">Output: </span>
-                                        <span className="text-emerald-700 font-bold">{JSON.stringify(tc.expected)}</span>
-                                    </div>
+                            <div>
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+                                    #{activeProblem.number}. {activeProblem.title}
+                                </h2>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
+                                        Topic: {activeProblem.topic}
+                                    </span>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 font-mono">
+                                        fn: {activeProblem.fnName}(...)
+                                    </span>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
 
-                        {/* Recruiter's Hint */}
-                        <div className="pt-2 border-t border-slate-100">
-                            <button
-                                type="button"
-                                onClick={() => setShowHint(!showHint)}
-                                className="w-full flex items-center justify-between p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 text-xs font-bold cursor-pointer transition hover:bg-amber-100/70"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <Lightbulb size={15} className="text-amber-600" /> Need Recruiter Hint?
+                            {/* Story / Description */}
+                            <div className="text-sm text-slate-700 leading-relaxed space-y-2">
+                                <p>{activeProblem.description}</p>
+                            </div>
+
+                            {/* Constraints */}
+                            {activeProblem.constraints && activeProblem.constraints.length > 0 && (
+                                <div className="space-y-2 pt-2 border-t border-slate-100">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                                        Constraints
+                                    </span>
+                                    <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600 font-mono">
+                                        {activeProblem.constraints.map((c, i) => (
+                                            <li key={i}>{c}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Sample Cases */}
+                            <div className="space-y-3 pt-2 border-t border-slate-100">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                                    Sample Test Cases
                                 </span>
-                                <span>{showHint ? 'Hide Hint' : 'Reveal Hint'}</span>
-                            </button>
-                            {showHint && (
-                                <div className="mt-2.5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed font-medium">
-                                    💡 <strong>Placement Tip:</strong> {activeProblem.hint}
+                                {activeProblem.testCases.filter((tc) => !tc.isHidden).map((tc, idx) => (
+                                    <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
+                                        <div className="font-bold text-slate-500">Example {idx + 1}:</div>
+                                        <div>
+                                            <span className="text-slate-400">Input: </span>
+                                            <span className="text-slate-800 font-semibold">
+                                                {activeProblem.params.map((p, pi) => `${p.name} = ${JSON.stringify(tc.args[pi])}`).join(', ')}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-400">Output: </span>
+                                            <span className="text-emerald-700 font-bold">{JSON.stringify(tc.expected)}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Recruiter's Hint & Solution View */}
+                            <div className="pt-2 border-t border-slate-100 space-y-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowHint(!showHint)}
+                                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-900 text-xs font-bold cursor-pointer transition hover:bg-amber-100/70"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <Lightbulb size={15} className="text-amber-600" /> Need Recruiter Hint?
+                                    </span>
+                                    <span>{showHint ? 'Hide Hint' : 'Reveal Hint'}</span>
+                                </button>
+                                {showHint && (
+                                    <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed font-medium space-y-2">
+                                        <div>💡 <strong>Placement Tip:</strong> {activeProblem.hint}</div>
+                                        <div className="pt-2 border-t border-amber-200/60 flex items-center justify-between">
+                                            <span className="text-[11px] text-amber-800 font-semibold">Completely stuck?</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowSolution(!showSolution)}
+                                                className="text-[11px] font-bold text-amber-900 underline cursor-pointer"
+                                            >
+                                                {showSolution ? 'Hide Reference Solution' : 'View Reference Solution'}
+                                            </button>
+                                        </div>
+                                        {showSolution && (
+                                            <div className="p-2.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto">
+                                                <pre className="m-0 whitespace-pre-wrap">{activeProblem.solution[selectedLang]}</pre>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TAB 2: Submissions History */}
+                    {leftPanelTab === 'submissions' && (
+                        <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                    <History size={15} className="text-[#5899B5]" /> Past Submissions
+                                </h3>
+                                <span className="text-xs text-slate-400 font-semibold">
+                                    {problemSubmissions.length} attempt{problemSubmissions.length === 1 ? '' : 's'}
+                                </span>
+                            </div>
+
+                            {problemSubmissions.length === 0 ? (
+                                <div className="p-8 rounded-2xl bg-slate-50 border border-slate-100 text-center text-xs text-slate-500 space-y-2">
+                                    <p>No submissions yet for this challenge.</p>
+                                    <p className="text-[11px] text-slate-400">Click <strong>Submit Code</strong> on the right to test and record your attempt!</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {problemSubmissions.map((sub) => {
+                                        const isAcc = sub.verdict === 'Accepted';
+                                        return (
+                                            <div
+                                                key={sub.id}
+                                                className={`p-4 rounded-2xl border transition-all space-y-2 ${
+                                                    isAcc
+                                                        ? 'bg-emerald-50/50 border-emerald-200'
+                                                        : 'bg-rose-50/40 border-rose-200'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 ${
+                                                        isAcc ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                                                    }`}>
+                                                        {isAcc ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                                                        {sub.verdict}
+                                                    </span>
+                                                    <span className="text-[11px] text-slate-500 font-medium">
+                                                        {sub.timestamp}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center justify-between text-xs text-slate-600 font-mono">
+                                                    <span>Lang: <strong className="text-slate-800">{sub.lang.toUpperCase()}</strong></span>
+                                                    <span>Passed: <strong className={isAcc ? 'text-emerald-700' : 'text-rose-700'}>{sub.passedCount} / {sub.totalCount}</strong></span>
+                                                    <span>Time: <strong className="text-slate-800">{sub.timeMs} ms</strong></span>
+                                                </div>
+
+                                                <div className="pt-2 border-t border-slate-200/60 flex items-center justify-end">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedLang(sub.lang);
+                                                            setCode(sub.code);
+                                                        }}
+                                                        className="px-3 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-[11px] font-bold text-slate-700 flex items-center gap-1 cursor-pointer transition shadow-xs"
+                                                    >
+                                                        <Copy size={11} /> Load This Code
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
-                    </div>
+                    )}
                 </div>
 
-                {/* RIGHT COLUMN (7 cols): Multi-Language Editor & Compiler Console */}
+                {/* RIGHT COLUMN (7 cols): Syntax Highlighted Editor & Compiler Console */}
                 <div className="xl:col-span-7 space-y-5">
                     {/* Code Editor Container */}
                     <div className="bg-[#1E293B] rounded-3xl shadow-sm border border-slate-800 overflow-hidden">
                         {/* Editor Header Bar */}
                         <div className="px-5 py-3.5 bg-[#0F172A] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
-                            {/* Language Pills */}
+                            {/* Language Selector Pills */}
                             <div className="flex items-center gap-1.5 flex-wrap">
                                 {LANGUAGES.map((lang) => (
                                     <button
@@ -2075,7 +4374,7 @@ const StudentLockedInLabTab = ({ student }) => {
                                     type="button"
                                     onClick={() => setCode(activeProblem.starter[selectedLang] || '')}
                                     className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-                                    title="Reset Code Template"
+                                    title="Reset Code to Skeleton Stub"
                                 >
                                     <RotateCcw size={15} />
                                 </button>
@@ -2093,32 +4392,27 @@ const StudentLockedInLabTab = ({ student }) => {
                                     disabled={running}
                                     className="px-4 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition shadow-sm"
                                 >
-                                    <Send size={13} /> {running ? 'Compiling...' : 'Submit Code'}
+                                    <Send size={13} /> {running ? 'Evaluating...' : 'Submit Code'}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Editor Textarea with Line Numbers */}
-                        <div className="relative flex min-h-[360px] max-h-[520px]">
-                            <div className="select-none py-4 px-3 text-right bg-[#0F172A]/40 text-slate-600 font-mono text-xs w-10 border-r border-slate-800">
-                                {code.split('\n').map((_, i) => (
-                                    <div key={i}>{i + 1}</div>
-                                ))}
-                            </div>
-                            <textarea
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                spellCheck={false}
-                                className="flex-1 p-4 bg-[#1E293B] text-emerald-300 font-mono text-xs sm:text-sm leading-relaxed outline-none resize-none overflow-auto"
-                                style={{ tabSize: 4 }}
-                            />
-                        </div>
+                        {/* Interactive Syntax-Highlighted Editor with Autocomplete */}
+                        <CodeEditor
+                            code={code}
+                            onChange={setCode}
+                            lang={selectedLang}
+                            params={activeProblem.params}
+                            minHeight="380px"
+                        />
 
                         {/* Status Footer */}
-                        <div className="px-5 py-2.5 bg-[#0F172A] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                            <span>Language: {LANGUAGES.find((l) => l.id === selectedLang)?.label}</span>
-                            <span>Engine: Client-Side Web Worker (0ms Network)</span>
+                        <div className="px-5 py-2 bg-[#0F172A] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span className="flex items-center gap-2">
+                                <Zap size={12} className="text-amber-400" />
+                                Smart Autocomplete &amp; Syntax Highlighting Active
+                            </span>
+                            <span>Tab: 4 spaces • {selectedLang.toUpperCase()}</span>
                         </div>
                     </div>
 
@@ -2126,7 +4420,7 @@ const StudentLockedInLabTab = ({ student }) => {
                     <div className="bg-white border border-slate-100 shadow-sm rounded-3xl p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                                <Terminal size={14} className="text-[#5899B5]" /> Test Case & Compiler Console
+                                <Terminal size={14} className="text-[#5899B5]" /> Test Case &amp; Compiler Console
                             </span>
                             {runOutput && (
                                 <span
@@ -2160,16 +4454,28 @@ const StudentLockedInLabTab = ({ student }) => {
                                             <CheckCircle2 size={18} className="text-emerald-600" />
                                             Accepted! All {runOutput.results.length} Test Cases Passed 🔒⚡
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setActiveView('list');
-                                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                                            }}
-                                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer"
-                                        >
-                                            Return to Problem Arena →
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (isFullscreen) setIsFullscreen(false);
+                                                    setActiveView('list');
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className="px-3 py-1.5 rounded-xl bg-white border border-emerald-300 text-emerald-800 text-xs font-bold cursor-pointer hover:bg-emerald-100 transition"
+                                            >
+                                                Problem List
+                                            </button>
+                                            {activeIndex < PROBLEMS.length - 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleNextProblem}
+                                                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer flex items-center gap-1 shadow-sm transition"
+                                                >
+                                                    Next Challenge →
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 
