@@ -4,8 +4,9 @@ import {
     Clock, Code2, Sparkles, ChevronLeft, ChevronRight, Lightbulb, Eye,
     Search, Filter, Trophy, Lock, Cpu, Layers, Check, ArrowLeft, Building2,
     Briefcase, Flame, Award, ExternalLink, Maximize2, Minimize2, History,
-    FileText, CheckSquare, Zap, Copy
+    FileText, CheckSquare, Zap, Copy, Loader2
 } from 'lucide-react';
+import { executeCode, preloadPython, getPythonStatus } from '../../utils/codeRunner';
 
 // ============================================================================
 // STATIC CARTOON SVGS FOR "LOCKED IN LAB"
@@ -89,11 +90,11 @@ export const LockedInCartoonSvg = ({ variant = 'hub', className = 'w-64 h-32' })
 // LANGUAGE DEFINITIONS
 // ============================================================================
 const LANGUAGES = [
+    { id: 'python', label: 'Python 3', ext: '.py', badge: 'bg-emerald-50 text-emerald-700' },
+    { id: 'javascript', label: 'JavaScript (ES6)', ext: '.js', badge: 'bg-amber-50 text-amber-800' },
     { id: 'c', label: 'C (GCC)', ext: '.c', badge: 'bg-slate-100 text-slate-800' },
     { id: 'cpp', label: 'C++ (G++)', ext: '.cpp', badge: 'bg-blue-50 text-blue-700' },
-    { id: 'java', label: 'Java (OpenJDK)', ext: '.java', badge: 'bg-orange-50 text-orange-700' },
-    { id: 'python', label: 'Python 3', ext: '.py', badge: 'bg-emerald-50 text-emerald-700' },
-    { id: 'javascript', label: 'JavaScript (ES6)', ext: '.js', badge: 'bg-amber-50 text-amber-800' }
+    { id: 'java', label: 'Java (OpenJDK)', ext: '.java', badge: 'bg-orange-50 text-orange-700' }
 ];
 
 const COMPANIES = [
@@ -3308,347 +3309,7 @@ const PROBLEMS = [
     }
 ];
 
-// ============================================================================
-// 100% CLIENT-SIDE MULTI-LANGUAGE COMPILER & TRANSPILER ENGINE
-// ============================================================================
-const checkBalancedDelimiters = (code) => {
-    const stack = [];
-    const pairs = { ')': '(', ']': '[', '}': '{' };
-    let inSingle = false;
-    let inDouble = false;
-    for (let i = 0; i < code.length; i++) {
-        const ch = code[i];
-        const prev = i > 0 ? code[i - 1] : '';
-        if (ch === "'" && !inDouble && prev !== '\\') inSingle = !inSingle;
-        else if (ch === '"' && !inSingle && prev !== '\\') inDouble = !inDouble;
-        else if (!inSingle && !inDouble) {
-            if (ch === '(' || ch === '[' || ch === '{') stack.push(ch);
-            else if (ch === ')' || ch === ']' || ch === '}') {
-                if (stack.pop() !== pairs[ch]) {
-                    return `Compilation Error: Unmatched closing '${ch}' token.`;
-                }
-            }
-        }
-    }
-    if (stack.length > 0) {
-        return `Compilation Error: Unclosed '${stack[stack.length - 1]}' delimiter at end of source.`;
-    }
-    return null;
-};
-
-const transpileToExecutableJs = (lang, rawCode) => {
-    const balanceErr = checkBalancedDelimiters(rawCode);
-    if (balanceErr) throw new Error(balanceErr);
-
-    if (lang === 'javascript') {
-        if (!/function\s+solve\s*\(/.test(rawCode) && !/const\s+solve\s*=/.test(rawCode)) {
-            throw new Error("Compilation Error: Missing 'function solve(...)' entrypoint.");
-        }
-        return rawCode;
-    }
-
-    if (lang === 'python') {
-        if (!/def\s+solve\s*\(/.test(rawCode)) {
-            throw new Error("SyntaxError: Missing 'def solve(...):' function definition.");
-        }
-
-        let prep = rawCode.replace(/\t/g, '    ');
-        prep = prep.replace(/for\s+([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_]+)\[1:\]:/g, 'for $1 in ($2).slice(1):');
-        prep = prep.replace(/for\s+([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_]+)\[:([^\]]+)\]:/g, 'for $1 in ($2).slice(0, $3):');
-        prep = prep.replace(/([a-zA-Z0-9_]+)\s*\+=\s*(.+?)\s+if\s+(.+?)\s+else\s+(.+)$/gm, '$1 += ($3) ? ($2) : ($4)');
-
-        const lines = prep.split('\n');
-        const out = [];
-        const indentStack = [0];
-
-        const convertPyExpr = (expr) => {
-            let e = expr
-                .replace(/\bTrue\b/g, 'true')
-                .replace(/\bFalse\b/g, 'false')
-                .replace(/\bNone\b/g, 'null')
-                .replace(/\band\b/g, '&&')
-                .replace(/\bor\b/g, '||')
-                .replace(/\bnot\s+/g, '!')
-                .replace(/((?:\([^)]+\)|[a-zA-Z0-9_[\]()+* -])+?)\s*\/\/\s*(\([^)]+\)|[a-zA-Z0-9_[\]]+)/g, 'Math.trunc(($1) / ($2))')
-                .replace(/\.append\(/g, '.push(')
-                .replace(/\.sort\(\)/g, '.sort((a,b)=>(typeof a==="number"?a-b:String(a).localeCompare(String(b))))');
-            return e;
-        };
-
-        for (let rawLine of lines) {
-            const commentIdx = rawLine.indexOf('#');
-            if (commentIdx !== -1) rawLine = rawLine.slice(0, commentIdx);
-            if (!rawLine.trim()) continue;
-
-            const indent = rawLine.match(/^ */)[0].length;
-            let trimmed = rawLine.trim();
-
-            while (indent < indentStack[indentStack.length - 1]) {
-                indentStack.pop();
-                out.push('}');
-            }
-
-            if (/^elif\s+(.+):$/.test(trimmed)) {
-                const cond = convertPyExpr(trimmed.replace(/^elif\s+(.+):$/, '$1'));
-                if (out[out.length - 1] === '}') out.pop();
-                out.push(`} else if (${cond}) {`);
-                indentStack.push(indent + 4);
-                continue;
-            }
-            if (/^else\s*:$/.test(trimmed)) {
-                if (out[out.length - 1] === '}') out.pop();
-                out.push('} else {');
-                indentStack.push(indent + 4);
-                continue;
-            }
-            if (/^def\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*:$/.test(trimmed)) {
-                out.push(trimmed.replace(/^def\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*:$/, 'function $1($2) {'));
-                indentStack.push(indent + 4);
-                continue;
-            }
-            if (/^if\s+(.+):$/.test(trimmed)) {
-                let cond = trimmed.replace(/^if\s+(.+):$/, '$1');
-                cond = cond.replace(/([^\s<>=!]+)\s*(<=|<)\s*([^\s<>=!]+)\s*(<=|<)\s*([^\s<>=!:]+)/g, '($1 $2 $3 && $3 $4 $5)');
-                cond = cond.replace(/([a-zA-Z0-9_[\]]+)\s+in\s+("[^"]+"|'[^']+')/g, '($2).includes($1)');
-                out.push(`if (${convertPyExpr(cond)}) {`);
-                indentStack.push(indent + 4);
-                continue;
-            }
-            if (/^while\s+(.+):$/.test(trimmed)) {
-                const cond = convertPyExpr(trimmed.replace(/^while\s+(.+):$/, '$1'));
-                out.push(`while (${cond}) {`);
-                indentStack.push(indent + 4);
-                continue;
-            }
-            if (/^for\s+([a-zA-Z0-9_]+)\s+in\s+(.+):$/.test(trimmed)) {
-                const m = trimmed.match(/^for\s+([a-zA-Z0-9_]+)\s+in\s+(.+):$/);
-                out.push(`for (let ${m[1]} of ${convertPyExpr(m[2])}) {`);
-                indentStack.push(indent + 4);
-                continue;
-            }
-
-            if (/^return\s+(.+)\s+if\s+(.+)\s+else\s+(.+)$/.test(trimmed)) {
-                const m = trimmed.match(/^return\s+(.+)\s+if\s+(.+)\s+else\s+(.+)$/);
-                out.push(`return (${convertPyExpr(m[2])}) ? (${convertPyExpr(m[1])}) : (${convertPyExpr(m[3])});`);
-                continue;
-            }
-
-            trimmed = trimmed.replace(/\[([^\]]+)\]\s*\*\s*\(([^)]+)\)/g, 'new Array($2).fill($1)');
-            trimmed = trimmed.replace(/\[([^\]]+)\]\s*\*\s*([a-zA-Z0-9_]+)/g, 'new Array($2).fill($1)');
-            trimmed = trimmed.replace(/([a-zA-Z0-9_]+)\[:([a-zA-Z0-9_]+)\]/g, '$1.slice(0, $2)');
-            trimmed = trimmed.replace(/([a-zA-Z0-9_]+)\[1:\]/g, '$1.slice(1)');
-
-            if (/^([a-zA-Z0-9_]+)\s*,\s*([a-zA-Z0-9_]+)\s*=\s*(.+),(.+)$/.test(trimmed)) {
-                const m = trimmed.match(/^([a-zA-Z0-9_]+)\s*,\s*([a-zA-Z0-9_]+)\s*=\s*(.+),(.+)$/);
-                out.push(`[${m[1]}, ${m[2]}] = [${convertPyExpr(m[3])}, ${convertPyExpr(m[4])}];`);
-                continue;
-            }
-
-            out.push(`${convertPyExpr(trimmed)};`);
-        }
-
-        while (indentStack.length > 1) {
-            indentStack.pop();
-            out.push('}');
-        }
-
-        const pyHelpers = `
-            const range = (start, stop, step) => {
-                if (stop === undefined) { stop = start; start = 0; }
-                if (step === undefined) step = 1;
-                const r = [];
-                if (step > 0) { for (let i = start; i < stop; i += step) r.push(i); }
-                else { for (let i = start; i > stop; i += step) r.push(i); }
-                return r;
-            };
-            const len = (x) => (x ? (x.length !== undefined ? x.length : Object.keys(x).length) : 0);
-            const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-            const max = (...args) => {
-                if (args.length === 1 && Array.isArray(args[0])) return Math.max(...args[0]);
-                return Math.max(...args);
-            };
-            const min = (...args) => {
-                if (args.length === 1 && Array.isArray(args[0])) return Math.min(...args[0]);
-                return Math.min(...args);
-            };
-            const abs = Math.abs;
-            const sorted = (x) => (typeof x === 'string' ? [...x].sort().join('') : [...x].sort((a, b) => (typeof a === 'number' ? a - b : String(a).localeCompare(String(b)))));
-        `;
-
-        return pyHelpers + '\n' + out.join('\n');
-    }
-
-    // C, C++, and Java Transpiler
-    if (!/\bsolve\s*\(/.test(rawCode)) {
-        throw new Error("Compilation Error: Missing 'solve(...)' function signature.");
-    }
-
-    let src = rawCode;
-    src = src.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-
-    // 1. C array+len signature normalization
-    src = src.replace(
-        /(?:[a-zA-Z0-9_*]+)\s+solve\s*\(\s*(?:int|long|double|float)\s+([a-zA-Z0-9_]+)\s*\[\s*\]\s*,\s*int\s+([a-zA-Z0-9_]+)(?:,\s*([^)]*))?\)\s*\{/g,
-        (_, arr, len, rest) => {
-            const cleanRest = rest ? `, ${rest.replace(/\b(?:int|long|double|float|char|string)\b/g, '').trim()}` : '';
-            return `function solve(${arr}${cleanRest}) {\n    let ${len} = ${arr}.length;`;
-        }
-    );
-
-    // 2. Standard C/C++/Java function header
-    src = src.replace(
-        /(?:public\s+|private\s+|static\s+)*(?:vector<\s*[a-zA-Z0-9_]+\s*>|int\s*\[\s*\]|int\s*\*|long\s+long|int|long|double|float|bool|boolean|String|string)\s+solve\s*\(([^)]*)\)/g,
-        (_, paramsStr) => {
-            const cleanParams = paramsStr
-                .split(',')
-                .map((p) => p.trim())
-                .filter(Boolean)
-                .map((p) => {
-                    const tokens = p.replace(/&/g, ' ').replace(/\[\s*\]/g, '').trim().split(/\s+/);
-                    return tokens[tokens.length - 1];
-                })
-                .join(', ');
-            return `function solve(${cleanParams})`;
-        }
-    );
-
-    // Transform array declarations: int[] a = ..., char[] a = ...
-    src = src.replace(/(?:[a-zA-Z0-9_]+)\s*\[\s*\]\s+([a-zA-Z0-9_]+)\s*=\s*new\s+(?:[a-zA-Z0-9_]+)\s*\[\s*([^\]]+)\s*\]/g, 'let $1 = new Array($2).fill(0)');
-    src = src.replace(/(?:[a-zA-Z0-9_]+)\s*\[\s*\]\s+([a-zA-Z0-9_]+)\s*=/g, 'let $1 =');
-
-    // Transform vector declarations
-    src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)\s*\(\s*([^,]+),\s*([^)]+)\)/g, 'let $1 = new Array($2).fill($3)');
-    src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)\s*\(\s*([^)]+)\)/g, 'let $1 = new Array($2).fill(0)');
-    src = src.replace(/vector<\s*[a-zA-Z0-9_]+\s*>\s+([a-zA-Z0-9_]+)/g, 'let $1');
-
-    // Java Arrays helpers
-    src = src.replace(/Arrays\.fill\s*\(\s*([a-zA-Z0-9_]+)\s*,\s*([^)]+)\)/g, '$1.fill($2)');
-    src = src.replace(/Arrays\.sort\s*\(\s*([a-zA-Z0-9_]+)\s*\)/g, '$1.sort((a,b)=>(typeof a==="number"?a-b:("" + a).localeCompare("" + b)))');
-    src = src.replace(/Arrays\.equals\s*\(\s*([a-zA-Z0-9_]+)\s*,\s*([a-zA-Z0-9_]+)\s*\)/g, '(JSON.stringify($1) === JSON.stringify($2))');
-    src = src.replace(/\.toCharArray\s*\(\s*\)/g, ".split('')");
-    src = src.replace(/\.charAt\s*\(\s*([^)]+)\)/g, '[$1]');
-
-    // C++ STL sort & swap
-    src = src.replace(/sort\s*\(\s*([a-zA-Z0-9_]+)\.begin\(\)\s*,\s*\1\.end\(\)\s*\)/g, 'if (typeof $1 === "__CPP_STR__") { $1 = $1.split("").sort().join(""); } else { $1.sort((a,b)=>a-b); }');
-    src = src.replace(/swap\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g, '([$1, $2] = [$2, $1])');
-
-    // Range-based for loop
-    src = src.replace(/for\s*\(\s*(?:const\s+)?(?:auto|int|long|char|String|string)\s*&?\s*([a-zA-Z0-9_]+)\s*:\s*([^)]+)\)/g, 'for (let $1 of $2)');
-
-    // Convert common typed variables
-    src = src.replace(/\b(?:long\s+long|unsigned\s+int|int|long|double|float|bool|boolean|char\s*\[\s*\]|char|string|String)\b/g, 'let');
-    src = src.replace(/__CPP_STR__/g, 'string');
-
-    // Transform returns
-    src = src.replace(/new\s+let\s*\[\s*\]\s*\{([^}]*)\}/g, '[$1]');
-    src = src.replace(/new\s+int\s*\[\s*\]\s*\{([^}]*)}/g, '[$1]');
-    src = src.replace(/return\s+\{([^}]*)\}\s*;/g, 'return [$1];');
-
-    // Transform .size() and .length()
-    src = src.replace(/\.size\s*\(\s*\)/g, '.length');
-    src = src.replace(/\.length\s*\(\s*\)/g, '.length');
-
-    // Handle C/Java integer divisions: (a + b) / 2 -> Math.trunc((a + b) / 2)
-    src = src.replace(/\(([^)]+)\)\s*\/\s*(\d+|[a-zA-Z0-9_]+)/g, 'Math.trunc(($1) / $2)');
-    src = src.replace(/([a-zA-Z0-9_]+)\s*\/\s*(\d+)/g, 'Math.trunc($1 / $2)');
-
-    const helperHeader = `
-        const max = Math.max;
-        const min = Math.min;
-        const abs = Math.abs;
-    `;
-
-    return `${helperHeader}\n${src}`;
-};
-
-// Execute inside an isolated Web Worker with a 2000ms watchdog timer
-const executeInBrowserWorker = (lang, code, testCases) => {
-    return new Promise((resolve) => {
-        let jsSource;
-        try {
-            jsSource = transpileToExecutableJs(lang, code);
-        } catch (compileErr) {
-            resolve({
-                status: 'Compilation Error',
-                error: compileErr.message || String(compileErr),
-                results: []
-            });
-            return;
-        }
-
-        const workerScript = `
-            self.onmessage = function(e) {
-                const { jsSource, testCases } = e.data;
-                const results = [];
-                try {
-                    const runner = new Function(jsSource + "\\n; return solve;");
-                    const solveFn = runner();
-                    for (let i = 0; i < testCases.length; i++) {
-                        const tc = testCases[i];
-                        const argsCopy = JSON.parse(JSON.stringify(tc.args));
-                        const t0 = performance.now();
-                        let actual = solveFn(...argsCopy);
-                        const t1 = performance.now();
-                        if (typeof actual === 'number' && !Number.isInteger(actual)) {
-                            actual = Math.trunc(actual);
-                        }
-                        const pass = JSON.stringify(actual) === JSON.stringify(tc.expected);
-                        results.push({
-                            index: i + 1,
-                            args: tc.args,
-                            expected: tc.expected,
-                            actual,
-                            pass,
-                            isHidden: Boolean(tc.isHidden),
-                            timeMs: Math.max(1, Math.round((t1 - t0) * 10) / 10)
-                        });
-                    }
-                    self.postMessage({ status: 'OK', results });
-                } catch (err) {
-                    self.postMessage({
-                        status: 'Runtime / Syntax Error',
-                        error: err && err.message ? err.message : String(err),
-                        results
-                    });
-                }
-            };
-        `;
-
-        const blob = new Blob([workerScript], { type: 'application/javascript' });
-        const url = URL.createObjectURL(blob);
-        const worker = new Worker(url);
-
-        const timeoutId = setTimeout(() => {
-            worker.terminate();
-            URL.revokeObjectURL(url);
-            resolve({
-                status: 'Time Limit Exceeded',
-                error: 'Execution exceeded 2000ms limit (Check for infinite while/for loops!).',
-                results: []
-            });
-        }, 2000);
-
-        worker.onmessage = (e) => {
-            clearTimeout(timeoutId);
-            worker.terminate();
-            URL.revokeObjectURL(url);
-            resolve(e.data);
-        };
-
-        worker.onerror = (err) => {
-            clearTimeout(timeoutId);
-            worker.terminate();
-            URL.revokeObjectURL(url);
-            resolve({
-                status: 'Compilation Error',
-                error: err.message || 'Syntax error in submitted code.',
-                results: []
-            });
-        };
-
-        worker.postMessage({ jsSource, testCases });
-    });
-};
+// Multi-language zero-latency execution engine imported from ../../utils/codeRunner.js
 
 // ============================================================================
 // MAIN COMPONENT: STUDENT LOCKED IN LAB TAB
@@ -3683,13 +3344,19 @@ const StudentLockedInLabTab = ({ student }) => {
     const [selectedTopic, setSelectedTopic] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeProblemId, setActiveProblemId] = useState(PROBLEMS[0].id);
-    const [selectedLang, setSelectedLang] = useState('cpp');
-    const [code, setCode] = useState(PROBLEMS[0].starter.cpp);
+    const [selectedLang, setSelectedLang] = useState('python');
+    const [code, setCode] = useState(PROBLEMS[0].starter.python);
     const [showHint, setShowHint] = useState(false);
     const [showSolution, setShowSolution] = useState(false);
     const [running, setRunning] = useState(false);
+    const [engineStatus, setEngineStatus] = useState('');
     const [runOutput, setRunOutput] = useState(null);
     const [activeSampleIdx, setActiveSampleIdx] = useState(0);
+
+    // Warm up Python 3.11 WebAssembly runtime in the background
+    useEffect(() => {
+        preloadPython().catch(() => {});
+    }, []);
 
     const activeIndex = useMemo(
         () => PROBLEMS.findIndex((p) => p.id === activeProblemId),
@@ -3778,7 +3445,7 @@ const StudentLockedInLabTab = ({ student }) => {
     const handleRunSample = async () => {
         setRunning(true);
         const sampleCases = activeProblem.testCases.filter((tc) => !tc.isHidden);
-        const res = await executeInBrowserWorker(selectedLang, code, sampleCases);
+        const res = await executeCode(selectedLang, code, sampleCases, (s) => setEngineStatus(s));
         const allPassed = res.status === 'OK' && res.results.length > 0 && res.results.every((r) => r.pass);
         setRunOutput({
             mode: 'run',
@@ -3787,11 +3454,12 @@ const StudentLockedInLabTab = ({ student }) => {
             results: res.results || []
         });
         setRunning(false);
+        setEngineStatus('');
     };
 
     const handleSubmitAll = async () => {
         setRunning(true);
-        const res = await executeInBrowserWorker(selectedLang, code, activeProblem.testCases);
+        const res = await executeCode(selectedLang, code, activeProblem.testCases, (s) => setEngineStatus(s));
         const allPassed = res.status === 'OK' && res.results.length > 0 && res.results.every((r) => r.pass);
         const passedCount = res.results ? res.results.filter((r) => r.pass).length : 0;
         const totalCount = activeProblem.testCases.length;
@@ -3822,6 +3490,7 @@ const StudentLockedInLabTab = ({ student }) => {
             results: res.results || []
         });
         setRunning(false);
+        setEngineStatus('');
     };
 
     const handleNextProblem = () => {
@@ -4384,7 +4053,8 @@ const StudentLockedInLabTab = ({ student }) => {
                                     disabled={running}
                                     className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition"
                                 >
-                                    <Play size={13} className="text-emerald-400" /> Run Samples
+                                    {running ? <Loader2 size={13} className="animate-spin text-emerald-400" /> : <Play size={13} className="text-emerald-400" />}
+                                    Run Samples
                                 </button>
                                 <button
                                     type="button"
@@ -4392,7 +4062,8 @@ const StudentLockedInLabTab = ({ student }) => {
                                     disabled={running}
                                     className="px-4 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition shadow-sm"
                                 >
-                                    <Send size={13} /> {running ? 'Evaluating...' : 'Submit Code'}
+                                    {running ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                                    {running ? 'Evaluating...' : 'Submit Code'}
                                 </button>
                             </div>
                         </div>
@@ -4407,11 +4078,28 @@ const StudentLockedInLabTab = ({ student }) => {
                         />
 
                         {/* Status Footer */}
-                        <div className="px-5 py-2 bg-[#0F172A] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                            <span className="flex items-center gap-2">
-                                <Zap size={12} className="text-amber-400" />
-                                Smart Autocomplete &amp; Syntax Highlighting Active
-                            </span>
+                        <div className="px-5 py-2.5 bg-[#0F172A] border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
+                                {selectedLang === 'python' ? (
+                                    <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Python 3.11 (Real CPython WebAssembly Engine)
+                                    </span>
+                                ) : selectedLang === 'javascript' ? (
+                                    <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
+                                        <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                                        JavaScript ES6+ (Native Sandboxed Worker)
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1.5 text-sky-400 font-semibold">
+                                        <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                                        Client DSA Preview Engine
+                                    </span>
+                                )}
+                                {engineStatus && (
+                                    <span className="text-slate-300 ml-2 animate-pulse">• {engineStatus}</span>
+                                )}
+                            </div>
                             <span>Tab: 4 spaces • {selectedLang.toUpperCase()}</span>
                         </div>
                     </div>
@@ -4538,6 +4226,12 @@ const StudentLockedInLabTab = ({ student }) => {
                                                     </span>
                                                 </div>
                                             </div>
+                                            {cur.stdout && (
+                                                <div className="p-3 rounded-xl bg-slate-900 text-slate-100 font-mono text-[11px] mt-2 border border-slate-800">
+                                                    <span className="text-slate-400 font-semibold block mb-1">Standard Output (print / console.log):</span>
+                                                    <pre className="whitespace-pre-wrap m-0 font-mono text-emerald-400">{cur.stdout}</pre>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })()}
