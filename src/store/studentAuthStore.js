@@ -3,7 +3,8 @@ import { persist } from 'zustand/middleware';
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
+    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000/api'),
+    timeout: 15000
 });
 
 const useStudentAuthStore = create(
@@ -32,12 +33,14 @@ const useStudentAuthStore = create(
                     });
                     return { success: true };
                 } catch (error) {
-                    const errMsg = error.response?.data?.error || 'Login failed';
+                    const errMsg = error.response?.data?.error || error.message || 'Login failed';
                     set({ 
                         error: errMsg, 
                         loading: false 
                     });
                     return { success: false, error: errMsg };
+                } finally {
+                    set({ loading: false });
                 }
             },
 
@@ -227,8 +230,24 @@ const useStudentAuthStore = create(
         }),
         {
             name: 'student-auth-storage',
+            partialize: (state) => ({
+                student: state.student,
+                token: state.token,
+                isAuthenticated: state.isAuthenticated,
+                todos: state.todos
+            }),
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.loading = false;
+                }
+            }
         }
     )
 );
+
+// Immediately clear any stuck loading flags from previous sessions
+if (typeof window !== 'undefined') {
+    useStudentAuthStore.setState({ loading: false });
+}
 
 export default useStudentAuthStore;

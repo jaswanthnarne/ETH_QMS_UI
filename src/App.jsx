@@ -24,6 +24,7 @@ import TrainerExams from './pages/trainer/TrainerExams';
 import WaitingRoom from './pages/trainer/WaitingRoom';
 import TrainingLogs from './pages/trainer/TrainingLogs';
 import Batches from './pages/trainer/Batches';
+import TrainerStudyMaterials from './pages/trainer/TrainerStudyMaterials';
 import Colleges from './pages/admin/Colleges';
 import Courses from './pages/admin/Courses';
 import Trainers from './pages/admin/Trainers';
@@ -343,6 +344,11 @@ function App() {
                 <Route path="/trainer/batches" element={
                     <ProtectedRoute allowedRoles={['trainer']}>
                         <MainLayout><Batches /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/trainer/study-materials" element={
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                        <MainLayout><TrainerStudyMaterials /></MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/trainer/batches/:batchId" element={

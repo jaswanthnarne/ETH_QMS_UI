@@ -37,106 +37,184 @@ export const deepEqual = (a, b) => {
     return false;
 };
 
+// In-thread synchronous fallback for JavaScript execution if Web Workers are restricted by browser policy/extensions
+export const executeJavaScriptInThread = (code, testCases) => {
+    const tStart = performance.now();
+    const results = [];
+    const logs = [];
+
+    const originalLog = console.log;
+    console.log = function(...args) {
+        logs.push(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '));
+    };
+
+    try {
+        const factory = new Function(
+            code + "\n\n" +
+            "if (typeof solve !== 'function') { throw new Error(\"Missing function definition: 'function solve(...)' was not found in your code.\"); }\n" +
+            "return solve;"
+        );
+        const solveFn = factory();
+
+        for (let i = 0; i < testCases.length; i++) {
+            const tc = testCases[i];
+            const argsCopy = JSON.parse(JSON.stringify(tc.args));
+            logs.length = 0;
+            const t0 = performance.now();
+            let actual = solveFn(...argsCopy);
+            const t1 = performance.now();
+
+            if (typeof actual === 'number' && typeof tc.expected === 'number') {
+                if (Number.isInteger(tc.expected) && !Number.isInteger(actual) && Math.abs(actual - tc.expected) < 1e-6) {
+                    actual = Math.round(actual);
+                }
+            }
+
+            const pass = deepEqual(actual, tc.expected);
+            results.push({
+                index: i + 1,
+                args: tc.args,
+                expected: tc.expected,
+                actual: actual === undefined ? 'undefined' : actual,
+                pass,
+                isHidden: Boolean(tc.isHidden),
+                timeMs: Math.max(1, Math.round((t1 - t0) * 10) / 10),
+                stdout: logs.join('\n')
+            });
+        }
+
+        console.log = originalLog;
+        const totalMs = Math.round(performance.now() - tStart);
+        const allPass = results.length > 0 && results.every(r => r.pass);
+        return {
+            status: allPass ? 'OK' : 'Wrong Answer',
+            executionTimeMs: totalMs,
+            results
+        };
+    } catch (err) {
+        console.log = originalLog;
+        const totalMs = Math.round(performance.now() - tStart);
+        return {
+            status: 'Runtime / Syntax Error',
+            error: err && err.message ? err.message : String(err),
+            executionTimeMs: totalMs,
+            results: []
+        };
+    }
+};
+
 // ============================================================================
-// 1. JAVASCRIPT EXECUTION ENGINE (NATIVE WEB WORKER)
+// 1. JAVASCRIPT EXECUTION ENGINE (NATIVE WEB WORKER WITH INSTANT IN-THREAD FALLBACK)
 // ============================================================================
 export const executeJavaScript = (code, testCases) => {
     return new Promise((resolve) => {
-        const workerScript = `
-            ${deepEqual.toString()}
+        try {
+            const workerScript = `
+                ${deepEqual.toString()}
 
-            self.onmessage = function(e) {
-                const { code, testCases } = e.data;
-                const results = [];
-                const logs = [];
+                self.onmessage = function(e) {
+                    const { code, testCases } = e.data;
+                    const results = [];
+                    const logs = [];
 
-                // Intercept console.log for student debugging
-                const originalLog = console.log;
-                console.log = function(...args) {
-                    logs.push(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '));
-                };
+                    const originalLog = console.log;
+                    console.log = function(...args) {
+                        logs.push(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '));
+                    };
 
-                try {
-                    // Extract solve function
-                    const factory = new Function(
-                        code + "\\n\\n" +
-                        "if (typeof solve !== 'function') { throw new Error(\\"Missing function definition: 'function solve(...)' was not found in your code.\\"); }\\n" +
-                        "return solve;"
-                    );
-                    const solveFn = factory();
+                    try {
+                        const factory = new Function(
+                            code + "\\n\\n" +
+                            "if (typeof solve !== 'function') { throw new Error(\\"Missing function definition: 'function solve(...)' was not found in your code.\\"); }\\n" +
+                            "return solve;"
+                        );
+                        const solveFn = factory();
 
-                    for (let i = 0; i < testCases.length; i++) {
-                        const tc = testCases[i];
-                        const argsCopy = JSON.parse(JSON.stringify(tc.args));
-                        logs.length = 0;
-                        const t0 = performance.now();
-                        let actual = solveFn(...argsCopy);
-                        const t1 = performance.now();
+                        for (let i = 0; i < testCases.length; i++) {
+                            const tc = testCases[i];
+                            const argsCopy = JSON.parse(JSON.stringify(tc.args));
+                            logs.length = 0;
+                            const t0 = performance.now();
+                            let actual = solveFn(...argsCopy);
+                            const t1 = performance.now();
 
-                        // Treat floats matching ints gracefully
-                        if (typeof actual === 'number' && typeof tc.expected === 'number') {
-                            if (Number.isInteger(tc.expected) && !Number.isInteger(actual) && Math.abs(actual - tc.expected) < 1e-6) {
-                                actual = Math.round(actual);
+                            if (typeof actual === 'number' && typeof tc.expected === 'number') {
+                                if (Number.isInteger(tc.expected) && !Number.isInteger(actual) && Math.abs(actual - tc.expected) < 1e-6) {
+                                    actual = Math.round(actual);
+                                }
                             }
+
+                            const pass = deepEqual(actual, tc.expected);
+                            results.push({
+                                index: i + 1,
+                                args: tc.args,
+                                expected: tc.expected,
+                                actual: actual === undefined ? 'undefined' : actual,
+                                pass,
+                                isHidden: Boolean(tc.isHidden),
+                                timeMs: Math.max(1, Math.round((t1 - t0) * 10) / 10),
+                                stdout: logs.join('\\n')
+                            });
                         }
 
-                        const pass = deepEqual(actual, tc.expected);
-                        results.push({
-                            index: i + 1,
-                            args: tc.args,
-                            expected: tc.expected,
-                            actual: actual === undefined ? 'undefined' : actual,
-                            pass,
-                            isHidden: Boolean(tc.isHidden),
-                            timeMs: Math.max(1, Math.round((t1 - t0) * 10) / 10),
-                            stdout: logs.join('\\n')
+                        const allPass = results.length > 0 && results.every(r => r.pass);
+                        self.postMessage({ status: allPass ? 'OK' : 'Wrong Answer', results });
+                    } catch (err) {
+                        self.postMessage({
+                            status: 'Runtime / Syntax Error',
+                            error: err && err.message ? err.message : String(err),
+                            results
                         });
                     }
+                };
+            `;
 
-                    self.postMessage({ status: 'OK', results });
-                } catch (err) {
-                    self.postMessage({
-                        status: 'Runtime / Syntax Error',
-                        error: err && err.message ? err.message : String(err),
-                        results
-                    });
-                }
+            const blob = new Blob([workerScript], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            let worker;
+
+            try {
+                worker = new Worker(url);
+            } catch (err) {
+                // If Worker creation fails (e.g. extension or CSP blocked blob), use in-thread runner
+                URL.revokeObjectURL(url);
+                return resolve(executeJavaScriptInThread(code, testCases));
+            }
+
+            const timeoutId = setTimeout(() => {
+                try { worker.terminate(); } catch {}
+                URL.revokeObjectURL(url);
+                resolve({
+                    status: 'Time Limit Exceeded',
+                    error: 'Execution exceeded 2500ms limit. Please check for infinite while/for loops!',
+                    executionTimeMs: 2500,
+                    results: []
+                });
+            }, 2500);
+
+            worker.onmessage = (e) => {
+                clearTimeout(timeoutId);
+                try { worker.terminate(); } catch {}
+                URL.revokeObjectURL(url);
+                const results = e.data.results || [];
+                const totalTime = results.reduce((acc, r) => acc + (r.timeMs || 0), 0);
+                resolve({
+                    ...e.data,
+                    executionTimeMs: Math.max(1, Math.round(totalTime))
+                });
             };
-        `;
 
-        const blob = new Blob([workerScript], { type: 'application/javascript' });
-        const url = URL.createObjectURL(blob);
-        const worker = new Worker(url);
+            worker.onerror = () => {
+                clearTimeout(timeoutId);
+                try { worker.terminate(); } catch {}
+                URL.revokeObjectURL(url);
+                resolve(executeJavaScriptInThread(code, testCases));
+            };
 
-        const timeoutId = setTimeout(() => {
-            worker.terminate();
-            URL.revokeObjectURL(url);
-            resolve({
-                status: 'Time Limit Exceeded',
-                error: 'Execution exceeded 2500ms limit. Please check for infinite while/for loops!',
-                results: []
-            });
-        }, 2500);
-
-        worker.onmessage = (e) => {
-            clearTimeout(timeoutId);
-            worker.terminate();
-            URL.revokeObjectURL(url);
-            resolve(e.data);
-        };
-
-        worker.onerror = (err) => {
-            clearTimeout(timeoutId);
-            worker.terminate();
-            URL.revokeObjectURL(url);
-            resolve({
-                status: 'Compilation / Syntax Error',
-                error: err.message || 'Syntax error in JavaScript code.',
-                results: []
-            });
-        };
-
-        worker.postMessage({ code, testCases });
+            worker.postMessage({ code, testCases });
+        } catch {
+            resolve(executeJavaScriptInThread(code, testCases));
+        }
     });
 };
 
@@ -163,27 +241,40 @@ export const preloadPython = async (onStatus) => {
                 throw new Error('Pyodide can only run in the browser.');
             }
 
+            const PYODIDE_CDNS = [
+                'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
+                'https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.26.1/full/'
+            ];
+
             // 1. Load Pyodide bootstrap script from CDN if not already on window
             if (!window.loadPyodide) {
-                if (onStatus) onStatus('Downloading Python 3.11 WebAssembly Runtime from CDN...');
-                await new Promise((resolve, reject) => {
-                    const existing = document.querySelector('script[src*="pyodide.js"]');
-                    if (existing) {
-                        existing.addEventListener('load', resolve);
-                        existing.addEventListener('error', () => reject(new Error('Failed to load Pyodide script.')));
-                        return;
-                    }
-                    const script = document.createElement('script');
-                    script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js';
-                    script.async = true;
-                    script.onload = () => resolve();
-                    script.onerror = () => reject(new Error('Failed to download Python 3.11 WebAssembly from CDN. Please check your internet connection.'));
-                    document.head.appendChild(script);
-                });
+                if (onStatus) onStatus('Loading Python 3.11 WebAssembly Runtime...');
+                let loaded = false;
+
+                for (const cdn of PYODIDE_CDNS) {
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = `${cdn}pyodide.js`;
+                            script.async = true;
+                            script.onload = () => resolve();
+                            script.onerror = () => reject(new Error(`Failed to fetch from ${cdn}`));
+                            document.head.appendChild(script);
+                        });
+                        if (window.loadPyodide) {
+                            loaded = true;
+                            break;
+                        }
+                    } catch {}
+                }
+
+                if (!loaded && !window.loadPyodide) {
+                    throw new Error('Failed to download Python 3.11 WebAssembly from CDN. Please check your internet connection or switch to JavaScript (which runs 100% offline).');
+                }
             }
 
             // 2. Initialize CPython WebAssembly VM
-            if (onStatus) onStatus('Compiling Python 3.11 Virtual Machine...');
+            if (onStatus) onStatus('Initializing Python 3.11 Virtual Machine...');
             const py = await window.loadPyodide({
                 indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/'
             });
@@ -210,6 +301,7 @@ const cleanPythonTraceback = (msg) => {
 };
 
 export const executePython = async (code, testCases, onStatus) => {
+    const tStart = performance.now();
     try {
         const pyodide = await preloadPython(onStatus);
 
@@ -234,6 +326,7 @@ if 'solve' in globals():
             return {
                 status: 'Syntax / Runtime Error',
                 error: cleanPythonTraceback(syntaxErr.message),
+                executionTimeMs: Math.round(performance.now() - tStart),
                 results: []
             };
         }
@@ -243,19 +336,21 @@ if 'solve' in globals():
             return {
                 status: 'Compilation Error',
                 error: "Missing entry function: 'def solve(...):' was not found in your Python code.",
+                executionTimeMs: Math.round(performance.now() - tStart),
                 results: []
             };
         }
 
-        // 2. Run each test case against real CPython
+        // 2. Run each test case against real CPython using pyodide.globals.set
         const results = [];
         for (let i = 0; i < testCases.length; i++) {
             const tc = testCases[i];
             stdoutLogs.length = 0;
-            const argsJson = JSON.stringify(tc.args);
             const t0 = performance.now();
             try {
-                // Pass args cleanly as JSON string to preserve arrays, ints, strings, dicts
+                // Pass args cleanly into Pyodide globals without string escaping corruption
+                pyodide.globals.set('_raw_args_json', JSON.stringify(tc.args));
+
                 const pyRunner = `
 import json
 
@@ -264,7 +359,7 @@ def _custom_serializer(o):
         return list(o)
     return str(o)
 
-_raw_args = json.loads(${JSON.stringify(argsJson)})
+_raw_args = json.loads(_raw_args_json)
 _actual_res = solve(*_raw_args)
 json.dumps(_actual_res, default=_custom_serializer)
 `;
@@ -305,15 +400,18 @@ json.dumps(_actual_res, default=_custom_serializer)
             }
         }
 
+        const totalMs = Math.round(performance.now() - tStart);
         const allPass = results.length > 0 && results.every((r) => r.pass);
         return {
             status: allPass ? 'OK' : 'Wrong Answer',
+            executionTimeMs: totalMs,
             results
         };
     } catch (err) {
         return {
             status: 'Engine Error',
             error: err.message || String(err),
+            executionTimeMs: Math.round(performance.now() - tStart),
             results: []
         };
     }

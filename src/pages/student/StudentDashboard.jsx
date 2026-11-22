@@ -25,13 +25,15 @@ import {
     AlertTriangle,
     CalendarCheck,
     Trophy,
-    Terminal
+    Terminal,
+    Building2
 } from 'lucide-react';
 import axios from 'axios';
 import { AlertModal } from '../../components/Modals';
 import StudentGamesTab from '../../components/student/StudentGamesTab';
 import StudentTypeSpeedTab from '../../components/student/StudentTypeSpeedTab';
 import StudentLockedInLabTab from '../../components/student/StudentLockedInLabTab';
+import StudentStudyMaterialTab from '../../components/student/StudentStudyMaterialTab';
 import useStudentAuthStore from '../../store/studentAuthStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -39,14 +41,17 @@ const api = axios.create({
     baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
 });
 
-const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
+const StudentBannerSvg = ({ activeTab, profileSubTab, compact = false }) => {
     const key = activeTab === 'profile' ? `profile-${profileSubTab}` : activeTab;
+    const sizeClass = compact ? 'w-40 lg:w-48 shrink-0 hidden md:block' : 'w-52 lg:w-60 shrink-0 hidden md:block';
+    const wideSizeClass = compact ? 'w-44 lg:w-52 shrink-0 hidden md:block' : 'w-56 lg:w-64 shrink-0 hidden md:block';
+    const arenaSizeClass = compact ? 'w-48 lg:w-56 shrink-0 hidden md:block' : 'w-60 lg:w-68 shrink-0 hidden md:block';
 
     switch (key) {
         case 'dashboard':
             // Cartoon Student Command Center with Analytics Board, Trophy & Rocket
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Analytics Board on Left */}
                     <rect x="20" y="24" width="88" height="68" rx="10" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
@@ -80,14 +85,14 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'meta-batch':
             // Cartoon Classroom Cohort with Blackboard, Trainer & Student Group
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Classroom Chalkboard */}
                     <rect x="20" y="20" width="110" height="66" rx="8" fill="#065F46" stroke="#1E293B" strokeWidth="2.2" />
                     <rect x="16" y="82" width="118" height="6" rx="3" fill="#D97706" stroke="#1E293B" strokeWidth="2" />
-                    <text x="75" y="44" textAnchor="middle" fontSize="10" fontWeight="900" fill="#FDE047">META BATCH</text>
-                    <line x1="36" y1="56" x2="84" y2="56" stroke="#A7F3D0" strokeWidth="2.5" strokeLinecap="round" />
-                    <line x1="36" y1="68" x2="108" y2="68" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    <text x="75" y="42" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#FDE047">META BATCH</text>
+                    <text x="75" y="56" textAnchor="middle" fontSize="7.2" fontWeight="800" fill="#A7F3D0">WHO ACTUALLY STUDIED?</text>
+                    <line x1="36" y1="68" x2="112" y2="68" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 4" />
                     {/* 3 Cartoon Batchmates */}
                     {[
                         { cx: 146, shirt: '#38BDF8' },
@@ -110,7 +115,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'enter-exam':
             // Cartoon Student with Glasses & Headphones at Laptop Desk
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     {/* Soft backdrop cloud */}
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     <circle cx="115" cy="66" r="52" fill="#FFFFFF" fillOpacity="0.14" />
@@ -147,9 +152,9 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <path d="M206 98 h4 a4 4 0 0 1 0 8 h-4" stroke="#1E293B" strokeWidth="2" fill="none" />
                     <path d="M194 88 Q192 83 196 80 M200 88 Q198 83 202 80" stroke="#FFFFFF" strokeWidth="1.8" fill="none" strokeLinecap="round" />
                     {/* Speech Bubble */}
-                    <rect x="142" y="20" width="68" height="28" rx="10" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
-                    <path d="M154 48 L146 56 L162 48 Z" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
-                    <text x="176" y="38" textAnchor="middle" fontSize="10" fontWeight="900" fill="#B45309">READY! ★</text>
+                    <rect x="136" y="18" width="76" height="28" rx="10" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                    <path d="M154 46 L146 54 L162 46 Z" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                    <text x="174" y="36" textAnchor="middle" fontSize="9.2" fontWeight="900" fill="#B45309">NO CHATGPT?!</text>
                     {/* Desk Line */}
                     <line x1="14" y1="116" x2="216" y2="116" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
@@ -158,7 +163,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'exam-history':
             // Cartoon Student Celebrating with Giant Golden Trophy & Medal
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Sparkle Stars */}
                     <path d="M34 32 l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6-4.5-4 6-1z" fill="#FDE047" stroke="#1E293B" strokeWidth="1.5" />
@@ -175,8 +180,8 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <circle cx="90" cy="56" r="2.2" fill="#1E293B" />
                     <path d="M76 64 Q83 71 90 64 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
                     {/* Giant Cartoon Golden Trophy on Podium */}
-                    <rect x="128" y="92" width="60" height="24" rx="4" fill="#E0F2FE" stroke="#1E293B" strokeWidth="2.2" />
-                    <text x="158" y="108" textAnchor="middle" fontSize="11" fontWeight="900" fill="#0369A1">#1 PASS</text>
+                    <rect x="122" y="92" width="72" height="24" rx="4" fill="#E0F2FE" stroke="#1E293B" strokeWidth="2.2" />
+                    <text x="158" y="107.5" textAnchor="middle" fontSize="9.2" fontWeight="900" fill="#0369A1">GUESSED "C" ★</text>
                     <path d="M140 42 h36 v20 c0 11-8 20-18 20 s-18-9-18-20 V42 z" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
                     <path d="M140 48 h-8 a6 6 0 0 0 0 12 h8 M176 48 h8 a6 6 0 0 1 0 12 h-8" stroke="#1E293B" strokeWidth="2.2" fill="none" />
                     <rect x="153" y="82" width="10" height="10" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
@@ -192,7 +197,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'profile-preferences':
             // Cartoon Student with Graduation Cap & Stylized ID Card
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Stylized Giant Cartoon ID Card */}
                     <rect x="104" y="24" width="104" height="86" rx="14" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
@@ -203,7 +208,8 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <rect x="150" y="54" width="44" height="7" rx="3.5" fill="#1E293B" />
                     <rect x="150" y="66" width="34" height="6" rx="3" fill="#38BDF8" />
                     <rect x="150" y="77" width="40" height="6" rx="3" fill="#94A3B8" />
-                    <rect x="118" y="92" width="76" height="10" rx="5" fill="#DCFCE7" stroke="#10B981" strokeWidth="1.5" />
+                    <rect x="118" y="91" width="76" height="12" rx="6" fill="#DCFCE7" stroke="#10B981" strokeWidth="1.5" />
+                    <text x="156" y="99.5" textAnchor="middle" fontSize="7" fontWeight="900" fill="#047857">HIRE ME PLS ★</text>
                     {/* Cartoon Student Waving on Left */}
                     <path d="M36 114 C36 88, 94 88, 94 114 Z" fill="#34D399" stroke="#1E293B" strokeWidth="2.2" />
                     <circle cx="65" cy="62" r="20" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
@@ -222,7 +228,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'placement':
             // Cartoon Graduate with Briefcase, Tie & "HIRED" Offer Letter
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Character in Smart Blazer & Tie */}
                     <path d="M40 114 C40 86, 100 86, 100 114 Z" fill="#1E293B" stroke="#1E293B" strokeWidth="2.2" />
@@ -239,8 +245,8 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <rect x="116" y="82" width="66" height="6" fill="#B45309" stroke="#1E293B" strokeWidth="1.8" />
                     <rect x="143" y="79" width="12" height="12" rx="3" fill="#FACC15" stroke="#1E293B" strokeWidth="2" />
                     {/* Offer Badge */}
-                    <rect x="128" y="20" width="76" height="30" rx="10" fill="#DCFCE7" stroke="#1E293B" strokeWidth="2" />
-                    <text x="166" y="39" textAnchor="middle" fontSize="10" fontWeight="900" fill="#047857">HIRED! ★</text>
+                    <rect x="122" y="20" width="88" height="30" rx="10" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                    <text x="166" y="38.5" textAnchor="middle" fontSize="8.8" fontWeight="900" fill="#B45309">CGPA 8.0+ PLS</text>
                     <line x1="20" y1="114" x2="210" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
             );
@@ -248,11 +254,12 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'attendance':
             // Cartoon Student Raising Hand Next to Classroom Calendar
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Flip Calendar */}
                     <rect x="114" y="26" width="90" height="86" rx="12" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
                     <rect x="114" y="26" width="90" height="22" rx="10" fill="#F43F5E" stroke="#1E293B" strokeWidth="2.2" />
+                    <text x="159" y="41" textAnchor="middle" fontSize="8" fontWeight="900" fill="#FFFFFF">75.01% SAFE</text>
                     <rect x="132" y="18" width="8" height="14" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
                     <rect x="178" y="18" width="8" height="14" rx="4" fill="#CBD5E1" stroke="#1E293B" strokeWidth="2" />
                     <circle cx="159" cy="76" r="20" fill="#DCFCE7" stroke="#10B981" strokeWidth="2.2" />
@@ -274,7 +281,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'todo':
             // Cartoon Clipboard, Giant Pencil & Twin-Bell Alarm Clock
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Clipboard */}
                     <rect x="34" y="20" width="76" height="94" rx="10" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
@@ -289,6 +296,9 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <rect x="68" y="65" width="22" height="6" rx="3" fill="#1E293B" />
                     <rect x="50" y="82" width="12" height="12" rx="3" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2" />
                     <rect x="68" y="85" width="24" height="6" rx="3" fill="#94A3B8" />
+                    {/* Sarcastic Sticky Note on Alarm Clock */}
+                    <rect x="142" y="16" width="70" height="20" rx="6" fill="#FEE2E2" stroke="#1E293B" strokeWidth="1.8" />
+                    <text x="177" y="29" textAnchor="middle" fontSize="7.5" fontWeight="900" fill="#B91C1C">DUE: YESTERDAY</text>
                     {/* Twin-Bell Cartoon Alarm Clock */}
                     <circle cx="164" cy="78" r="28" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
                     <circle cx="164" cy="78" r="22" fill="#E0F2FE" stroke="#38BDF8" strokeWidth="1.5" />
@@ -309,7 +319,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'security':
             // Cartoon Smiling Padlock Mascot, Shield & Golden Key
             return (
-                <svg viewBox="0 0 230 135" className="w-52 lg:w-60 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 230 135" className={sizeClass} aria-hidden="true">
                     <ellipse cx="115" cy="118" rx="92" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Shield Behind */}
                     <path d="M74 20 L118 34 V68 C118 92 98 108 74 114 C50 108 30 92 30 68 V34 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" strokeLinejoin="round" />
@@ -322,6 +332,8 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <circle cx="144" cy="74" r="2.8" fill="#1E293B" />
                     <circle cx="164" cy="74" r="2.8" fill="#1E293B" />
                     <path d="M147 84 Q154 90 161 84" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    <rect x="128" y="96" width="52" height="14" rx="5" fill="#1E293B" />
+                    <text x="154" y="105.5" textAnchor="middle" fontSize="7" fontWeight="900" fill="#FDE047">NOT 123456</text>
                     <line x1="20" y1="114" x2="210" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
             );
@@ -329,7 +341,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'games':
             // Cartoon Student Player, Puzzle Cube & Gen-Z "My Brain Is Not Braining" Speech Bubble
             return (
-                <svg viewBox="0 0 255 135" className="w-56 lg:w-64 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 255 135" className={wideSizeClass} aria-hidden="true">
                     <ellipse cx="126" cy="118" rx="102" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Golden Crown Above Student */}
                     <polygon points="50,30 58,18 66,27 74,16 82,30" fill="#FACC15" stroke="#1E293B" strokeWidth="1.8" strokeLinejoin="round" />
@@ -367,7 +379,7 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
         case 'type-speed':
             // Cartoon Sweating Student at Mechanical Keyboard & Sarcastic "Slow Hands" Speech Bubble
             return (
-                <svg viewBox="0 0 260 135" className="w-56 lg:w-64 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 260 135" className={wideSizeClass} aria-hidden="true">
                     <ellipse cx="130" cy="118" rx="106" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Cartoon Student Typing */}
                     <path d="M32 114 C32 88, 92 88, 92 114 Z" fill="#F97316" stroke="#1E293B" strokeWidth="2.2" />
@@ -406,9 +418,10 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
             );
 
         case 'locked-in':
+        case 'company-arena':
             // Sarcastic Campus Placement Arena: Offer Letter Roll (7.2 LPA), Stopwatch (30:00), Coffee Mug & Interview Speech Bubble
             return (
-                <svg viewBox="0 0 270 135" className="w-60 lg:w-68 shrink-0 hidden md:block" aria-hidden="true">
+                <svg viewBox="0 0 270 135" className={arenaSizeClass} aria-hidden="true">
                     <ellipse cx="135" cy="118" rx="114" ry="10" fill="#0F172A" fillOpacity="0.18" />
                     {/* Sarcastic Placement Speech Bubble */}
                     <path
@@ -446,6 +459,45 @@ const StudentBannerSvg = ({ activeTab, profileSubTab }) => {
                     <circle cx="238" cy="84" r="16" fill="#10B981" stroke="#1E293B" strokeWidth="2.2" />
                     <path d="M232 84 l4 4 l8 -8" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     <line x1="14" y1="116" x2="258" y2="116" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+
+        case 'study-material':
+            // Cartoon Towering Stack of Books, PDF Badge & Sarcastic "READ IT TOMORROW" Speech Bubble
+            return (
+                <svg viewBox="0 0 260 135" className={wideSizeClass} aria-hidden="true">
+                    <ellipse cx="130" cy="118" rx="106" ry="10" fill="#0F172A" fillOpacity="0.18" />
+                    {/* Sarcastic Speech Bubble */}
+                    <path
+                        d="M16 10 H208 A10 10 0 0 1 218 20 V36 A10 10 0 0 1 208 46 H112 L100 54 L103 46 H16 A10 10 0 0 1 6 36 V20 A10 10 0 0 1 16 10 Z"
+                        fill="#FEF3C7"
+                        stroke="#1E293B"
+                        strokeWidth="2.2"
+                        strokeLinejoin="round"
+                    />
+                    <text x="112" y="25" textAnchor="middle" fontSize="8" fontWeight="900" fill="#B45309">
+                        47 UNOPENED PDFs
+                    </text>
+                    <text x="112" y="38" textAnchor="middle" fontSize="9.2" fontWeight="900" fill="#92400E">
+                        I&apos;LL READ IT TOMORROW 📚
+                    </text>
+                    {/* Tall Stack of Textbooks */}
+                    <rect x="28" y="96" width="84" height="18" rx="4" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="34" y="78" width="76" height="18" rx="4" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                    <rect x="30" y="60" width="80" height="18" rx="4" fill="#34D399" stroke="#1E293B" strokeWidth="2" />
+                    <line x1="40" y1="105" x2="96" y2="105" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="44" y1="87" x2="96" y2="87" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="40" y1="69" x2="96" y2="69" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    {/* Open Notebook & Highlighter on Right */}
+                    <rect x="136" y="62" width="96" height="52" rx="8" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                    <line x1="184" y1="62" x2="184" y2="114" stroke="#CBD5E1" strokeWidth="2" />
+                    <line x1="146" y1="76" x2="176" y2="76" stroke="#38BDF8" strokeWidth="3" strokeLinecap="round" />
+                    <line x1="146" y1="88" x2="174" y2="88" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="146" y1="100" x2="170" y2="100" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+                    <line x1="194" y1="76" x2="222" y2="76" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="194" y1="88" x2="220" y2="88" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" />
+                    <rect x="194" y="96" width="28" height="10" rx="3" fill="#DCFCE7" stroke="#10B981" strokeWidth="1.5" />
+                    <line x1="18" y1="114" x2="244" y2="114" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
             );
 
@@ -887,7 +939,7 @@ const StudentDashboard = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['dashboard', 'meta-batch', 'games', 'type-speed', 'locked-in', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
+        if (tab && ['dashboard', 'meta-batch', 'games', 'type-speed', 'locked-in', 'company-arena', 'study-material', 'profile', 'attendance', 'todo', 'security', 'enter-exam', 'exam-history', 'placement', 'leaderboard'].includes(tab)) {
             setActiveTab(tab);
         } else if (!tab) {
             setActiveTab('dashboard');
@@ -1759,31 +1811,123 @@ const StudentDashboard = () => {
         }
     }, [activeTab, token, student]);
 
-    return (
-        <div className="space-y-8">
-            
+    const TAB_BANNERS = {
+        'meta-batch': {
+            badge: 'Meta Batch • Cohort',
+            title: 'Your Batchmates (And The Ones Who Pretend To Study)',
+            subtitle: 'Track your cohort, see who actually shows up, and remind yourself you are all competing for the same offer.'
+        },
+        'enter-exam': {
+            badge: 'Live Assessment • Zero Chill',
+            title: 'No Tab Switching. No ChatGPT. Just Vibes.',
+            subtitle: 'Enter your exam key, lock your screen, and pretend you definitely revised that module last night.'
+        },
+        'exam-history': {
+            badge: 'Scoreboard • Emotional Damage',
+            title: 'Receipts Of Every MCQ You Guessed "C" On',
+            subtitle: 'Review past attempts, download certificates to flex on LinkedIn, and silently judge your accuracy.'
+        },
+        'profile': {
+            badge: 'Student Identity • Placement Ready',
+            title: 'Convince Recruiters You Are More Than A CGPA',
+            subtitle: 'Keep your skills, resume, and academic stats updated before the placement cell sends a "last warning" mail.'
+        },
+        'placement': {
+            badge: 'Campus Placements • Hunger Games',
+            title: 'Manifesting That Offer Letter Before Sem Ends',
+            subtitle: 'Check eligibility, track drives, and pray the cutoff doesn’t randomly jump from 6.5 to 8.0 CGPA.'
+        },
+        'attendance': {
+            badge: '75% Rule • Survival Mode',
+            title: 'Walking The Tightrope Between Condonation & Sleep',
+            subtitle: 'Every session matters when you are one missed morning class away from begging the HOD.'
+        },
+        'todo': {
+            badge: 'Tasks • Procrastination Tracker',
+            title: 'Things You Swore You Would Finish Yesterday',
+            subtitle: 'Write down your study goals, ignore them for 3 hours, and then speedrun them at 11:58 PM.'
+        },
+        'study-material': {
+            badge: 'Study Material • Zero Excuses',
+            title: 'Notes You Downloaded And Never Opened',
+            subtitle: 'Access batch handouts uploaded by your trainer or revise SPOC-curated LMS guides before placement season hits.'
+        },
+        'games': {
+            badge: 'Brain Gym • Productive Break',
+            title: 'Technically Studying Because It Says "Brain Games"',
+            subtitle: 'Warm up those last two surviving brain cells before going back to debugging missing semicolons.'
+        },
+        'type-speed': {
+            badge: 'WPM Arena • Keyboard Warrior',
+            title: 'Two-Finger Typing Won’t Pass The Coding Round',
+            subtitle: 'Test your raw WPM and accuracy. Bonus points if you don’t look down at the keyboard.'
+        },
+        'company-arena': {
+            badge: 'Company Arena • Real Compiler',
+            title: 'Practice What Companies Actually Ask (Not Just FizzBuzz)',
+            subtitle: 'Curated service, product & startup rounds. Real code execution—no regex shortcuts, no excuses.'
+        },
+        'locked-in': {
+            badge: 'Company Arena • Real Compiler',
+            title: 'Practice What Companies Actually Ask (Not Just FizzBuzz)',
+            subtitle: 'Curated service, product & startup rounds. Real code execution—no regex shortcuts, no excuses.'
+        },
+        'security': {
+            badge: 'Security • Don’t Get Hacked',
+            title: 'Please Tell Us Your Password Isn’t "123456"',
+            subtitle: 'Update your password before your roommate logs in and submits your assessment with blank answers.'
+        }
+    };
 
-            
-            {/* Glassmorphic Profile Banner */}
-            <div className="bg-gradient-to-r from-[#5899B5] to-[#3D7690] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div className="space-y-3">
-                        <span className="bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider inline-block">
-                            {activeTab === 'meta-batch' ? 'Meta Batch' : 'Student Portal'}
-                        </span>
-                        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-                            Welcome, {student?.name || 'Candidate'}
-                        </h1>
-                        <p className="text-blue-100/90 text-sm sm:text-base max-w-xl font-medium">
-                            Keep track of your assessments, view evaluation certificates, and manage your academic & career placement profile.
-                        </p>
-                    </div>
-                    
-                    <div className="flex items-center justify-end w-full md:w-auto shrink-0">
-                        <StudentBannerSvg activeTab={activeTab} profileSubTab={profileSubTab} />
+    const currentTabBanner = activeTab !== 'dashboard' ? TAB_BANNERS[activeTab] : null;
+
+    return (
+        <div className="space-y-6">
+            {/* Glassmorphic Profile Banner - Only shown on Dashboard tab */}
+            {activeTab === 'dashboard' && (
+                <div className="bg-gradient-to-r from-[#5899B5] to-[#3D7690] rounded-[2rem] text-white p-8 sm:p-10 shadow-lg relative overflow-hidden">
+                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="space-y-3">
+                            <span className="bg-white/15 border border-white/20 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider inline-block">
+                                Student Portal
+                            </span>
+                            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
+                                Welcome, {student?.name || 'Candidate'}
+                            </h1>
+                            <p className="text-blue-100/90 text-sm sm:text-base max-w-xl font-medium">
+                                Keep track of your assessments, view evaluation certificates, and manage your academic & career placement profile.
+                            </p>
+                        </div>
+                        
+                        <div className="flex items-center justify-end w-full md:w-auto shrink-0">
+                            <StudentBannerSvg activeTab={activeTab} profileSubTab={profileSubTab} />
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Compact Sarcastic Banner for Every Other Tab */}
+            {currentTabBanner && (
+                <div className="bg-gradient-to-r from-[#5899B5] to-[#3D7690] rounded-2xl text-white px-6 py-4 sm:px-7 sm:py-5 shadow-md relative overflow-hidden">
+                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="space-y-1.5">
+                            <span className="bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider inline-block">
+                                {currentTabBanner.badge}
+                            </span>
+                            <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
+                                {currentTabBanner.title}
+                            </h2>
+                            <p className="text-blue-100/90 text-xs sm:text-sm max-w-2xl font-medium">
+                                {currentTabBanner.subtitle}
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-end w-full md:w-auto shrink-0">
+                            <StudentBannerSvg activeTab={activeTab} profileSubTab={profileSubTab} compact />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Tab Panels */}
             <div className="space-y-8">
@@ -1953,7 +2097,7 @@ const StudentDashboard = () => {
                                                 { label: 'To-do List', tab: 'todo', icon: CheckCircle },
                                                 { label: 'Brain Games', tab: 'games', icon: Award },
                                                 { label: 'Type Speed', tab: 'type-speed', icon: Key },
-                                                { label: 'Locked In Lab', tab: 'locked-in', icon: Terminal }
+                                                { label: 'Company Arena', tab: 'company-arena', icon: Building2 }
                                             ].map((q) => (
                                                 <button
                                                     key={`${q.tab}-${q.sub || ''}`}
@@ -3984,8 +4128,12 @@ const StudentDashboard = () => {
                 <StudentTypeSpeedTab />
             )}
 
-            {activeTab === 'locked-in' && (
+            {(activeTab === 'locked-in' || activeTab === 'company-arena') && (
                 <StudentLockedInLabTab student={student} />
+            )}
+
+            {activeTab === 'study-material' && (
+                <StudentStudyMaterialTab student={student} />
             )}
         </div>
     );

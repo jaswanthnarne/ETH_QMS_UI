@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import { 
     LayoutDashboard, School, BookOpen, Users, User, FileText, BarChart3, 
     LogOut, Menu, X, Bell, ChevronDown, Search, Send, Globe, ArrowLeftRight, Trophy, ShieldCheck, Database, FileSpreadsheet,
-    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard, Terminal
+    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard, Terminal, Building2
 } from 'lucide-react';
 import { SocketContext } from '../contexts/SocketContext';
 import useAuthStore from '../store/authStore';
@@ -124,15 +124,17 @@ const MainLayout = ({ children }) => {
         { label: 'Placements', icon: Briefcase, path: '/student/dashboard?tab=placement' },
         { label: 'Attendance', icon: CalendarCheck, path: '/student/dashboard?tab=attendance' },
         { label: 'To-do List', icon: CheckSquare, path: '/student/dashboard?tab=todo' },
+        { label: 'Study Material', icon: BookOpen, path: '/student/dashboard?tab=study-material' },
         { label: 'Brain Games', icon: Gamepad2, path: '/student/dashboard?tab=games' },
         { label: 'Type Speed', icon: Keyboard, path: '/student/dashboard?tab=type-speed' },
-        { label: 'Locked In Lab', icon: Terminal, path: '/student/dashboard?tab=locked-in' },
+        { label: 'Company Arena', icon: Building2, path: '/student/dashboard?tab=company-arena' },
         { label: 'Account Security', icon: Lock, path: '/student/dashboard?tab=security' }
     ] : user?.role === 'trainer' ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
         { label: 'Exams', icon: FileText, path: '/trainer/exams' },
         { label: 'Courses', icon: BookOpen, path: '/trainer/courses' },
         { label: 'My Batches', icon: Users, path: '/trainer/batches' },
+        { label: 'Study Materials', icon: FileSpreadsheet, path: '/trainer/study-materials' },
         { label: 'Attendance', icon: CalendarCheck, path: '/trainer/attendance' },
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
         { label: 'Reports & Exports', icon: Database, path: '/reports' }
@@ -274,7 +276,9 @@ const MainLayout = ({ children }) => {
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
                     {menuItems.map((item) => {
                         const isActive = isStudent 
-                            ? (location.pathname + location.search) === item.path || (item.path === '/student/dashboard?tab=dashboard' && !location.search)
+                            ? (location.pathname + location.search) === item.path ||
+                              (item.path === '/student/dashboard?tab=dashboard' && location.pathname === '/student/dashboard' && !location.search) ||
+                              (item.path === '/student/dashboard?tab=exam-history' && location.pathname.startsWith('/exam/'))
                             : location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
                         return (
                             <NavLink

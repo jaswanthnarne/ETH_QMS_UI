@@ -600,9 +600,11 @@ const StudentEntry = () => {
     const [loginPw, setLoginPw] = useState('');
     const [showLoginPw, setShowLoginPw] = useState(false);
     const [collegeList, setCollegeList] = useState(COLLEGES);
-    const { loginStudent, loading: studentAuthLoading } = useStudentAuthStore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { loginStudent } = useStudentAuthStore();
 
     useEffect(() => {
+        useStudentAuthStore.setState({ loading: false });
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
         axios
             .get(`${apiUrl}/student/colleges`)
@@ -650,12 +652,20 @@ const StudentEntry = () => {
             setAlertState({ open: true, title: 'Details Required', message: 'Please enter your Mobile number/USN and Password.', type: 'info' });
             return;
         }
-        const res = await loginStudent(loginVal.trim(), loginPw.trim());
-        if (res.success) {
-            useAuthStore.getState().logout();
-            navigate('/student/dashboard');
-        } else {
-            setAlertState({ open: true, title: 'Authentication Failed', message: res.error || 'Login failed. Please check your details.', type: 'error' });
+        setIsSubmitting(true);
+        try {
+            const res = await loginStudent(loginVal.trim(), loginPw.trim());
+            if (res.success) {
+                useAuthStore.getState().logout();
+                navigate('/student/dashboard');
+            } else {
+                setAlertState({ open: true, title: 'Authentication Failed', message: res.error || 'Login failed. Please check your details.', type: 'error' });
+            }
+        } catch (err) {
+            setAlertState({ open: true, title: 'Authentication Error', message: err.message || 'An unexpected error occurred.', type: 'error' });
+        } finally {
+            setIsSubmitting(false);
+            useStudentAuthStore.setState({ loading: false });
         }
     };
 
@@ -810,10 +820,10 @@ const StudentEntry = () => {
 
                                                     <button
                                                         type="submit"
-                                                        disabled={studentAuthLoading || !loginVal.trim() || !loginPw.trim()}
+                                                        disabled={isSubmitting || !loginVal.trim() || !loginPw.trim()}
                                                         className="w-full h-11 mt-2 rounded-xl bg-[#004AAD] hover:bg-[#003882] text-white text-[14.5px] font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                     >
-                                                        {studentAuthLoading && <Loader2 size={16} className="animate-spin" />}
+                                                        {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                                                         Sign in
                                                         <ArrowRight size={15} />
                                                     </button>

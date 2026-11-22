@@ -37,6 +37,7 @@ import { io } from 'socket.io-client';
 import useCheatDetection from '../hooks/useCheatDetection';
 import { ConfirmModal, AlertModal } from '../components/Modals';
 import useStudentAuthStore from '../store/studentAuthStore';
+import MainLayout from '../layouts/MainLayout';
 
 const StudentExam = () => {
     const { key } = useParams();
@@ -222,6 +223,13 @@ const StudentExam = () => {
             if (screenStreamRef.current) screenStreamRef.current.getTracks().forEach(t => t.stop());
         };
     }, []);
+
+    // Exit fullscreen automatically once result view is shown
+    useEffect(() => {
+        if (result && document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
+    }, [result]);
 
     const handleStartExam = async () => {
         setMediaError(null);
@@ -1264,60 +1272,243 @@ const StudentExam = () => {
             return `${Math.floor(secs / 60)}m ${secs % 60}s`;
         };
 
-        return (
-            <div id="printable-area" className="min-h-screen bg-[#f8f9fb]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {/* Print styles */}
-                <style>{`
-                    @media print {
-                        body {
-                            background: white !important;
-                            color: black !important;
-                            font-size: 12px !important;
-                        }
-                        .no-print {
-                            display: none !important;
-                        }
-                        #printable-area {
-                            background: white !important;
-                            padding: 0 !important;
-                            margin: 0 !important;
-                        }
-                        .bg-slate-50 {
-                            background-color: #f8fafc !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        .bg-white {
-                            background-color: #ffffff !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        .border {
-                            border-color: #e2e8f0 !important;
-                        }
-                        h1, h2, h3, p, span {
-                            color: black !important;
-                        }
+        const pctNum = parseFloat(result.percentage) || 0;
+
+        const tierConfig = !showResult
+            ? {
+                id: 'submitted',
+                rangeLabel: 'Submitted',
+                badge: 'Assessment Submitted • Recorded',
+                badgeClass: 'bg-blue-400/20 text-blue-200 border-blue-400/30',
+                heroBg: 'from-[#0f172a] via-[#1e293b] to-[#0f172a]',
+                title: 'Assessment Complete',
+                subtitle: 'Your responses have been securely recorded and submitted for evaluation.',
+                pillClass: 'bg-blue-50 text-blue-700 border-blue-200',
+                barClass: 'bg-[#5899B5]'
+            }
+            : pctNum >= 70
+                ? {
+                    id: 'champion',
+                    rangeLabel: '70% – 100%',
+                    badge: 'Champion Tier • 70%+ Mastery',
+                    badgeClass: 'bg-amber-400/20 text-amber-200 border-amber-300/40',
+                    heroBg: 'from-[#064E3B] via-[#047857] to-[#0F172A]',
+                    title: 'Champion Performance! You Cooked This Exam',
+                    subtitle: 'Top-tier accuracy. You dominated the tricky questions and set the benchmark for your batch.',
+                    pillClass: 'bg-amber-50 text-amber-800 border-amber-200',
+                    barClass: 'bg-emerald-500'
+                }
+                : pctNum >= 50
+                    ? {
+                        id: 'contender',
+                        rangeLabel: '50% – 69%',
+                        badge: 'Contender Tier • 50% – 70% Solid Zone',
+                        badgeClass: 'bg-sky-400/20 text-sky-200 border-sky-300/40',
+                        heroBg: 'from-[#0F172A] via-[#1E3A8A] to-[#0F172A]',
+                        title: 'Solid Effort! Right In The Contender Zone',
+                        subtitle: 'Good fundamentals and a respectable score. Tighten up a few weak spots and 70%+ Champion tier is yours next round.',
+                        pillClass: 'bg-sky-50 text-sky-800 border-sky-200',
+                        barClass: 'bg-sky-500'
                     }
-                `}</style>
-                {/* ——— Top Hero Banner ——— */}
-                <div className="relative bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] overflow-hidden">
-                    <div className="no-print absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 20%, rgba(88, 153, 181,0.15) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.08) 0%, transparent 50%)' }} />
-                    <div className="max-w-3xl mx-auto px-6 pt-10 pb-28 relative z-10">
-                        <div className="flex items-center gap-2.5 justify-center mb-10">
-                            <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech" className="h-8 w-8 brightness-0 invert opacity-90" />
-                            <span className="text-white/90 text-sm font-semibold tracking-wide">Ethnotech Academy</span>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-[11px] font-semibold text-blue-400 uppercase tracking-[0.2em] mb-3">Assessment Report</p>
-                            <h1 className="text-3xl md:text-[2.75rem] font-extrabold text-white leading-tight tracking-tight">Assessment Complete</h1>
-                            <p className="text-slate-400 text-[15px] mt-3 font-normal max-w-md mx-auto leading-relaxed">Your responses have been securely recorded and evaluated.</p>
+                    : pctNum >= 35
+                        ? {
+                            id: 'borderline',
+                            rangeLabel: '35% – 49%',
+                            badge: 'Borderline Tier • 35% – 50% Close Call',
+                            badgeClass: 'bg-amber-500/20 text-amber-200 border-amber-400/40',
+                            heroBg: 'from-[#451A03] via-[#78350F] to-[#0F172A]',
+                            title: 'Living Dangerously On The Edge!',
+                            subtitle: 'That was closer than a 75.01% attendance cutoff. Review the response matrix below before the next test humbles you.',
+                            pillClass: 'bg-amber-50 text-amber-800 border-amber-200',
+                            barClass: 'bg-amber-500'
+                        }
+                        : {
+                            id: 'comeback',
+                            rangeLabel: 'Below 35%',
+                            badge: 'Comeback Tier • < 35% Needs Revision',
+                            badgeClass: 'bg-rose-500/20 text-rose-200 border-rose-400/40',
+                            heroBg: 'from-[#4C0519] via-[#881337] to-[#0F172A]',
+                            title: 'Tough Round... Time For Your Comeback Arc',
+                            subtitle: 'Every topper has had a rough test day. Inspect every missed question below, revise the concepts, and bounce back stronger.',
+                            pillClass: 'bg-rose-50 text-rose-800 border-rose-200',
+                            barClass: 'bg-rose-500'
+                        };
+
+        const renderPostExamSvg = (tierId) => {
+            if (tierId === 'champion') {
+                return (
+                    <svg viewBox="0 0 250 145" className="w-56 md:w-64 shrink-0 mx-auto" aria-hidden="true">
+                        <ellipse cx="125" cy="128" rx="102" ry="10" fill="#0F172A" fillOpacity="0.28" />
+                        {/* Sparkle Stars */}
+                        <path d="M26 30 l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6-4.5-4 6-1z" fill="#FDE047" stroke="#1E293B" strokeWidth="1.5" />
+                        <path d="M222 24 l2.5 5 5 1-3.5 3.5 1 5-5-2.5-5 2.5 1-5-3.5-3.5 5-1z" fill="#FDE047" stroke="#1E293B" strokeWidth="1.5" />
+                        {/* Champion Student with Crown & Medal */}
+                        <path d="M44 122 C44 92, 108 92, 108 122 Z" fill="#10B981" stroke="#1E293B" strokeWidth="2.2" />
+                        <path d="M68 94 L76 110 L84 94" stroke="#EF4444" strokeWidth="3" fill="none" />
+                        <circle cx="76" cy="113" r="5.5" fill="#FACC15" stroke="#1E293B" strokeWidth="1.6" />
+                        <circle cx="76" cy="64" r="21" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                        {/* Golden Crown */}
+                        <polygon points="56,46 64,30 76,40 88,30 96,46" fill="#FACC15" stroke="#1E293B" strokeWidth="2" strokeLinejoin="round" />
+                        <circle cx="69" cy="63" r="2.3" fill="#1E293B" />
+                        <circle cx="83" cy="63" r="2.3" fill="#1E293B" />
+                        <path d="M68 71 Q76 79 84 71 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                        {/* Giant Golden Champion Trophy on #1 Podium */}
+                        <rect x="132" y="98" width="76" height="26" rx="5" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2.2" />
+                        <text x="170" y="115" textAnchor="middle" fontSize="10" fontWeight="900" fill="#B45309">CHAMP 70%+</text>
+                        <path d="M150 46 h40 v22 c0 12-9 21-20 21 s-20-9-20-21 V46 z" fill="#FACC15" stroke="#1E293B" strokeWidth="2.2" />
+                        <path d="M150 52 h-9 a7 7 0 0 0 0 14 h9 M190 52 h9 a7 7 0 0 1 0 14 h-9" stroke="#1E293B" strokeWidth="2.2" fill="none" />
+                        <rect x="165" y="89" width="10" height="9" fill="#F59E0B" stroke="#1E293B" strokeWidth="2" />
+                        <path d="M170 55 l3 6 6.5 1-4.7 4.5 1.1 6.5-5.9-3.1-5.9 3.1 1.1-6.5-4.7-4.5 6.5-1z" fill="#FFFFFF" />
+                        {/* Speech Bubble */}
+                        <rect x="114" y="12" width="110" height="24" rx="8" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                        <text x="169" y="27.5" textAnchor="middle" fontSize="9.2" fontWeight="900" fill="#92400E">TOO EASY! GG ★</text>
+                        <line x1="18" y1="124" x2="232" y2="124" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                );
+            }
+            if (tierId === 'contender') {
+                return (
+                    <svg viewBox="0 0 250 145" className="w-56 md:w-64 shrink-0 mx-auto" aria-hidden="true">
+                        <ellipse cx="125" cy="128" rx="102" ry="10" fill="#0F172A" fillOpacity="0.28" />
+                        {/* Contender Student with Headband & Silver Medal */}
+                        <path d="M44 122 C44 92, 106 92, 106 122 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.2" />
+                        <path d="M67 94 L75 109 L83 94" stroke="#0284C7" strokeWidth="3" fill="none" />
+                        <circle cx="75" cy="112" r="5" fill="#E2E8F0" stroke="#1E293B" strokeWidth="1.6" />
+                        <circle cx="75" cy="64" r="21" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                        <path d="M54 58 C57 40, 93 40, 96 58 C88 50, 62 50, 54 58 Z" fill="#1E293B" />
+                        <rect x="55" y="51" width="40" height="6" rx="3" fill="#F43F5E" stroke="#1E293B" strokeWidth="1.5" />
+                        <circle cx="68" cy="64" r="2.2" fill="#1E293B" />
+                        <circle cx="82" cy="64" r="2.2" fill="#1E293B" />
+                        <path d="M68 73 Q75 79 82 73" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                        {/* Rising Analytics Target Board on Right */}
+                        <rect x="128" y="46" width="96" height="76" rx="10" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+                        <rect x="128" y="46" width="96" height="16" rx="8" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="142" y="92" width="14" height="18" rx="2" fill="#BAE6FD" stroke="#1E293B" strokeWidth="1.6" />
+                        <rect x="164" y="80" width="14" height="30" rx="2" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.6" />
+                        <rect x="186" y="68" width="14" height="42" rx="2" fill="#34D399" stroke="#1E293B" strokeWidth="1.6" />
+                        {/* Speech Bubble */}
+                        <rect x="112" y="12" width="122" height="24" rx="8" fill="#E0F2FE" stroke="#1E293B" strokeWidth="2" />
+                        <text x="173" y="27.5" textAnchor="middle" fontSize="8.8" fontWeight="900" fill="#0369A1">SOLID! NEXT: 70%+ ★</text>
+                        <line x1="18" y1="124" x2="232" y2="124" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                );
+            }
+            if (tierId === 'borderline') {
+                return (
+                    <svg viewBox="0 0 250 145" className="w-56 md:w-64 shrink-0 mx-auto" aria-hidden="true">
+                        <ellipse cx="125" cy="128" rx="102" ry="10" fill="#0F172A" fillOpacity="0.28" />
+                        {/* Sweating Student on Edge */}
+                        <path d="M44 122 C44 92, 106 92, 106 122 Z" fill="#F59E0B" stroke="#1E293B" strokeWidth="2.2" />
+                        <circle cx="75" cy="64" r="21" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                        <path d="M54 58 C57 40, 93 40, 96 58 C88 50, 62 50, 54 58 Z" fill="#1E293B" />
+                        {/* Sweat Drop */}
+                        <path d="M101 48 C101 48, 106 55, 106 58 A4.5 4.5 0 1 1 97 58 C97 55, 101 48, 101 48 Z" fill="#38BDF8" stroke="#1E293B" strokeWidth="1.5" />
+                        <circle cx="68" cy="64" r="2.3" fill="#1E293B" />
+                        <circle cx="82" cy="64" r="2.3" fill="#1E293B" />
+                        <path d="M67 75 Q75 72 83 75" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                        {/* Stack of Books & Warning Meter */}
+                        <rect x="132" y="104" width="84" height="18" rx="4" fill="#F43F5E" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="138" y="86" width="74" height="18" rx="4" fill="#38BDF8" stroke="#1E293B" strokeWidth="2" />
+                        <rect x="148" y="48" width="54" height="38" rx="8" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2.2" />
+                        <text x="175" y="71" textAnchor="middle" fontSize="10" fontWeight="900" fill="#B45309">35-50%</text>
+                        {/* Speech Bubble */}
+                        <rect x="110" y="12" width="124" height="24" rx="8" fill="#FEF3C7" stroke="#1E293B" strokeWidth="2" />
+                        <text x="172" y="27.5" textAnchor="middle" fontSize="8.8" fontWeight="900" fill="#B45309">CLOSE CALL! PHEW!</text>
+                        <line x1="18" y1="124" x2="232" y2="124" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                );
+            }
+            return (
+                <svg viewBox="0 0 250 145" className="w-56 md:w-64 shrink-0 mx-auto" aria-hidden="true">
+                    <ellipse cx="125" cy="128" rx="102" ry="10" fill="#0F172A" fillOpacity="0.28" />
+                    {/* Dizzy Student Ready for Comeback */}
+                    <path d="M44 122 C44 92, 106 92, 106 122 Z" fill="#FB7185" stroke="#1E293B" strokeWidth="2.2" />
+                    <circle cx="75" cy="64" r="21" fill="#FDE68A" stroke="#1E293B" strokeWidth="2.2" />
+                    <path d="M54 58 C57 40, 93 40, 96 58 C88 50, 62 50, 54 58 Z" fill="#1E293B" />
+                    {/* X-eyes for comedic emotional damage */}
+                    <path d="M64 61 l6 6 M70 61 l-6 6 M80 61 l6 6 M86 61 l-6 6" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M68 76 Q75 71 82 76" stroke="#1E293B" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                    {/* Overheated Laptop & Comeback Checklist */}
+                    <rect x="134" y="76" width="76" height="44" rx="7" fill="#E2E8F0" stroke="#1E293B" strokeWidth="2.2" />
+                    <rect x="126" y="118" width="92" height="6" rx="3" fill="#94A3B8" stroke="#1E293B" strokeWidth="2" />
+                    <text x="172" y="102" textAnchor="middle" fontSize="9.5" fontWeight="900" fill="#E11D48">REVISE 101</text>
+                    <path d="M160 68 q4 -8 0 -14 M174 68 q4 -8 0 -14 M188 68 q4 -8 0 -14" stroke="#FDA4AF" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    {/* Speech Bubble */}
+                    <rect x="108" y="12" width="128" height="24" rx="8" fill="#FFE4E6" stroke="#1E293B" strokeWidth="2" />
+                    <text x="172" y="27.5" textAnchor="middle" fontSize="8.6" fontWeight="900" fill="#9F1239">TIME TO LOCK IN!</text>
+                    <line x1="18" y1="124" x2="232" y2="124" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+            );
+        };
+
+        return (
+            <MainLayout>
+                <div id="printable-area" className="space-y-6 pb-16" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {/* Print styles */}
+                    <style>{`
+                        @media print {
+                            body {
+                                background: white !important;
+                                color: black !important;
+                                font-size: 12px !important;
+                            }
+                            .no-print {
+                                display: none !important;
+                            }
+                            #printable-area {
+                                background: white !important;
+                                padding: 0 !important;
+                                margin: 0 !important;
+                            }
+                            .bg-slate-50 {
+                                background-color: #f8fafc !important;
+                                -webkit-print-color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                            }
+                            .bg-white {
+                                background-color: #ffffff !important;
+                                -webkit-print-color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                            }
+                            .border {
+                                border-color: #e2e8f0 !important;
+                            }
+                            h1, h2, h3, p, span {
+                                color: black !important;
+                            }
+                        }
+                    `}</style>
+                    {/* ——— Dynamic Result-Tier Top Hero Banner ——— */}
+                    <div className={`relative bg-gradient-to-br ${tierConfig.heroBg} rounded-[2rem] shadow-lg overflow-hidden`}>
+                        <div className="no-print absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.10) 0%, transparent 60%)' }} />
+                        <div className="px-6 sm:px-10 py-8 sm:py-10 relative z-10">
+                            <div className="flex items-center gap-2.5 justify-center md:justify-start mb-4">
+                                <img src="/assets/cropped-New-logo-footer-270x270.png" alt="Ethnotech" className="h-6 w-6 brightness-0 invert opacity-90" />
+                                <span className="text-white/90 text-xs font-semibold tracking-wide uppercase">Ethnotech Academy • Assessment Report</span>
+                            </div>
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+                                <div className="space-y-3 max-w-xl">
+                                    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${tierConfig.badgeClass}`}>
+                                        {tierConfig.badge}
+                                    </span>
+                                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                                        {tierConfig.title}
+                                    </h1>
+                                    <p className="text-white/80 text-sm sm:text-[15px] font-normal leading-relaxed">
+                                        {tierConfig.subtitle}
+                                    </p>
+                                </div>
+                                {showResult && (
+                                    <div className="no-print shrink-0">
+                                        {renderPostExamSvg(tierConfig.id)}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* ——— Main Content ——— */}
-                <div className="max-w-3xl w-full mx-auto px-5 relative -mt-16 z-20 pb-20">
+                    {/* ——— Main Content ——— */}
+                    <div className="w-full">
                     {/* Score Card */}
                     <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-200/80 overflow-hidden mb-6">
                         {showResult ? (
@@ -1331,11 +1522,14 @@ const StudentExam = () => {
                                                 <span className="text-6xl md:text-7xl font-extrabold text-slate-900 tabular-nums leading-none">{result.percentage}</span>
                                                 <span className="text-2xl font-semibold text-slate-400">%</span>
                                             </div>
-                                            <div className="mt-4">
+                                            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-2.5">
                                                 <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold ${isPassed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-rose-50 text-rose-700 border border-rose-200/80'
                                                     }`}>
                                                     {isPassed ? <Trophy size={15} /> : <XCircle size={15} />}
                                                     {isPassed ? 'Passed' : 'Not Passed'}
+                                                </span>
+                                                <span className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold border ${tierConfig.pillClass}`}>
+                                                    Range: {tierConfig.rangeLabel}
                                                 </span>
                                             </div>
                                         </div>
@@ -1435,18 +1629,47 @@ const StudentExam = () => {
                                     </div>
                                 </div>
 
-                                {/* Progress bar */}
-                                <div className="px-7 md:px-9 pb-7 md:pb-9 border-t border-slate-100 pt-6">
-                                    <div className="flex justify-between text-[11px] font-medium text-slate-400 mb-2">
-                                        <span>Performance</span>
-                                        <span>{result.score} / {result.totalMarks} pts</span>
+                                {/* Progress bar & 4-Range Tier Strip */}
+                                <div className="px-7 md:px-9 pb-7 md:pb-9 border-t border-slate-100 pt-6 space-y-4">
+                                    <div>
+                                        <div className="flex justify-between text-[11px] font-medium text-slate-400 mb-2">
+                                            <span>Performance Meter ({tierConfig.badge.split('•')[0].trim()})</span>
+                                            <span>{result.score} / {result.totalMarks} pts ({result.percentage}%)</span>
+                                        </div>
+                                        <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-1000 ease-out ${tierConfig.barClass}`}
+                                                style={{ width: `${Math.max(result.percentage, 3)}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-1000 ease-out ${isPassed ? 'bg-emerald-500' : 'bg-rose-500'
-                                                }`}
-                                            style={{ width: `${Math.max(result.percentage, 2)}%` }}
-                                        />
+
+                                    {/* 4 Score Ranges Indicator */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left">
+                                        {[
+                                            { id: 'comeback', label: 'Comeback', range: '< 35%', activeCls: 'bg-rose-50 border-rose-300 text-rose-800' },
+                                            { id: 'borderline', label: 'Borderline', range: '35% – 50%', activeCls: 'bg-amber-50 border-amber-300 text-amber-800' },
+                                            { id: 'contender', label: 'Contender', range: '50% – 70%', activeCls: 'bg-sky-50 border-sky-300 text-sky-800' },
+                                            { id: 'champion', label: 'Champion', range: '70% – 100%', activeCls: 'bg-emerald-50 border-emerald-300 text-emerald-800' }
+                                        ].map((r) => {
+                                            const active = tierConfig.id === r.id;
+                                            return (
+                                                <div
+                                                    key={r.id}
+                                                    className={`px-3 py-2 rounded-xl border text-xs transition ${
+                                                        active
+                                                            ? `${r.activeCls} font-bold shadow-2xs`
+                                                            : 'bg-slate-50/70 border-slate-200/70 text-slate-400 font-medium'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <span>{r.label}</span>
+                                                        {active && <span className="text-[10px] uppercase tracking-wider">You</span>}
+                                                    </div>
+                                                    <div className="text-[11px] opacity-80">{r.range}</div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </>
@@ -1616,7 +1839,8 @@ const StudentExam = () => {
                         <img src="/assets/NSDC.png" alt="NSDC" className="h-6 w-auto" />
                     </div>
                 </div>
-            </div>
+                </div>
+            </MainLayout>
         );
     }
 
@@ -1783,8 +2007,28 @@ const StudentExam = () => {
         ? activeSecQs.findIndex(q => q.id === currentQ?.id) 
         : -1;
 
+    const watermarkUsn = (student?.usn || rollNumber || 'CANDIDATE').toString().trim().toUpperCase();
+
     return (
-        <div className="min-h-screen bg-[#f8f9fb] flex flex-col overflow-hidden select-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="min-h-screen bg-[#f8f9fb] flex flex-col overflow-hidden select-none relative" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {/* Full-Page Anti-Cheating USN Watermark Background */}
+            <div
+                aria-hidden="true"
+                className="fixed inset-0 pointer-events-none select-none overflow-hidden z-[35] flex items-center justify-center"
+            >
+                <div
+                    className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-x-16 gap-y-14 -rotate-24 scale-125 w-full h-full place-items-center"
+                >
+                    {Array.from({ length: 48 }).map((_, idx) => (
+                        <span
+                            key={idx}
+                            className="font-mono font-black text-base sm:text-lg md:text-xl tracking-[0.22em] text-slate-900/[0.055] whitespace-nowrap uppercase"
+                        >
+                            {watermarkUsn}
+                        </span>
+                    ))}
+                </div>
+            </div>
 
             {/* Section Transition Overlay */}
             {transitionState.active && (
