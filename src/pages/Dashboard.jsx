@@ -4,7 +4,7 @@ import {
     School, BookOpen, Users, FileText, TrendingUp, Loader2, Activity,
     ChevronRight, Building2, UserPlus, Download, ShieldCheck, User,
     GraduationCap, Trash2, Copy, Book, Clock, Upload, Database, Layers, Send,
-    ArrowLeftRight
+    ArrowLeftRight, CalendarCheck, Briefcase, FileSpreadsheet, Trophy
 } from 'lucide-react';
 import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -12,8 +12,9 @@ import {
 } from 'recharts';
 import useAuthStore from '../store/authStore';
 import useCollegeStore from '../store/collegeStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import ActivityHeatmapGraph from '../components/common/ActivityHeatmapGraph';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -118,8 +119,12 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const { collegeId: paramCollegeId } = useParams();
+    const location = useLocation();
     const { user, token } = useAuthStore();
-    const { selectedCollegeId, selectedCollegeName, setSelectedCollege, clearSelectedCollege } = useCollegeStore();
+    const { selectedCollegeId: storeCollegeId, selectedCollegeName, setSelectedCollege, clearSelectedCollege } = useCollegeStore();
+    const urlCollegeMatch = location.pathname.match(/^\/college\/([a-f0-9]{24})/i);
+    const selectedCollegeId = paramCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null) || storeCollegeId;
 
     useEffect(() => {
         if (user) {
@@ -255,7 +260,7 @@ const Dashboard = () => {
     };
 
     const statCards = [
-        { label: 'Colleges', value: stats.colleges, icon: School, color: 'bg-blue-600', roles: ['super_admin'] },
+        { label: 'Colleges', value: stats.colleges, icon: School, color: 'bg-blue-600', roles: ['super_admin', 'ops_admin'] },
         { label: 'Courses', value: stats.courses, icon: BookOpen, color: 'bg-indigo-600' },
         { label: 'Trainers', value: stats.trainers || 0, icon: UserPlus, color: 'bg-purple-600' },
         { label: 'Attempts', value: stats.attempts || 0, icon: Users, color: 'bg-orange-600' },
@@ -333,7 +338,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-900">Recent Activity</h3>
-                <button onClick={() => navigate('/admin/audit')} className="text-xs font-semibold text-[#5899B5] hover:underline flex items-center gap-1">
+                <button onClick={() => navigate(selectedCollegeId ? `/college/${selectedCollegeId}/admin/audit` : '/admin/audit')} className="text-xs font-semibold text-[#5899B5] hover:underline flex items-center gap-1">
                     View all <ChevronRight size={14} />
                 </button>
             </div>
@@ -628,6 +633,13 @@ const Dashboard = () => {
                     {visibleCards.map((card, i) => <StatCard key={i} {...card} loading={loading} />)}
                 </div>
 
+                {/* GitHub-Style Daily Time & Activity Graph */}
+                <ActivityHeatmapGraph
+                    userId={user?._id || user?.id || user?.email || 'admin'}
+                    userName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username}
+                    auditLogs={recentLogs}
+                />
+
                 {/* Recent Activity + Quick Actions */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Quick Actions */}
@@ -700,10 +712,18 @@ const Dashboard = () => {
     ];
 
     const quickActions = [
+        { title: 'College ERP Hub', desc: 'Map curricula, assign course trainers, manage cohorts & student registry.', icon: Building2, color: 'blue', path: `/college/${selectedCollegeId}/overview` },
         { title: 'Manage Courses', desc: 'Map, view, and organize curricula delivered at this college.', icon: BookOpen, color: 'indigo', path: `/college/${selectedCollegeId}/admin/courses` },
-        { title: 'Manage Trainers', desc: 'Assign facilitators, update locations, and review profiles.', icon: UserPlus, color: 'purple', path: `/college/${selectedCollegeId}/admin/trainers` },
-        { title: 'Manage Exams', desc: 'Create, publish, and track assessment performance.', icon: FileText, color: 'emerald', path: `/college/${selectedCollegeId}/admin/exams` },
-        { title: 'Manage Batches', desc: 'Organize student cohorts by department and course.', icon: Layers, color: 'orange', path: `/college/${selectedCollegeId}/admin/batches` },
+        { title: 'Batches & Students', desc: 'Organize student cohorts by department, course, and import rosters.', icon: Layers, color: 'orange', path: `/college/${selectedCollegeId}/admin/batches` },
+        { title: 'Manage Exams', desc: 'Create, publish, and track college assessment performance.', icon: FileText, color: 'emerald', path: `/college/${selectedCollegeId}/admin/exams` },
+        { title: 'Question Bank', desc: 'Browse and add course questions categorized by difficulty & Bloom\'s level.', icon: Database, color: 'indigo', path: `/college/${selectedCollegeId}/admin/question-bank` },
+        { title: 'Allotments & Live Keys', desc: 'Inspect trainer exam keys and launch live proctoring rooms.', icon: Send, color: 'blue', path: `/college/${selectedCollegeId}/admin/allotments` },
+        { title: 'Manage Trainers', desc: 'Assign facilitators, update classroom locations, and review profiles.', icon: UserPlus, color: 'purple', path: `/college/${selectedCollegeId}/admin/trainers` },
+        { title: 'Study Materials', desc: 'Publish in-site study notes, code labs, PDFs, and slides for batches.', icon: FileSpreadsheet, color: 'emerald', path: `/college/${selectedCollegeId}/admin/study-materials` },
+        { title: 'Attendance Register', desc: 'Inspect day-wise batch attendance matrices and student logs.', icon: CalendarCheck, color: 'orange', path: `/college/${selectedCollegeId}/admin/attendance` },
+        { title: 'Training Logs', desc: 'Audit trainer daily session progress, topics covered, and time slots.', icon: Book, color: 'purple', path: `/college/${selectedCollegeId}/admin/logs` },
+        { title: 'Campus Placements', desc: 'Post job drives, configure eligibility rules, and shortlist applicants.', icon: Briefcase, color: 'blue', path: `/college/${selectedCollegeId}/placement/dashboard` },
+        { title: 'Leaderboard & Analytics', desc: 'Review top performers, score trends, and export Excel reports.', icon: Trophy, color: 'emerald', path: `/college/${selectedCollegeId}/admin/leaderboard` },
     ];
 
     const colorMap = {
@@ -829,6 +849,13 @@ const Dashboard = () => {
 
             {/* ── Performance Overview (Full Width) ── */}
             <PerformancePanel />
+
+            {/* ── GitHub-Style Daily Time & Activity Graph ── */}
+            <ActivityHeatmapGraph
+                userId={user?._id || user?.id || user?.email || 'admin'}
+                userName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username}
+                auditLogs={recentLogs}
+            />
 
             {/* ── Active Trainers + Recent Activity ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

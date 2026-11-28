@@ -27,7 +27,7 @@ const StatusBadge = ({ status }) => {
 };
 
 const WaitingRoom = () => {
-    const { key } = useParams();
+    const { key, collegeId: paramCollegeId } = useParams();
     const navigate = useNavigate();
     const { token } = useAuthStore();
 
@@ -367,7 +367,7 @@ const WaitingRoom = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/dashboard')}
+                    <button onClick={() => navigate(paramCollegeId ? `/college/${paramCollegeId}/admin/allotments` : '/dashboard')}
                         className="p-2 text-slate-400 hover:text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                         <ArrowLeft size={18} />
                     </button>

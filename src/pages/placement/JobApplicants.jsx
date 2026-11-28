@@ -224,7 +224,10 @@ const JobApplicants = () => {
         <div className="space-y-6">
             {/* Back button */}
             <button 
-                onClick={() => navigate(-1)} 
+                onClick={() => {
+                    const activeCid = collegeId || selectedCollegeId || user?.collegeId?._id || user?.collegeId;
+                    navigate(activeCid ? `/college/${activeCid}/placement/dashboard` : '/placement/dashboard');
+                }} 
                 className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors text-sm font-semibold cursor-pointer"
             >
                 <ArrowLeft size={16} /> Back to Placements

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { ArrowRight, Mail, Lock, Loader2, Eye, EyeOff, Shield, ShieldCheck, KeyRound } from 'lucide-react';
@@ -31,8 +31,21 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPw, setShowPw] = useState(false);
-    const { login, loading, error } = useAuthStore();
+    const { login, loading, error, isAuthenticated, token } = useAuthStore();
     const navigate = useNavigate();
+
+    // If user closed & reopened tab with an active valid session, seamlessly resume into dashboard
+    useEffect(() => {
+        if (!isAuthenticated || !token) return;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        fetch(`${apiUrl}/auth/session-check`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then((res) => {
+                if (res.ok) navigate('/dashboard', { replace: true });
+            })
+            .catch(() => {});
+    }, [isAuthenticated, token, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

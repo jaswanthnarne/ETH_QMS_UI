@@ -144,7 +144,7 @@ const Exams = () => {
                         <Download size={15} /> Export
                     </button>
                     {!isReadOnly && (
-                        <button onClick={() => navigate('/admin/exams/create')} className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] shadow-sm active:scale-95 transition-all">
+                        <button onClick={() => navigate(effectiveCollegeId ? `/college/${effectiveCollegeId}/admin/exams/create` : '/admin/exams/create')} className="flex items-center gap-2 px-5 py-2.5 bg-[#5899B5] text-white text-sm font-semibold rounded-lg hover:bg-[#3D7690] shadow-sm active:scale-95 transition-all">
                             <Plus size={16} /> New Exam
                         </button>
                     )}
@@ -294,7 +294,7 @@ const Exams = () => {
                                     {!isReadOnly && (
                                         <>
                                             {user?.role !== 'college_admin' && (
-                                                <button onClick={() => navigate(`/admin/exams/edit/${exam._id}`)} className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                                <button onClick={() => navigate(effectiveCollegeId ? `/college/${effectiveCollegeId}/admin/exams/edit/${exam._id}` : `/admin/exams/edit/${exam._id}`)} className="p-2 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
                                                     <Edit size={14} />
                                                 </button>
                                             )}

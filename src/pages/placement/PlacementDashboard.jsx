@@ -301,7 +301,10 @@ const PlacementDashboard = () => {
 
                                 <div className="flex flex-row lg:flex-col items-center lg:items-end gap-3 self-stretch lg:self-auto justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
                                     <button 
-                                        onClick={() => navigate(`/college/${collegeId || user.collegeId?._id || user.collegeId}/placement/jobs/${job._id}/applicants`)}
+                                        onClick={() => {
+                                            const activeCid = collegeId || selectedCollegeId || user?.collegeId?._id || user?.collegeId;
+                                            navigate(activeCid ? `/college/${activeCid}/placement/jobs/${job._id}/applicants` : `/placement/jobs/${job._id}/applicants`);
+                                        }}
                                         className="flex items-center gap-1.5 px-4 py-2 border border-[#5899B5] text-[#5899B5] text-xs font-bold rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                                     >
                                         <Users size={14} /> Applicants

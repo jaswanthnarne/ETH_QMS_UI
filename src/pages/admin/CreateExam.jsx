@@ -181,17 +181,18 @@ const CreateExam = () => {
     const isEditing = !!id;
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
-    const redirectPath = user?.role === 'trainer' ? '/trainer/exams' : '/admin/exams';
+    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
+    const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
+    const effectiveCollegeId = urlCollegeId || selectedCollegeId;
+    const redirectPath = user?.role === 'trainer'
+        ? '/trainer/exams'
+        : (effectiveCollegeId ? `/college/${effectiveCollegeId}/admin/exams` : '/admin/exams');
 
     useEffect(() => {
         if (user && ['regional_manager', 'asst_rm'].includes(user.role)) {
             navigate(redirectPath);
         }
     }, [user, navigate, redirectPath]);
-
-    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
-    const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
-    const effectiveCollegeId = selectedCollegeId || urlCollegeId;
 
     const [step, setStep] = useState(1);
     const [colleges, setColleges] = useState([]);
@@ -232,7 +233,7 @@ const CreateExam = () => {
 
     useEffect(() => {
         if (!token || !user) return;
-        if ((user.role === 'super_admin' || user.role === 'trainer') && !isEditing) {
+        if ((['super_admin', 'ops_admin', 'ast_ops_admin', 'college_admin'].includes(user.role) || user.role === 'trainer') && !isEditing) {
             axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } })
                 .then(res => setColleges(res.data.data))
                 .catch(() => { });
@@ -259,8 +260,8 @@ const CreateExam = () => {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/exams/${id}`, { headers: { Authorization: `Bearer ${token}` } });
                 const { exam, questions: fetchedQs } = res.data.data;
 
-                // If super_admin or trainer, fetch colleges so the select isn't empty
-                if (user?.role === 'super_admin' || user?.role === 'trainer') {
+                // If admin or trainer, fetch colleges so the select isn't empty
+                if (['super_admin', 'ops_admin', 'ast_ops_admin', 'college_admin', 'trainer'].includes(user?.role)) {
                     const cRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } });
                     setColleges(cRes.data.data);
                 }

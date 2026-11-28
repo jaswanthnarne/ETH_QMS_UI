@@ -601,7 +601,24 @@ const StudentEntry = () => {
     const [showLoginPw, setShowLoginPw] = useState(false);
     const [collegeList, setCollegeList] = useState(COLLEGES);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { loginStudent } = useStudentAuthStore();
+    const { loginStudent, isAuthenticated: isStudentAuthenticated, token: studentToken } = useStudentAuthStore();
+
+    // If student closed & reopened the tab with an active valid session (and didn't explicitly jump to #login), resume dashboard
+    useEffect(() => {
+        if (!isStudentAuthenticated || !studentToken) return;
+        if (window.location.hash === '#login') return;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        axios
+            .get(`${apiUrl}/student/session-check`, {
+                headers: { Authorization: `Bearer ${studentToken}` },
+            })
+            .then((res) => {
+                if (res.data?.success) {
+                    navigate('/student/dashboard', { replace: true });
+                }
+            })
+            .catch(() => {});
+    }, [isStudentAuthenticated, studentToken, navigate]);
 
     useEffect(() => {
         useStudentAuthStore.setState({ loading: false });

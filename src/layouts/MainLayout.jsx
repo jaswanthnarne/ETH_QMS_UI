@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io } from 'socket.io-client';
-import { 
-    LayoutDashboard, School, BookOpen, Users, User, FileText, BarChart3, 
+import {
+    LayoutDashboard, School, BookOpen, Users, User, FileText, BarChart3,
     LogOut, Menu, X, Bell, ChevronDown, Search, Send, Globe, ArrowLeftRight, Trophy, ShieldCheck, Database, FileSpreadsheet,
-    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard, Terminal, Building2
+    CalendarCheck, Briefcase, Lock, CheckSquare, Gamepad2, Keyboard, Terminal, Building2, PenTool, Code2, Cpu
 } from 'lucide-react';
 import { SocketContext } from '../contexts/SocketContext';
 import useAuthStore from '../store/authStore';
@@ -56,8 +56,8 @@ const MainLayout = ({ children }) => {
         // Connect socket for all authenticated users so pages can react to live updates.
         const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
         const isVercelServer = socketUrl.includes('vercel.app');
-        socketRef.current = isVercelServer 
-            ? { on: () => {}, off: () => {}, emit: () => {}, disconnect: () => {} }
+        socketRef.current = isVercelServer
+            ? { on: () => { }, off: () => { }, emit: () => { }, disconnect: () => { } }
             : io(socketUrl);
 
         if (user && user.role !== 'student') {
@@ -109,7 +109,15 @@ const MainLayout = ({ children }) => {
         }
     };
 
-    const prefix = selectedCollegeId ? `/college/${selectedCollegeId}` : '';
+    const urlCollegeMatch = location.pathname.match(/^\/college\/([a-f0-9]{24})/i);
+    const urlCollegeId = urlCollegeMatch ? urlCollegeMatch[1] : null;
+    const activeCollegeId = urlCollegeId || selectedCollegeId;
+    const activeCollegeObj = colleges.find(c => c._id === activeCollegeId);
+    const activeCollegeName = selectedCollegeName || activeCollegeObj?.name || 'College Workspace';
+    const activeCollegeCode = useCollegeStore((state) => state.selectedCollegeCode) || activeCollegeObj?.code || '';
+    const isIsolatedCollegeTab = Boolean(urlCollegeId);
+
+    const prefix = activeCollegeId ? `/college/${activeCollegeId}` : '';
 
     const ALL_ADMINS = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'college_admin', 'placement'];
     const isGlobalAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm', 'placement'].includes(user?.role);
@@ -118,55 +126,83 @@ const MainLayout = ({ children }) => {
     const menuItems = isStudent ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/student/dashboard?tab=dashboard' },
         { label: 'Meta Batch', icon: Users, path: '/student/dashboard?tab=meta-batch' },
-        { label: 'Enter Exam', icon: FileText, path: '/student/dashboard?tab=enter-exam' },
-        { label: 'Exam History', icon: Trophy, path: '/student/dashboard?tab=exam-history' },
-        { label: 'Profile', icon: User, path: '/student/dashboard?tab=profile' },
+        { label: 'Exam', icon: FileText, path: '/student/dashboard?tab=enter-exam' },
+        { label: 'Code2Career', icon: Building2, path: '/student/dashboard?tab=company-arena', isNew: true },
         { label: 'Placements', icon: Briefcase, path: '/student/dashboard?tab=placement' },
         { label: 'Attendance', icon: CalendarCheck, path: '/student/dashboard?tab=attendance' },
         { label: 'To-do List', icon: CheckSquare, path: '/student/dashboard?tab=todo' },
         { label: 'Study Material', icon: BookOpen, path: '/student/dashboard?tab=study-material' },
+        { label: 'ByteBase', icon: Code2, path: '/student/dashboard?tab=bytebase', isNew: true },
+        { label: 'AlgoPlay', icon: Cpu, path: '/student/dashboard?tab=algoplay', isNew: true },
+        { label: 'Blogs', icon: PenTool, path: '/student/dashboard?tab=blogs', isNew: true },
         { label: 'Brain Games', icon: Gamepad2, path: '/student/dashboard?tab=games' },
         { label: 'Type Speed', icon: Keyboard, path: '/student/dashboard?tab=type-speed' },
-        { label: 'Company Arena', icon: Building2, path: '/student/dashboard?tab=company-arena' },
+        { label: 'Profile', icon: User, path: '/student/dashboard?tab=profile' },
         { label: 'Account Security', icon: Lock, path: '/student/dashboard?tab=security' }
     ] : user?.role === 'trainer' ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+        { label: 'Search User', icon: Search, path: '/trainer/search-user' },
         { label: 'Exams', icon: FileText, path: '/trainer/exams' },
         { label: 'Courses', icon: BookOpen, path: '/trainer/courses' },
         { label: 'My Batches', icon: Users, path: '/trainer/batches' },
         { label: 'Study Materials', icon: FileSpreadsheet, path: '/trainer/study-materials' },
+        { label: 'ByteBase', icon: Code2, path: '/trainer/bytebase', isNew: true },
+        { label: 'AlgoPlay', icon: Cpu, path: '/trainer/algoplay', isNew: true },
+        { label: 'Blogs', icon: PenTool, path: '/trainer/blogs', isNew: true },
         { label: 'Attendance', icon: CalendarCheck, path: '/trainer/attendance' },
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
         { label: 'Reports & Exports', icon: Database, path: '/reports' }
-    ] : (user?.role === 'placement' && !selectedCollegeId) ? [
+    ] : (user?.role === 'placement' && !activeCollegeId) ? [
         { label: 'Select College', icon: LayoutDashboard, path: '/dashboard' }
     ] : user?.role === 'placement' ? [
         { label: 'Placements', icon: Briefcase, path: `${prefix}/placement/dashboard` },
+        { label: 'Search User', icon: Search, path: `${prefix}/search-user` },
         { label: 'Result Analytics', icon: BarChart3, path: `${prefix}/analytics` },
         { label: 'Courses', icon: BookOpen, path: `${prefix}/admin/courses` },
         { label: 'Batches', icon: Users, path: `${prefix}/admin/batches` },
         { label: 'Trainers', icon: Users, path: `${prefix}/admin/trainers` }
-    ] : (isRegionalOrAsstRM && !selectedCollegeId) ? [
+    ] : (isRegionalOrAsstRM && !activeCollegeId) ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' }
-    ] : (isGlobalAdmin && !selectedCollegeId) ? [
+    ] : (isGlobalAdmin && !activeCollegeId) ? [
         { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+        { label: 'Search User', icon: Search, path: '/search-user' },
         { label: 'Colleges', icon: School, path: '/admin/colleges' },
         { label: 'Courses', icon: BookOpen, path: '/admin/courses' },
+        { label: 'Exams', icon: FileText, path: '/admin/exams' },
+        { label: 'Question Bank', icon: Database, path: '/admin/question-bank' },
+        ...(['super_admin', 'ops_admin', 'ast_ops_admin'].includes(user?.role) ? [{ label: 'Code2Career', icon: Terminal, path: '/admin/company-arena', isNew: true }] : []),
+        { label: 'Allotments & Live Keys', icon: Send, path: '/admin/allotments' },
         { label: 'Trainers', icon: Users, path: '/admin/trainers' },
+        { label: 'Study Materials', icon: FileSpreadsheet, path: '/trainer/study-materials' },
+        { label: 'ByteBase', icon: Code2, path: '/admin/bytebase', isNew: true },
+        { label: 'AlgoPlay', icon: Cpu, path: '/admin/algoplay', isNew: true },
+        { label: 'Blogs', icon: PenTool, path: '/blogs', isNew: true },
         { label: 'Attendance', icon: CalendarCheck, path: '/admin/attendance' },
         { label: 'Training Logs', icon: FileSpreadsheet, path: '/admin/logs' },
+        { label: 'Placements', icon: Briefcase, path: '/placement/dashboard' },
         ...(['super_admin', 'ops_admin'].includes(user?.role) ? [{ label: 'Admins & Staff', icon: ShieldCheck, path: '/admin/users' }] : []),
         { label: 'Analytics', icon: BarChart3, path: '/analytics' },
-        { label: 'Reports & Exports', icon: Database, path: '/reports' }
+        { label: 'Reports & Exports', icon: Database, path: '/reports' },
+        { label: 'Audit Log', icon: ShieldCheck, path: '/admin/audit' }
     ] : [
         { label: 'Dashboard', icon: LayoutDashboard, path: `${prefix}/dashboard` },
+        { label: 'Search User', icon: Search, path: `${prefix}/search-user` },
+        { label: 'College ERP Hub', icon: Building2, path: `${prefix}/overview` },
         { label: 'Courses', icon: BookOpen, path: `${prefix}/admin/courses` },
+        { label: 'Batches & Students', icon: Users, path: `${prefix}/admin/batches` },
         { label: 'Exams', icon: FileText, path: `${prefix}/admin/exams` },
+        { label: 'Question Bank', icon: Database, path: `${prefix}/admin/question-bank` },
+        ...(['super_admin', 'ops_admin', 'ast_ops_admin'].includes(user?.role) ? [{ label: 'Code2Career', icon: Terminal, path: `${prefix}/admin/company-arena`, isNew: true }] : []),
+        { label: 'Allotments & Live Keys', icon: Send, path: `${prefix}/admin/allotments` },
         { label: 'Trainers', icon: Users, path: `${prefix}/admin/trainers` },
-        { label: 'Batches', icon: Users, path: `${prefix}/admin/batches` },
+        { label: 'Study Materials', icon: FileSpreadsheet, path: `${prefix}/admin/study-materials` },
+        { label: 'ByteBase', icon: Code2, path: `${prefix}/admin/bytebase`, isNew: true },
+        { label: 'AlgoPlay', icon: Cpu, path: `${prefix}/admin/algoplay`, isNew: true },
+        { label: 'Blogs', icon: PenTool, path: `${prefix}/blogs`, isNew: true },
         { label: 'Attendance', icon: CalendarCheck, path: `${prefix}/admin/attendance` },
-        { label: 'Allotments', icon: Send, path: `${prefix}/admin/allotments` },
         { label: 'Training Logs', icon: FileSpreadsheet, path: `${prefix}/admin/logs` },
+        { label: 'Placements', icon: Briefcase, path: `${prefix}/placement/dashboard` },
+        { label: 'Leaderboard', icon: Trophy, path: `${prefix}/admin/leaderboard` },
         { label: 'Analytics', icon: BarChart3, path: `${prefix}/analytics` },
         { label: 'Reports & Exports', icon: Database, path: `${prefix}/reports` },
         { label: 'Audit Log', icon: ShieldCheck, path: `${prefix}/admin/audit` },
@@ -226,333 +262,386 @@ const MainLayout = ({ children }) => {
             <div className="flex h-screen bg-slate-50 font-['Inter'] overflow-hidden relative">
                 {/* Mobile Sidebar Backdrop */}
                 {sidebarOpen && (
-                    <div 
-                        className="fixed inset-0 bg-black/20 backdrop-blur-xs z-30 md:hidden" 
+                    <div
+                        className="fixed inset-0 bg-black/20 backdrop-blur-xs z-30 md:hidden"
                         onClick={() => setSidebarOpen(false)}
                     />
                 )}
 
-            {/* Sidebar */}
-            <aside className={`fixed md:relative inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200 transition-all duration-300 h-full ${
-                sidebarOpen 
-                    ? 'w-64 translate-x-0' 
+                {/* Sidebar */}
+                <aside className={`fixed md:relative inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200 transition-all duration-300 h-full ${sidebarOpen
+                    ? 'w-64 translate-x-0'
                     : 'w-64 -translate-x-full md:translate-x-0 md:w-20'
-            }`}>
-                {/* Logo */}
-                <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                            <img src="/logonew.jpg" alt="Ethnotech" className="w-full h-full object-cover" />
-                        </div>
-                        {sidebarOpen && (
-                            <div className="leading-tight">
-                                <span className="text-sm font-bold text-slate-900 block">Ethnotech</span>
-                                <span className="text-[10px] font-medium text-[#5899B5]">Academy</span>
+                    }`}>
+                    {/* Logo */}
+                    <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                <img src="/logonew.jpg" alt="Ethnotech" className="w-full h-full object-cover" />
                             </div>
+                            {sidebarOpen && (
+                                <div className="leading-tight">
+                                    <span className="text-sm font-bold text-slate-900 block">Ethnotech</span>
+                                    <span className="text-[10px] font-medium text-[#5899B5]">Academy</span>
+                                </div>
+                            )}
+                        </div>
+                        {/* Close button for mobile */}
+                        {sidebarOpen && (
+                            <button
+                                onClick={() => setSidebarOpen(false)}
+                                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 md:hidden"
+                            >
+                                <X size={18} />
+                            </button>
                         )}
                     </div>
-                    {/* Close button for mobile */}
-                    {sidebarOpen && (
-                        <button 
-                            onClick={() => setSidebarOpen(false)} 
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 md:hidden"
-                        >
-                            <X size={18} />
-                        </button>
-                    )}
-                </div>
 
-                {/* Context Badge */}
-                {sidebarOpen && !isStudent && (
-                    <div className="px-4 pt-4">
-                        <div className={`px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 ${selectedCollegeId ? 'bg-blue-50 text-[#5899B5] border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
-                            {selectedCollegeId ? <School size={14} /> : <Globe size={14} />}
-                            <span className="truncate">{selectedCollegeId ? selectedCollegeName : 'All Colleges'}</span>
+                    {/* Context Badge */}
+                    {sidebarOpen && !isStudent && (
+                        <div className="px-4 pt-4">
+                            <div className={`px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 ${activeCollegeId ? 'bg-blue-50 text-[#5899B5] border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                                {activeCollegeId ? <School size={14} className="shrink-0" /> : <Globe size={14} className="shrink-0" />}
+                                <div className="min-w-0 flex-1">
+                                    <span className="truncate block">{activeCollegeId ? activeCollegeName : 'All Colleges'}</span>
+                                    {isIsolatedCollegeTab && (
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">
+                                            {activeCollegeCode ? `${activeCollegeCode} • ` : ''}Isolated College Tab
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Nav Items */}
-                <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
-                    {menuItems.map((item) => {
-                        const isActive = isStudent 
-                            ? (location.pathname + location.search) === item.path ||
-                              (item.path === '/student/dashboard?tab=dashboard' && location.pathname === '/student/dashboard' && !location.search) ||
-                              (item.path === '/student/dashboard?tab=exam-history' && location.pathname.startsWith('/exam/'))
-                            : location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-                        return (
-                            <NavLink
-                                key={item.path} to={item.path}
+                    {/* Nav Items */}
+                    <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
+                        {menuItems.map((item) => {
+                            const isActive = isStudent
+                                ? (location.pathname + location.search) === item.path ||
+                                (item.path === '/student/dashboard?tab=dashboard' && location.pathname === '/student/dashboard' && !location.search) ||
+                                (item.path === '/student/dashboard?tab=enter-exam' && (location.search === '?tab=exam-history' || location.search === '?tab=exam' || location.pathname.startsWith('/exam/'))) ||
+                                (item.path === '/student/dashboard?tab=bytebase' && location.search === '?tab=language-description')
+                                : location.pathname === item.path || (item.path !== '/dashboard' && item.path !== `${prefix}/dashboard` && location.pathname.startsWith(item.path));
+                            return (
+                                <NavLink
+                                    key={item.path} to={item.path}
+                                    onClick={() => {
+                                        if (window.innerWidth < 768) {
+                                            setSidebarOpen(false);
+                                        }
+                                    }}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-[#5899B5] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} className="shrink-0" />
+                                    {sidebarOpen && (
+                                        <span className="flex-1 flex items-center justify-between gap-2 truncate">
+                                            <span className="truncate">{item.label}</span>
+                                            {item.isNew && (
+                                                <span
+                                                    className={`px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-md leading-none shrink-0 ${
+                                                        isActive
+                                                            ? 'bg-white text-[#5899B5]'
+                                                            : 'bg-emerald-500 text-white'
+                                                    }`}
+                                                >
+                                                    NEW
+                                                </span>
+                                            )}
+                                        </span>
+                                    )}
+                                </NavLink>
+                            );
+                        })}
+
+                        {!isStudent && activeCollegeId && isGlobalAdmin && user?.role !== 'placement' && (
+                            <button
                                 onClick={() => {
+                                    clearSelectedCollege();
+                                    navigate('/dashboard');
                                     if (window.innerWidth < 768) {
                                         setSidebarOpen(false);
                                     }
                                 }}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-[#5899B5] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                title={isRegionalOrAsstRM ? 'Switch College' : 'Switch to Global'}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors mt-4"
                             >
-                                <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                                {sidebarOpen && <span>{item.label}</span>}
-                            </NavLink>
-                        );
-                    })}
-
-                    {!isStudent && selectedCollegeId && isGlobalAdmin && user?.role !== 'placement' && (
-                        <button 
-                            onClick={() => { 
-                                clearSelectedCollege(); 
-                                navigate('/dashboard'); 
-                                if (window.innerWidth < 768) {
-                                    setSidebarOpen(false);
-                                }
-                            }}
-                            title={isRegionalOrAsstRM ? 'Switch College' : 'Switch to Global'}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors mt-4"
-                        >
-                            <ArrowLeftRight size={18} />
-                            {sidebarOpen && <span>{isRegionalOrAsstRM ? 'Switch College' : 'Switch to Global'}</span>}
-                        </button>
-                    )}
-                </nav>
-
-                {/* User Section */}
-                <div className="p-4 border-t border-slate-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#5899B5] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                            {displayAvatar}
-                        </div>
-                        {sidebarOpen && (
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-slate-900 truncate">{displayName}</p>
-                                <p className="text-xs text-slate-400 capitalize">{displayRole}</p>
-                            </div>
-                        )}
-                        {sidebarOpen && (
-                            <button onClick={displayLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Logout">
-                                <LogOut size={16} />
+                                <ArrowLeftRight size={18} />
+                                {sidebarOpen && <span>{isRegionalOrAsstRM ? 'Switch College' : 'Switch to Global'}</span>}
                             </button>
                         )}
-                    </div>
-                </div>
-            </aside>
+                    </nav>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0">
-                {/* Top Header */}
-                <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">
-                            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                        </button>
-
-                        {!isStudent && (
-                            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg w-80">
-                                <Search size={16} className="text-slate-400" />
-                                <input type="text" placeholder="Search..." className="bg-transparent text-sm outline-none w-full text-slate-600 placeholder:text-slate-400" />
+                    {/* User Section */}
+                    <div className="p-4 border-t border-slate-100">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-[#5899B5] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                {displayAvatar}
                             </div>
-                        )}
+                            {sidebarOpen && (
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-slate-900 truncate">{displayName}</p>
+                                    <p className="text-xs text-slate-400 capitalize">{displayRole}</p>
+                                </div>
+                            )}
+                            {sidebarOpen && (
+                                <button onClick={displayLogout} className="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Logout">
+                                    <LogOut size={16} />
+                                </button>
+                            )}
+                        </div>
                     </div>
+                </aside>
 
-                    <div className="flex items-center gap-4">
-                        {/* College Selector / Read-only Student Badge */}
-                        {isStudent && student?.collegeName && (
-                            <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 font-semibold flex items-center gap-2 max-w-[280px] md:max-w-[360px] truncate shadow-sm">
-                                <School size={15} className="text-[#5899B5] flex-shrink-0" />
-                                <span className="truncate">{student.collegeName}</span>
-                            </div>
-                        )}
-                        {!isStudent && (isGlobalAdmin || user?.role === 'trainer') && (
-                            selectedCollegeId ? (
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col min-w-0">
+                    {/* Top Header */}
+                    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">
+                                {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                            </button>
+
+                            {!isStudent && (
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const qVal = e.currentTarget.elements.globalSearch?.value?.trim() || '';
+                                        const targetSearchPath =
+                                            user?.role === 'trainer'
+                                                ? '/trainer/search-user'
+                                                : activeCollegeId
+                                                    ? `/college/${activeCollegeId}/search-user`
+                                                    : '/search-user';
+                                        navigate(qVal ? `${targetSearchPath}?q=${encodeURIComponent(qVal)}` : targetSearchPath);
+                                    }}
+                                    className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg w-80 focus-within:bg-white focus-within:border-[#5899B5] transition"
+                                >
+                                    <Search size={16} className="text-slate-400 shrink-0" />
+                                    <input
+                                        name="globalSearch"
+                                        type="text"
+                                        placeholder={
+                                            user?.role === 'trainer'
+                                                ? 'Search students in my batches...'
+                                                : activeCollegeId
+                                                    ? `Search users in ${activeCollegeName}...`
+                                                    : 'Search any user, USN, trainer...'
+                                        }
+                                        className="bg-transparent text-sm outline-none w-full text-slate-700 placeholder:text-slate-400"
+                                    />
+                                </form>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            {/* College Selector / Read-only Student Badge */}
+                            {isStudent && student?.collegeName && (
                                 <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 font-semibold flex items-center gap-2 max-w-[280px] md:max-w-[360px] truncate shadow-sm">
                                     <School size={15} className="text-[#5899B5] flex-shrink-0" />
-                                    <span className="truncate">{selectedCollegeName}</span>
-                                    <button 
-                                        onClick={() => { 
-                                            clearSelectedCollege(); 
-                                            if (isGlobalAdmin) navigate('/dashboard'); 
-                                        }}
-                                        className="ml-1 text-slate-400 hover:text-red-500 font-bold transition-colors cursor-pointer"
-                                        title="Clear college context"
-                                    >
-                                        ×
-                                    </button>
+                                    <span className="truncate">{student.collegeName}</span>
                                 </div>
-                            ) : (
-                                <select 
-                                    className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-[#5899B5] text-slate-600 min-w-[200px]"
-                                    value={selectedCollegeId || ''}
-                                    onChange={(e) => {
-                                        if (!e.target.value) { 
-                                            clearSelectedCollege(); 
-                                            if (isGlobalAdmin) navigate('/dashboard'); 
-                                        }
-                                        else {
-                                            const college = colleges.find(c => c._id === e.target.value);
-                                            if (college) { 
-                                                setSelectedCollege(college._id, college.name, college.code);
-                                                if (isGlobalAdmin) {
-                                                    if (user?.role === 'placement') {
-                                                        navigate(`/college/${college._id}/placement/dashboard`);
-                                                    } else {
-                                                        navigate(`/college/${college._id}/dashboard`);
+                            )}
+                            {!isStudent && (isGlobalAdmin || user?.role === 'trainer') && (
+                                activeCollegeId ? (
+                                    <div className="text-sm bg-blue-50/70 border border-blue-200 rounded-lg px-3.5 py-1.5 text-slate-800 font-semibold flex items-center gap-2 max-w-[300px] md:max-w-[400px] truncate shadow-2xs">
+                                        <School size={15} className="text-[#5899B5] flex-shrink-0" />
+                                        <span className="truncate">{activeCollegeName}</span>
+                                        {activeCollegeCode && (
+                                            <span className="px-1.5 py-0.5 rounded bg-[#5899B5]/15 text-[#3D7690] text-[10px] font-bold uppercase tracking-wider shrink-0">
+                                                {activeCollegeCode}
+                                            </span>
+                                        )}
+                                        {!isIsolatedCollegeTab && (
+                                            <button
+                                                onClick={() => {
+                                                    clearSelectedCollege();
+                                                    if (isGlobalAdmin) navigate('/dashboard');
+                                                }}
+                                                className="ml-1 text-slate-400 hover:text-red-500 font-bold transition-colors cursor-pointer"
+                                                title="Clear college context"
+                                            >
+                                                ×
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <select
+                                        className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-[#5899B5] text-slate-600 min-w-[200px]"
+                                        value={activeCollegeId || ''}
+                                        onChange={(e) => {
+                                            if (!e.target.value) {
+                                                clearSelectedCollege();
+                                                if (isGlobalAdmin) navigate('/dashboard');
+                                            }
+                                            else {
+                                                const college = colleges.find(c => c._id === e.target.value);
+                                                if (college) {
+                                                    setSelectedCollege(college._id, college.name, college.code);
+                                                    if (isGlobalAdmin) {
+                                                        if (user?.role === 'placement') {
+                                                            navigate(`/college/${college._id}/placement/dashboard`);
+                                                        } else {
+                                                            navigate(`/college/${college._id}/dashboard`);
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }}
-                                >
-                                    <option value="">All Colleges</option>
-                                    {colleges.map(c => (<option key={c._id} value={c._id}>{c.name}</option>))}
-                                </select>
-                            )
-                        )}
+                                        }}
+                                    >
+                                        <option value="">All Colleges</option>
+                                        {colleges.map(c => (<option key={c._id} value={c._id}>{c.name}</option>))}
+                                    </select>
+                                )
+                            )}
 
-                        {/* Notification Bell Dropdown */}
-                        {user && user.role !== 'student' && (
-                            <div className="relative">
-                                <button 
-                                    onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-                                    className={`relative p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors ${notifDropdownOpen ? 'bg-slate-50 text-slate-600' : ''}`}
-                                >
-                                    <Bell size={20} />
-                                    {unreadCount > 0 && (
-                                        <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
-                                            {unreadCount}
-                                        </span>
-                                    )}
-                                </button>
+                            {/* Notification Bell Dropdown */}
+                            {user && user.role !== 'student' && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                                        className={`relative p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors ${notifDropdownOpen ? 'bg-slate-50 text-slate-600' : ''}`}
+                                    >
+                                        <Bell size={20} />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
 
-                                <AnimatePresence>
-                                    {notifDropdownOpen && (
-                                        <>
-                                            <div className="fixed inset-0 z-40" onClick={() => setNotifDropdownOpen(false)} />
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                transition={{ duration: 0.15 }}
-                                                className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-3xl shadow-xl z-50 overflow-hidden flex flex-col max-h-[480px]"
-                                            >
-                                                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-                                                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                                                        <Bell size={14} className="text-[#5899B5]" />
-                                                        System Notifications
-                                                    </span>
-                                                    {unreadCount > 0 && (
-                                                        <button 
-                                                            onClick={handleClearAll}
-                                                            className="text-[10px] font-bold text-[#5899B5] hover:underline cursor-pointer"
-                                                        >
-                                                            Mark all as read
-                                                        </button>
-                                                    )}
-                                                </div>
+                                    <AnimatePresence>
+                                        {notifDropdownOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-40" onClick={() => setNotifDropdownOpen(false)} />
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    transition={{ duration: 0.15 }}
+                                                    className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-3xl shadow-xl z-50 overflow-hidden flex flex-col max-h-[480px]"
+                                                >
+                                                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                                                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                                                            <Bell size={14} className="text-[#5899B5]" />
+                                                            System Notifications
+                                                        </span>
+                                                        {unreadCount > 0 && (
+                                                            <button
+                                                                onClick={handleClearAll}
+                                                                className="text-[10px] font-bold text-[#5899B5] hover:underline cursor-pointer"
+                                                            >
+                                                                Mark all as read
+                                                            </button>
+                                                        )}
+                                                    </div>
 
-                                                <div className="overflow-y-auto divide-y divide-slate-100 flex-1 custom-scrollbar">
-                                                    {notifications.length === 0 ? (
-                                                        <div className="py-12 text-center text-slate-400">
-                                                            <Bell size={28} className="mx-auto text-slate-200 mb-2" />
-                                                            <p className="text-xs font-medium">No notifications yet</p>
-                                                        </div>
-                                                    ) : (
-                                                        notifications.map((notif) => {
-                                                            let typeBg = "bg-blue-50";
-                                                            if (notif.type === 'exam_started') {
-                                                                typeBg = "bg-emerald-50";
-                                                            } else if (notif.type === 'log_submitted') {
-                                                                typeBg = "bg-purple-50";
-                                                            }
+                                                    <div className="overflow-y-auto divide-y divide-slate-100 flex-1 custom-scrollbar">
+                                                        {notifications.length === 0 ? (
+                                                            <div className="py-12 text-center text-slate-400">
+                                                                <Bell size={28} className="mx-auto text-slate-200 mb-2" />
+                                                                <p className="text-xs font-medium">No notifications yet</p>
+                                                            </div>
+                                                        ) : (
+                                                            notifications.map((notif) => {
+                                                                let typeBg = "bg-blue-50";
+                                                                if (notif.type === 'exam_started') {
+                                                                    typeBg = "bg-emerald-50";
+                                                                } else if (notif.type === 'log_submitted') {
+                                                                    typeBg = "bg-purple-50";
+                                                                }
 
-                                                            return (
-                                                                <div 
-                                                                    key={notif._id}
-                                                                    onClick={() => {
-                                                                        if (!notif.isRead) handleMarkAsRead(notif._id);
-                                                                    }}
-                                                                    className={`p-4 flex gap-3 transition-colors text-left hover:bg-slate-50 cursor-pointer ${!notif.isRead ? 'bg-blue-50/15' : ''}`}
-                                                                >
-                                                                    <div className={`w-8 h-8 rounded-lg ${typeBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                                                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: notif.type === 'exam_started' ? '#10b981' : notif.type === 'log_submitted' ? '#a855f7' : '#5899B5' }} />
-                                                                    </div>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center justify-between gap-2 mb-1">
-                                                                            <h4 className="text-xs font-bold text-slate-800 truncate">{notif.title}</h4>
-                                                                            <span className="text-[9px] text-slate-400 font-medium">
-                                                                                {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                            </span>
+                                                                return (
+                                                                    <div
+                                                                        key={notif._id}
+                                                                        onClick={() => {
+                                                                            if (!notif.isRead) handleMarkAsRead(notif._id);
+                                                                        }}
+                                                                        className={`p-4 flex gap-3 transition-colors text-left hover:bg-slate-50 cursor-pointer ${!notif.isRead ? 'bg-blue-50/15' : ''}`}
+                                                                    >
+                                                                        <div className={`w-8 h-8 rounded-lg ${typeBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                                                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: notif.type === 'exam_started' ? '#10b981' : notif.type === 'log_submitted' ? '#a855f7' : '#5899B5' }} />
                                                                         </div>
-                                                                        <p className="text-xs text-slate-500 leading-relaxed break-words">{notif.message}</p>
-                                                                        
-                                                                        {!notif.isRead && (
-                                                                            <span className="inline-flex items-center gap-1 text-[9px] text-[#5899B5] font-bold mt-2">
-                                                                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" /> New Alert
-                                                                            </span>
-                                                                        )}
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                                                <h4 className="text-xs font-bold text-slate-800 truncate">{notif.title}</h4>
+                                                                                <span className="text-[9px] text-slate-400 font-medium">
+                                                                                    {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                                </span>
+                                                                            </div>
+                                                                            <p className="text-xs text-slate-500 leading-relaxed break-words">{notif.message}</p>
+
+                                                                            {!notif.isRead && (
+                                                                                <span className="inline-flex items-center gap-1 text-[9px] text-[#5899B5] font-bold mt-2">
+                                                                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" /> New Alert
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            );
-                                                        })
-                                                    )}
-                                                </div>
-                                            </motion.div>
-                                        </>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        )}
-                    </div>
-                </header>
-
-                {/* Page Content */}
-                <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-                    <div className="max-w-7xl mx-auto">
-                        {children}
-                    </div>
-                </main>
-            </div>
-
-            {/* Global Toasts Container */}
-            <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
-                {toasts.map((t) => {
-                    let bg = 'bg-white border-emerald-100 shadow-emerald-100/50';
-                    let text = 'text-emerald-800';
-                    let progressBg = 'bg-emerald-500';
-                    if (t.type === 'error') {
-                        bg = 'bg-white border-rose-100 shadow-rose-100/50';
-                        text = 'text-rose-800';
-                        progressBg = 'bg-rose-500';
-                    } else if (t.type === 'warning') {
-                        bg = 'bg-white border-amber-100 shadow-amber-100/50';
-                        text = 'text-amber-800';
-                        progressBg = 'bg-amber-500';
-                    } else if (t.type === 'info') {
-                        bg = 'bg-white border-blue-100 shadow-blue-100/50';
-                        text = 'text-blue-800';
-                        progressBg = 'bg-blue-500';
-                    }
-
-                    return (
-                        <div 
-                            key={t.id} 
-                            className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl border shadow-lg ${bg} animate-in slide-in-from-top-5 fade-in duration-300 relative overflow-hidden`}
-                        >
-                            <div className="flex items-center gap-2.5">
-                                <span className={`w-2 h-2 rounded-full ${progressBg} animate-pulse`} />
-                                <p className={`text-sm font-semibold ${text}`}>{t.message}</p>
-                            </div>
-                            <button 
-                                onClick={() => removeToast(t.id)} 
-                                className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded-md hover:bg-slate-50 cursor-pointer"
-                            >
-                                <X size={15} />
-                            </button>
-                            <div className="absolute bottom-0 left-0 h-0.5 w-full bg-slate-100">
-                                <div className={`h-full ${progressBg}`} style={{ animation: 'shrink 4s linear forwards' }} />
-                            </div>
+                                                                );
+                                                            })
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+                                            </>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
                         </div>
-                    );
-                })}
+                    </header>
+
+                    {/* Page Content */}
+                    <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+                        <div className="max-w-7xl mx-auto">
+                            {children}
+                        </div>
+                    </main>
+                </div>
+
+                {/* Global Toasts Container */}
+                <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+                    {toasts.map((t) => {
+                        let bg = 'bg-white border-emerald-100 shadow-emerald-100/50';
+                        let text = 'text-emerald-800';
+                        let progressBg = 'bg-emerald-500';
+                        if (t.type === 'error') {
+                            bg = 'bg-white border-rose-100 shadow-rose-100/50';
+                            text = 'text-rose-800';
+                            progressBg = 'bg-rose-500';
+                        } else if (t.type === 'warning') {
+                            bg = 'bg-white border-amber-100 shadow-amber-100/50';
+                            text = 'text-amber-800';
+                            progressBg = 'bg-amber-500';
+                        } else if (t.type === 'info') {
+                            bg = 'bg-white border-blue-100 shadow-blue-100/50';
+                            text = 'text-blue-800';
+                            progressBg = 'bg-blue-500';
+                        }
+
+                        return (
+                            <div
+                                key={t.id}
+                                className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl border shadow-lg ${bg} animate-in slide-in-from-top-5 fade-in duration-300 relative overflow-hidden`}
+                            >
+                                <div className="flex items-center gap-2.5">
+                                    <span className={`w-2 h-2 rounded-full ${progressBg} animate-pulse`} />
+                                    <p className={`text-sm font-semibold ${text}`}>{t.message}</p>
+                                </div>
+                                <button
+                                    onClick={() => removeToast(t.id)}
+                                    className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded-md hover:bg-slate-50 cursor-pointer"
+                                >
+                                    <X size={15} />
+                                </button>
+                                <div className="absolute bottom-0 left-0 h-0.5 w-full bg-slate-100">
+                                    <div className={`h-full ${progressBg}`} style={{ animation: 'shrink 4s linear forwards' }} />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-        </div>
         </SocketContext.Provider>
     );
 };

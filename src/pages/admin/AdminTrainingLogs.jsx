@@ -1,190 +1,174 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
-import { 
-    Download, FileText, Loader2, Database, School, Calendar, 
-    BookOpen, Users, Clock, ArrowRight, Eye, X, BookOpenCheck, Search
+import { useLocation, useParams } from 'react-router-dom';
+import {
+    Download,
+    Loader2,
+    School,
+    Calendar,
+    BookOpen,
+    Users,
+    Eye,
+    X,
+    Search,
+    Layers,
+    RotateCcw,
+    FileSpreadsheet
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const AdminTrainingLogs = () => {
     const { token, user } = useAuthStore();
-    const { selectedCollegeId, selectedCollegeName } = useCollegeStore();
+    const { selectedCollegeId: storeCollegeId, selectedCollegeName } = useCollegeStore();
+    const { collegeId: paramCollegeId } = useParams();
     const location = useLocation();
 
     const isMultiCollegeAdmin = ['super_admin', 'ops_admin', 'ast_ops_admin', 'regional_manager', 'asst_rm'].includes(user?.role);
 
-    // Derive college ID from URL as fallback when store hasn't hydrated yet
-    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
-    const effectiveCollegeId = selectedCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null);
-    
+    // Derive college ID strictly from URL first (isolated college tab), then store
+    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]{24})/i);
+    const urlCollegeId = paramCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null);
+    const effectiveCollegeId = urlCollegeId || storeCollegeId || (user?.role === 'college_admin' ? user.collegeId : null);
+
     const [logs, setLogs] = useState([]);
     const [colleges, setColleges] = useState([]);
     const [trainers, setTrainers] = useState([]);
     const [courses, setCourses] = useState([]);
-    
+    const [batches, setBatches] = useState([]);
+
     const [selectedCollege, setSelectedCollege] = useState(effectiveCollegeId || 'all');
     const [selectedTrainer, setSelectedTrainer] = useState('all');
     const [selectedCourse, setSelectedCourse] = useState('all');
+    const [selectedBatch, setSelectedBatch] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [loading, setLoading] = useState(true);
+    const [exportLoading, setExportLoading] = useState(false);
+
+    // Details Modal State
+    const [selectedLog, setSelectedLog] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Lock selectedCollege whenever inside a college context
     useEffect(() => {
         if (effectiveCollegeId) {
             setSelectedCollege(effectiveCollegeId);
         } else {
             setSelectedCollege('all');
         }
-    }, [effectiveCollegeId]);
-    
-    const [loading, setLoading] = useState(true);
-    const [exportLoading, setExportLoading] = useState(false);
-    
-    // Details Modal State
-    const [selectedLog, setSelectedLog] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // Fetch colleges on mount (only for multi-college admin roles)
-    useEffect(() => {
-        if (isMultiCollegeAdmin) {
-            fetchColleges();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isMultiCollegeAdmin]);
-
-    // Fetch trainers & courses when college scope changes, and reset trainer/course selection
-    useEffect(() => {
         setSelectedTrainer('all');
         setSelectedCourse('all');
-        fetchTrainers();
-        fetchCourses();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedCollege, effectiveCollegeId]);
+        setSelectedBatch('all');
+    }, [effectiveCollegeId]);
 
-    // Fetch logs when college, trainer, or course selection changes
+    const activeCollegeScope = effectiveCollegeId || (selectedCollege !== 'all' ? selectedCollege : '');
+
+    // Fetch colleges list
     useEffect(() => {
-        fetchLogs();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedCollege, selectedTrainer, selectedCourse, effectiveCollegeId]);
+        if (!token) return;
+        axios
+            .get(`${API}/admin/colleges`, { headers: { Authorization: `Bearer ${token}` } })
+            .then((res) => {
+                if (res.data.success) setColleges(res.data.data || []);
+            })
+            .catch(() => {});
+    }, [token]);
 
-    useSocketUpdate(() => {
-        fetchLogs();
-    }, ['attendance']);
+    // Fetch trainers, courses, and batches strictly scoped to activeCollegeScope
+    useEffect(() => {
+        if (!token) return;
+        const headers = { Authorization: `Bearer ${token}` };
 
-    const fetchColleges = async () => {
-        try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.data.success) {
-                setColleges(res.data.data);
+        const fetchFilterMetadata = async () => {
+            try {
+                const trainerUrl = activeCollegeScope
+                    ? `${API}/admin/trainers?collegeId=${activeCollegeScope}`
+                    : `${API}/admin/trainers`;
+                const courseUrl = activeCollegeScope
+                    ? `${API}/admin/colleges/${activeCollegeScope}/courses`
+                    : `${API}/admin/courses`;
+                const batchUrl = activeCollegeScope
+                    ? `${API}/admin/colleges/${activeCollegeScope}/batches`
+                    : `${API}/admin/colleges/all/batches`;
+
+                const [tRes, cRes, bRes] = await Promise.all([
+                    axios.get(trainerUrl, { headers }),
+                    axios.get(courseUrl, { headers }),
+                    axios.get(batchUrl, { headers })
+                ]);
+
+                if (tRes.data.success) setTrainers(tRes.data.data || []);
+                if (cRes.data.success) setCourses(cRes.data.data || []);
+                if (bRes.data.success) setBatches(bRes.data.data || []);
+            } catch (e) {
+                console.error('Failed to fetch training log filters:', e);
             }
-        } catch (error) {
-            console.error('Failed to fetch colleges', error);
-        }
-    };
+        };
 
-    const fetchTrainers = async () => {
-        try {
-            const collegeContextId = effectiveCollegeId || (isMultiCollegeAdmin 
-                ? (selectedCollege !== 'all' ? selectedCollege : '')
-                : user?.collegeId);
-            
-            const params = {};
-            if (collegeContextId) {
-                params.collegeId = collegeContextId;
-            }
+        setSelectedTrainer('all');
+        setSelectedCourse('all');
+        setSelectedBatch('all');
+        fetchFilterMetadata();
+    }, [token, activeCollegeScope]);
 
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/trainers`, {
-                headers: { Authorization: `Bearer ${token}` },
-                params
-            });
-            if (res.data.success) {
-                setTrainers(res.data.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch trainers', error);
-        }
-    };
-
-    const fetchCourses = async () => {
-        try {
-            const collegeContextId = effectiveCollegeId || (isMultiCollegeAdmin 
-                ? (selectedCollege !== 'all' ? selectedCollege : '')
-                : user?.collegeId);
-            
-            let url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/courses`;
-            if (collegeContextId) {
-                url = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/colleges/${collegeContextId}/courses`;
-            }
-
-            const res = await axios.get(url, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.data.success) {
-                setCourses(res.data.data || []);
-            }
-        } catch (error) {
-            console.error('Failed to fetch courses', error);
-        }
-    };
-
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async () => {
+        if (!token) return;
         setLoading(true);
         try {
             const params = {};
-            const collegeContextId = effectiveCollegeId || (isMultiCollegeAdmin 
-                ? (selectedCollege !== 'all' ? selectedCollege : '')
-                : user?.collegeId);
-
-            if (collegeContextId) {
-                params.collegeId = collegeContextId;
+            if (activeCollegeScope) {
+                params.collegeId = activeCollegeScope;
             }
-
             if (selectedTrainer !== 'all') {
                 params.trainerId = selectedTrainer;
             }
-
             if (selectedCourse !== 'all') {
                 params.courseId = selectedCourse;
             }
+            if (selectedBatch !== 'all') {
+                params.batchId = selectedBatch;
+            }
 
-            const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/admin/training-logs`, {
+            const res = await axios.get(`${API}/admin/training-logs`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params
             });
 
             if (res.data.success) {
-                setLogs(res.data.data);
+                const fetched = res.data.data || [];
+                const strictlyScoped = activeCollegeScope
+                    ? fetched.filter((l) => l.collegeId?.toString() === activeCollegeScope.toString())
+                    : fetched;
+                setLogs(strictlyScoped);
             }
         } catch (error) {
             console.error('Failed to fetch training logs', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, activeCollegeScope, selectedTrainer, selectedCourse, selectedBatch]);
+
+    useEffect(() => {
+        fetchLogs();
+    }, [fetchLogs]);
+
+    useSocketUpdate(() => {
+        fetchLogs();
+    }, ['attendance']);
 
     const handleExport = async () => {
         setExportLoading(true);
         try {
-            const params = {};
-            if (isMultiCollegeAdmin) {
-                if (effectiveCollegeId) {
-                    params.collegeId = effectiveCollegeId;
-                } else if (selectedCollege !== 'all') {
-                    params.collegeId = selectedCollege;
-                }
-            } else {
-                params.collegeId = effectiveCollegeId || user?.collegeId;
-            }
-
-            const collegeQuery = params.collegeId ? `&collegeId=${params.collegeId}` : '';
+            const collegeQuery = activeCollegeScope ? `&collegeId=${activeCollegeScope}` : '';
             const trainerQuery = selectedTrainer !== 'all' ? `&trainerId=${selectedTrainer}` : '';
             const courseQuery = selectedCourse !== 'all' ? `&courseId=${selectedCourse}` : '';
-            
+
             const res = await axios.get(
-                `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/analytics/export?type=training_logs${collegeQuery}${trainerQuery}${courseQuery}`,
+                `${API}/analytics/export?type=training_logs${collegeQuery}${trainerQuery}${courseQuery}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                     responseType: 'blob'
@@ -196,24 +180,12 @@ const AdminTrainingLogs = () => {
             link.href = url;
 
             let collegeName = 'Overall_Platform';
-            if (params.collegeId) {
-                if (isMultiCollegeAdmin) {
-                    const matched = colleges.find(c => c._id === selectedCollege);
-                    if (matched) collegeName = matched.name;
-                } else {
-                    collegeName = selectedCollegeName || 'College';
-                }
+            if (activeCollegeScope) {
+                const matched = colleges.find((c) => c._id === activeCollegeScope);
+                collegeName = matched?.name || selectedCollegeName || 'College';
             }
 
-            let filename = `${collegeName.replace(/\s+/g, '_')}_Training_Logs_Report.xlsx`;
-            if (selectedTrainer !== 'all') {
-                const matchedTrainer = trainers.find(t => t._id === selectedTrainer);
-                if (matchedTrainer) {
-                    const trainerName = `${matchedTrainer.firstName || ''} ${matchedTrainer.lastName || ''}`.trim() || matchedTrainer.username;
-                    filename = `${collegeName.replace(/\s+/g, '_')}_Trainer_${trainerName.replace(/\s+/g, '_')}_Training_Logs_Report.xlsx`;
-                }
-            }
-
+            const filename = `${collegeName.replace(/\s+/g, '_')}_Training_Logs_Report.xlsx`;
             link.setAttribute('download', filename);
             document.body.appendChild(link);
             link.click();
@@ -226,345 +198,399 @@ const AdminTrainingLogs = () => {
         }
     };
 
-    const openDetails = (log) => {
-        setSelectedLog(log);
-        setIsModalOpen(true);
-    };
-
-    const closeDetails = () => {
-        setSelectedLog(null);
-        setIsModalOpen(false);
-    };
-
-    const filteredLogs = logs.filter(log => {
+    const filteredLogs = logs.filter((log) => {
+        if (activeCollegeScope && log.collegeId?.toString() !== activeCollegeScope.toString()) {
+            return false;
+        }
+        if (selectedBatch !== 'all' && log.batchId?.toString() !== selectedBatch.toString()) {
+            return false;
+        }
         const trainerName = (log.trainerName || '').toLowerCase();
         const courseName = (log.courseName || '').toLowerCase();
         const collegeName = (log.collegeName || '').toLowerCase();
         const topics = (log.topicsCovered || '').toLowerCase();
         const batch = (log.batchName || '').toLowerCase();
         const search = searchTerm.toLowerCase();
-        return trainerName.includes(search) || courseName.includes(search) || collegeName.includes(search) || topics.includes(search) || batch.includes(search);
+        return (
+            trainerName.includes(search) ||
+            courseName.includes(search) ||
+            collegeName.includes(search) ||
+            topics.includes(search) ||
+            batch.includes(search)
+        );
     });
 
+    const activeCollegeDisplay =
+        selectedCollegeName ||
+        colleges.find((c) => c._id === activeCollegeScope)?.name ||
+        'Managed College';
+
+    const visibleBatches = batches.filter((b) => {
+        if (selectedCourse !== 'all') {
+            const bCid = b.courseId?._id || b.courseId;
+            return bCid?.toString() === selectedCourse.toString();
+        }
+        return true;
+    });
+
+    const hasActiveFilters =
+        (!effectiveCollegeId && selectedCollege !== 'all') ||
+        selectedCourse !== 'all' ||
+        selectedBatch !== 'all' ||
+        selectedTrainer !== 'all' ||
+        searchTerm.trim() !== '';
+
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+        <div className="space-y-6 pb-10">
+            {/* Page Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-200/80">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">
-                        Trainer Progress Logs
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
+                        <FileSpreadsheet className="text-[#5899B5] shrink-0" size={26} />
+                        <span>{effectiveCollegeId ? `Training Logs — ${activeCollegeDisplay}` : 'Trainer Progress Logs'}</span>
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Review, inspect, and export training progress logs recorded by your active teaching staff.
+                    <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                        {effectiveCollegeId
+                            ? `Showing session logs recorded exclusively for ${activeCollegeDisplay}.`
+                            : 'Review, inspect, and export training progress logs recorded across institutions.'}
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-wrap">
-                    {/* College Filter Selection */}
-                    {isMultiCollegeAdmin && !effectiveCollegeId ? (
-                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-2.5 border border-slate-200 rounded-lg shadow-sm">
-                            <School size={15} className="text-slate-400" />
-                            <select 
-                                value={selectedCollege} 
-                                onChange={(e) => setSelectedCollege(e.target.value)}
-                                className="text-xs font-semibold text-slate-600 bg-transparent outline-none cursor-pointer pr-4"
-                            >
-                                <option value="all">All Colleges (Overall)</option>
-                                {colleges.map(c => (
-                                    <option key={c._id} value={c._id}>{c.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2 bg-blue-50 text-[#5899B5] px-3.5 py-2.5 rounded-lg border border-blue-200 shadow-sm">
-                            <School size={15} className="text-[#5899B5]" />
-                            <span className="text-xs font-bold">
-                                College: {selectedCollegeName || 'Managed College'}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Trainer Filter Dropdown */}
-                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-2.5 border border-slate-200 rounded-lg shadow-sm">
-                        <Users size={15} className="text-slate-400" />
-                        <select 
-                            value={selectedTrainer} 
-                            onChange={(e) => setSelectedTrainer(e.target.value)}
-                            className="text-xs font-semibold text-slate-600 bg-transparent outline-none cursor-pointer pr-4"
-                        >
-                            <option value="all">All Trainers (Overall)</option>
-                            {trainers.map(t => {
-                                const trainerName = `${t.firstName || ''} ${t.lastName || ''}`.trim() || t.username;
-                                return (
-                                    <option key={t._id} value={t._id}>{trainerName}</option>
-                                );
-                            })}
-                        </select>
-                    </div>
-
-                    {/* Course Filter Dropdown */}
-                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-2.5 border border-slate-200 rounded-lg shadow-sm">
-                        <BookOpen size={15} className="text-slate-400" />
-                        <select 
-                            value={selectedCourse} 
-                            onChange={(e) => setSelectedCourse(e.target.value)}
-                            className="text-xs font-semibold text-slate-600 bg-transparent outline-none cursor-pointer pr-4"
-                        >
-                            <option value="all">All Courses (Overall)</option>
-                            {courses.map(c => (
-                                <option key={c._id} value={c._id}>{c.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <button 
+                <div className="flex items-center gap-3 shrink-0">
+                    <button
                         onClick={handleExport}
-                        disabled={exportLoading || logs.length === 0}
-                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-lg text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
+                        disabled={exportLoading || filteredLogs.length === 0}
+                        className="h-10 px-4 bg-[#5899B5] hover:bg-[#3D7690] text-white font-semibold rounded-xl text-xs inline-flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
                     >
-                        {exportLoading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                        Export to Excel
+                        {exportLoading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+                        Export Training Logs (.xlsx)
                     </button>
                 </div>
             </div>
 
-            {/* List */}
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h3 className="text-sm font-semibold text-slate-700">{filteredLogs.length} session log{filteredLogs.length !== 1 ? 's' : ''}</h3>
-                    <div className="relative w-72">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input 
-                            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#5899B5]" 
-                            placeholder="Search by trainer, course, topic, batch..." 
-                            value={searchTerm} 
-                            onChange={(e) => setSearchTerm(e.target.value)} 
-                        />
+            {/* Dedicated Filter Panel Card */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-2xs space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                    {/* 1. Institution Filter */}
+                    <div>
+                        <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                            <School size={13} className="text-[#5899B5]" />
+                            Institution Scope
+                        </label>
+                        {isMultiCollegeAdmin && !effectiveCollegeId ? (
+                            <select
+                                value={selectedCollege}
+                                onChange={(e) => setSelectedCollege(e.target.value)}
+                                className="w-full h-10 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all cursor-pointer"
+                            >
+                                <option value="all">All Colleges ({colleges.length})</option>
+                                {colleges.map((c) => (
+                                    <option key={c._id} value={c._id}>
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        ) : (
+                            <div className="w-full h-10 px-3.5 bg-slate-100/90 border border-slate-200 rounded-xl flex items-center gap-2 text-xs font-semibold text-slate-800 truncate">
+                                <span className="w-2 h-2 rounded-full bg-[#5899B5] shrink-0" />
+                                <span className="truncate">{activeCollegeDisplay}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 2. Course Filter */}
+                    <div>
+                        <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                            <BookOpen size={13} className="text-[#5899B5]" />
+                            Course
+                        </label>
+                        <select
+                            value={selectedCourse}
+                            onChange={(e) => {
+                                setSelectedCourse(e.target.value);
+                                setSelectedBatch('all');
+                            }}
+                            className="w-full h-10 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all cursor-pointer"
+                        >
+                            <option value="all">All Courses ({courses.length})</option>
+                            {courses.map((c) => (
+                                <option key={c._id} value={c._id}>
+                                    {c.name} ({c.code})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* 3. Batch Filter */}
+                    <div>
+                        <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                            <Layers size={13} className="text-[#5899B5]" />
+                            Batch
+                        </label>
+                        <select
+                            value={selectedBatch}
+                            onChange={(e) => setSelectedBatch(e.target.value)}
+                            className="w-full h-10 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all cursor-pointer"
+                        >
+                            <option value="all">All Batches ({visibleBatches.length})</option>
+                            {visibleBatches.map((b) => (
+                                <option key={b._id} value={b._id}>
+                                    {b.batchName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* 4. Trainer Filter */}
+                    <div>
+                        <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                            <Users size={13} className="text-[#5899B5]" />
+                            Trainer
+                        </label>
+                        <select
+                            value={selectedTrainer}
+                            onChange={(e) => setSelectedTrainer(e.target.value)}
+                            className="w-full h-10 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all cursor-pointer"
+                        >
+                            <option value="all">All Trainers ({trainers.length})</option>
+                            {trainers.map((t) => {
+                                const trainerName =
+                                    `${t.firstName || ''} ${t.lastName || ''}`.trim() || t.username;
+                                return (
+                                    <option key={t._id} value={t._id}>
+                                        {trainerName}
+                                    </option>
+                                );
+                            })}
+                        </select>
                     </div>
                 </div>
 
-                {loading ? (
-                    <div className="p-12 flex justify-center">
-                        <Loader2 className="animate-spin text-[#5899B5]" size={32} />
+                {/* Search & Reset Toolbar Row */}
+                <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <div className="relative flex-1 max-w-md">
+                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        <input
+                            className="w-full h-10 pl-10 pr-9 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all"
+                            placeholder="Search by trainer, course, topic, or batch..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {searchTerm && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchTerm('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
                     </div>
-                ) : logs.length === 0 ? (
-                    <div className="p-12 text-center text-slate-500">
-                        No training logs have been logged yet for the selected scope.
+
+                    <div className="flex items-center justify-between sm:justify-end gap-3">
+                        <span className="text-xs font-semibold text-slate-500">
+                            Showing <strong className="text-slate-800">{filteredLogs.length}</strong> session log{filteredLogs.length !== 1 ? 's' : ''}
+                        </span>
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!effectiveCollegeId) setSelectedCollege('all');
+                                    setSelectedCourse('all');
+                                    setSelectedBatch('all');
+                                    setSelectedTrainer('all');
+                                    setSearchTerm('');
+                                }}
+                                className="h-9 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                                <RotateCcw size={13} />
+                                Reset Filters
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Table Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+                {loading ? (
+                    <div className="py-16 flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="animate-spin text-[#5899B5]" size={28} />
+                        <p className="text-xs font-medium text-slate-400">Loading training logs...</p>
                     </div>
                 ) : filteredLogs.length === 0 ? (
-                    <div className="p-12 text-center text-slate-500">
-                        No training logs match the search query.
+                    <div className="py-16 px-6 text-center">
+                        <FileSpreadsheet size={36} className="mx-auto text-slate-200 mb-3" />
+                        <p className="text-sm font-semibold text-slate-700">
+                            No training logs found for {activeCollegeScope ? activeCollegeDisplay : 'the selected filters'}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                            Try adjusting the course, batch, or trainer filters above.
+                        </p>
                     </div>
                 ) : (
-                    <div>
-                        {/* Table View (Desktop & Tablet) */}
-                        <div className="hidden xl:block overflow-x-auto custom-scrollbar">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-slate-50">
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Session Date</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Log Date</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Trainer Name</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Course</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Topic Covered</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase">Batch & Module</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-center">Attendance</th>
-                                        <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm">
-                                    {filteredLogs.map((log) => {
-                                        return (
-                                            <tr key={log._id} className="hover:bg-slate-50/50 group">
-                                                <td className="px-6 py-4 font-semibold text-slate-800">
-                                                    {new Date(log.sessionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                </td>
-                                                <td className="px-6 py-4 text-xs font-medium text-slate-500">
-                                                    {new Date(log.logDate).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-slate-700">
-                                                    {log.trainerName}
-                                                </td>
-                                                <td className="px-6 py-4 text-slate-650">
-                                                    <div className="flex flex-col">
-                                                        <span className="font-semibold text-slate-850">{log.courseName}</span>
-                                                        <span className="text-[10px] text-slate-400">{log.courseCode} • {log.collegeName}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-slate-700 max-w-xs truncate" title={log.topicsCovered}>
-                                                    {log.topicsCovered}
-                                                </td>
-                                                <td className="px-6 py-4 text-slate-650">
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-slate-850">{log.batchName}</span>
-                                                        <span className="text-[10px] text-slate-400">{log.moduleTaught} • {log.timeSlot}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <div className="flex flex-col items-center justify-center">
-                                                        <span className="font-semibold text-slate-800">{log.presentCount} / {log.actualCount}</span>
-                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold mt-1 ${parseFloat(log.avgAttendance) >= 85 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : parseFloat(log.avgAttendance) < 70 ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-amber-50 text-amber-700 border border-amber-100'}`}>
-                                                            {log.avgAttendance}%
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <button 
-                                                        onClick={() => openDetails(log)}
-                                                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors animate-all"
-                                                    >
-                                                        <Eye size={14} />
-                                                        Details
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Card View (Mobile & Tablet) */}
-                        <div className="xl:hidden divide-y divide-slate-100">
-                            {filteredLogs.map((log) => {
-                                return (
-                                    <div key={log._id} className="p-5 space-y-4">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <span className="text-xs font-bold text-slate-800">
-                                                    {new Date(log.sessionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50/80 border-b border-slate-200/80">
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Session Date</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Trainer</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Batch &amp; Module</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Course</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Topic Covered</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">Attendance</th>
+                                    <th className="px-6 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-sm">
+                                {filteredLogs.map((log) => (
+                                    <tr key={log._id} className="hover:bg-slate-50/70 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <p className="font-semibold text-slate-800">
+                                                {new Date(log.sessionDate).toLocaleDateString('en-IN', {
+                                                    day: '2-digit',
+                                                    month: 'short',
+                                                    year: 'numeric'
+                                                })}
+                                            </p>
+                                            <p className="text-[11px] text-slate-400 mt-1">
+                                                Logged {new Date(log.logDate).toLocaleDateString('en-IN')}
+                                            </p>
+                                        </td>
+                                        <td className="px-6 py-4 font-semibold text-slate-700 whitespace-nowrap">
+                                            {log.trainerName}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <p className="font-semibold text-slate-900">{log.batchName}</p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                {log.moduleTaught} • {log.timeSlot}
+                                            </p>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <p className="font-medium text-slate-800">{log.courseName}</p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                {log.courseCode} • {log.collegeName}
+                                            </p>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-700 max-w-xs truncate" title={log.topicsCovered}>
+                                            {log.topicsCovered}
+                                        </td>
+                                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                                            <div className="inline-flex items-center gap-2">
+                                                <span className="font-semibold text-slate-800">
+                                                    {log.presentCount}/{log.actualCount}
                                                 </span>
-                                                <p className="text-xs font-medium text-slate-500 mt-0.5">Trainer: {log.trainerName}</p>
+                                                <span
+                                                    className={`px-2.5 py-0.5 rounded-md text-xs font-bold ${
+                                                        parseFloat(log.avgAttendance) >= 75
+                                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                                                            : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                                                    }`}
+                                                >
+                                                    {log.avgAttendance}%
+                                                </span>
                                             </div>
-                                            <button 
-                                                onClick={() => openDetails(log)}
-                                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors"
+                                        </td>
+                                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedLog(log);
+                                                    setIsModalOpen(true);
+                                                }}
+                                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs transition cursor-pointer"
                                             >
-                                                <Eye size={14} />
-                                                View Details
+                                                <Eye size={13} />
+                                                Details
                                             </button>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                                            <div>
-                                                <span className="block font-bold text-slate-400 text-[10px] uppercase">College</span>
-                                                <span className="font-semibold text-slate-700">{log.collegeName}</span>
-                                            </div>
-                                            <div>
-                                                <span className="block font-bold text-slate-400 text-[10px] uppercase">Course</span>
-                                                <span className="font-semibold text-slate-700">{log.courseName}</span>
-                                                <span className="text-[10px] text-slate-400 block">({log.courseCode})</span>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                            <div>
-                                                <span className="block font-bold text-slate-400 text-[10px] uppercase">Batch / Module</span>
-                                                <span className="font-semibold text-slate-700">{log.batchName} ({log.moduleTaught})</span>
-                                            </div>
-                                            <div>
-                                                <span className="block font-bold text-slate-400 text-[10px] uppercase">Topic Covered</span>
-                                                <span className="font-semibold text-slate-700 truncate block max-w-[120px]" title={log.topicsCovered}>{log.topicsCovered}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between items-center bg-slate-50/50 px-3 py-2 rounded-xl border border-slate-100 text-xs">
-                                            <span className="font-bold text-[#5899B5]">{log.presentCount} / {log.actualCount} present</span>
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${parseFloat(log.avgAttendance) >= 85 ? 'bg-emerald-50 text-emerald-700' : parseFloat(log.avgAttendance) < 70 ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}`}>
-                                                Att: {log.avgAttendance}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>
 
             {/* Details Modal */}
             {isModalOpen && selectedLog && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-                    <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
-                        {/* Modal Header */}
-                        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col shadow-xl border border-slate-200">
+                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                             <div>
-                                <span className="text-xs font-bold text-[#5899B5] uppercase tracking-wider bg-blue-50 px-2.5 py-1 rounded-md">Session Log Details</span>
-                                <h3 className="text-lg font-bold text-slate-900 mt-2 flex items-center gap-2">
-                                    <Calendar size={18} className="text-slate-400" />
-                                    Session Date: {new Date(selectedLog.sessionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                                    Session Log Details
+                                </span>
+                                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
+                                    <Calendar size={16} className="text-[#5899B5]" />
+                                    {new Date(selectedLog.sessionDate).toLocaleDateString('en-IN', {
+                                        day: '2-digit',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    })}
                                 </h3>
-                                <p className="text-xs text-slate-500 mt-1">
-                                    Logged by <span className="font-semibold text-slate-700">{selectedLog.trainerName}</span> on {new Date(selectedLog.logDate).toLocaleString('en-IN')}
-                                </p>
                             </div>
-                            <button onClick={closeDetails} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-150 rounded-xl transition-all">
-                                <X size={20} />
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                            >
+                                <X size={18} />
                             </button>
                         </div>
 
-                        {/* Modal Body */}
-                        <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/20">
-                            {/* Meta Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
-                                    <School className="text-slate-400 flex-shrink-0 mt-0.5" size={16} />
-                                    <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Institution</span>
-                                        <span className="text-xs font-bold text-slate-800">{selectedLog.collegeName}</span>
-                                    </div>
+                        <div className="p-6 space-y-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">College</span>
+                                    <span className="text-xs font-bold text-slate-800">{selectedLog.collegeName}</span>
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
-                                    <BookOpen className="text-slate-400 flex-shrink-0 mt-0.5" size={16} />
-                                    <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Course Detail</span>
-                                        <span className="text-xs font-bold text-slate-800">{selectedLog.courseName}</span>
-                                        <span className="text-[10px] text-slate-400 block font-mono">({selectedLog.courseCode})</span>
-                                    </div>
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Course</span>
+                                    <span className="text-xs font-bold text-slate-800">
+                                        {selectedLog.courseName} ({selectedLog.courseCode})
+                                    </span>
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
-                                    <Users className="text-slate-400 flex-shrink-0 mt-0.5" size={16} />
-                                    <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Batch & Department</span>
-                                        <span className="text-xs font-bold text-slate-800">{selectedLog.batchName}</span>
-                                        <span className="text-[10px] text-slate-400 block font-mono">{selectedLog.department}</span>
-                                    </div>
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Batch &amp; Trainer</span>
+                                    <span className="text-xs font-bold text-slate-800">
+                                        {selectedLog.batchName} • {selectedLog.trainerName}
+                                    </span>
                                 </div>
                             </div>
 
-                            {/* Session Info Block */}
-                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-                                <div className="border-b border-slate-100 pb-3">
-                                    <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Topic Covered</span>
-                                    <h4 className="text-base font-extrabold text-slate-900 mt-1">{selectedLog.topicsCovered}</h4>
+                            <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4">
+                                <div>
+                                    <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Topic Covered</span>
+                                    <p className="text-sm font-bold text-slate-900">{selectedLog.topicsCovered}</p>
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-slate-200/70">
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Module</span>
-                                        <span className="text-xs font-bold text-slate-800">{selectedLog.moduleTaught}</span>
+                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Module</span>
+                                        <span className="text-xs font-semibold text-slate-800">{selectedLog.moduleTaught}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Period / Slot</span>
-                                        <span className="text-xs font-bold text-slate-800">{selectedLog.timeSlot}</span>
+                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Period / Slot</span>
+                                        <span className="text-xs font-semibold text-slate-800">{selectedLog.timeSlot}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Duration</span>
-                                        <span className="text-xs font-bold text-slate-800">{selectedLog.duration} mins</span>
+                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Duration</span>
+                                        <span className="text-xs font-semibold text-slate-800">{selectedLog.duration} mins</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Attendance Rate</span>
-                                        <span className={`text-xs font-bold ${parseFloat(selectedLog.avgAttendance) >= 85 ? 'text-emerald-600' : parseFloat(selectedLog.avgAttendance) < 70 ? 'text-rose-600' : 'text-amber-600'}`}>
-                                            {selectedLog.presentCount} / {selectedLog.actualCount} ({selectedLog.avgAttendance}%)
+                                        <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider mb-1">Attendance</span>
+                                        <span className="text-xs font-bold text-slate-900">
+                                            {selectedLog.presentCount}/{selectedLog.actualCount} ({selectedLog.avgAttendance}%)
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Modal Footer */}
-                        <div className="p-4 border-t border-slate-150 bg-slate-50/50 flex justify-end">
-                            <button 
-                                onClick={closeDetails}
-                                className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-colors"
+                        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs cursor-pointer"
                             >
-                                Close Details
+                                Close
                             </button>
                         </div>
                     </div>

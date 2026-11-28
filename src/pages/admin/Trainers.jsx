@@ -1360,12 +1360,12 @@ const Trainers = () => {
 
             {/* Table card */}
             <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
-                <div className="px-6 py-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-slate-50/50 min-w-[800px]">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <h3 className="text-sm font-bold text-slate-700 mr-2">{sortedTrainers.length} trainer{sortedTrainers.length !== 1 ? 's' : ''}</h3>
+                <div className="p-5 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-slate-50/50 min-w-[800px]">
+                    <div className="flex flex-wrap items-center gap-3.5">
+                        <h3 className="text-sm font-bold text-slate-700 mr-1">{sortedTrainers.length} trainer{sortedTrainers.length !== 1 ? 's' : ''}</h3>
                         
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="h-10 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all"
                             value={programFilter}
                             onChange={(e) => setProgramFilter(e.target.value)}
                         >
@@ -1378,7 +1378,7 @@ const Trainers = () => {
 
                         {!effectiveCollegeId && (
                             <select
-                                className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
+                                className="h-10 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all max-w-xs"
                                 value={selectedCollegeFilter}
                                 onChange={(e) => setSelectedCollegeFilter(e.target.value)}
                             >
@@ -1390,7 +1390,7 @@ const Trainers = () => {
                         )}
 
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="h-10 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                         >

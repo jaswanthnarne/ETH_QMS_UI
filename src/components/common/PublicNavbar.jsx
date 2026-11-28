@@ -7,6 +7,7 @@ const navLinks = [
     { label: 'How it works', to: '/how-it-works' },
     { label: 'Campus life', to: '/campus-life', aliases: ['/campus'] },
     { label: 'Tracks', to: '/tracks' },
+    { label: 'LMS Team', to: '/team' },
     { label: 'FAQ', to: '/faq' },
 ];
 

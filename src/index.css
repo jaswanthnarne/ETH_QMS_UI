@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@500;600;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@500;600;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,400..700;1,400..700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -26,6 +26,17 @@
   --color-brand-dark: #003580;
   --color-background: #ffffff;
   --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-border: #e2e8f0;
+  --color-ring: #004AAD;
+  --color-chart-1: #004AAD;
+  --color-chart-2: #0ea5e9;
+  --color-chart-3: #10b981;
+  --color-chart-4: #f59e0b;
+  --color-chart-5: #8b5cf6;
 
   --animate-marquee: marquee var(--duration, 40s) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear infinite;
@@ -141,6 +152,135 @@ input:focus, button:focus-visible {
 }
 .prose strong {
   @apply font-bold text-slate-900;
+}
+
+/* Medium-style Editorial Blog Typography */
+.medium-font-serif {
+  font-family: 'Lora', Georgia, Cambria, "Times New Roman", Times, serif;
+}
+.medium-font-sans {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.medium-font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.medium-article {
+  color: #1e293b;
+  line-height: 1.82;
+  font-size: 1.08rem;
+  word-break: break-word;
+}
+.medium-article h1 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  margin-top: 2rem;
+  margin-bottom: 0.85rem;
+}
+.medium-article h2 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+  margin-top: 1.85rem;
+  margin-bottom: 0.75rem;
+}
+.medium-article h3 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.22rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #1e293b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.6rem;
+}
+.medium-article p {
+  margin-bottom: 1.25rem;
+  color: #1e293b;
+}
+.medium-article blockquote {
+  border-left: 3.5px solid #0f172a;
+  padding-left: 1.25rem;
+  margin: 1.75rem 0;
+  font-style: italic;
+  font-size: 1.18rem;
+  line-height: 1.65;
+  color: #334155;
+}
+.medium-article ul {
+  list-style-type: disc;
+  padding-left: 1.6rem;
+  margin-bottom: 1.35rem;
+}
+.medium-article ol {
+  list-style-type: decimal;
+  padding-left: 1.6rem;
+  margin-bottom: 1.35rem;
+}
+.medium-article li {
+  margin-bottom: 0.45rem;
+}
+.medium-article pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1.15rem 1.35rem;
+  border-radius: 0.85rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  margin: 1.5rem 0;
+}
+.medium-article code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  font-size: 0.88em;
+}
+.medium-article pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+.medium-article a {
+  color: #004AAD;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.medium-article hr {
+  border: 0;
+  height: 1px;
+  background: #e2e8f0;
+  margin: 2.25rem auto;
+  width: 45%;
+}
+.medium-article img {
+  max-width: 100%;
+  border-radius: 0.85rem;
+  margin: 1.5rem 0;
+  border: 1px solid #e2e8f0;
+}
+.medium-article .callout-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #5899B5;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  font-size: 0.98rem;
+}
+.medium-editor-canvas:empty:before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  pointer-events: none;
 }
 
 @keyframes shimmer {

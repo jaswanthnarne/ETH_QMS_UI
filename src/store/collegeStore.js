@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 const useCollegeStore = create(
     persist(
@@ -22,6 +22,7 @@ const useCollegeStore = create(
         }),
         {
             name: 'college-context',
+            storage: createJSONStorage(() => sessionStorage),
         }
     )
 );

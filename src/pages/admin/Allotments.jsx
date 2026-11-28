@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { 
     Send, Search, Key, User, Copy, RefreshCcw, Loader2, Download, 
     CheckCircle2, X, School, BookOpen, Clock, Target, Calendar, 
-    Layers, ChevronRight, Settings, Info
+    Layers, ChevronRight, Settings, Info, Play
 } from 'lucide-react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
@@ -14,6 +14,7 @@ const Allotments = () => {
     const { token, user } = useAuthStore();
     const { selectedCollegeId } = useCollegeStore();
     const location = useLocation();
+    const navigate = useNavigate();
 
     // Derive college ID from URL as fallback
     const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
@@ -118,17 +119,7 @@ const Allotments = () => {
 
     const activeTrainerData = filteredTrainers.find(item => (item.trainer._id || 'unassigned') === selectedTrainerId);
 
-    if (user?.role === 'super_admin' && !effectiveCollegeId) {
-        return (
-            <div className="h-[50vh] flex flex-col items-center justify-center">
-                <Send size={40} className="text-slate-200 mb-4" />
-                <h2 className="text-xl font-bold text-slate-900">Select a College</h2>
-                <p className="text-sm text-slate-500 mt-1 max-w-sm text-center">
-                    Choose a college to view exam allotments and access keys.
-                </p>
-            </div>
-        );
-    }
+    // Both super_admin and ops_admin can view all allotments globally or scoped by selected college
 
     return (
         <div className="space-y-6">
@@ -244,6 +235,13 @@ const Allotments = () => {
 
                                             {/* Action buttons */}
                                             <div className="flex items-center gap-1.5">
+                                                <button
+                                                    onClick={() => navigate(effectiveCollegeId ? `/college/${effectiveCollegeId}/trainer/room/${a.uniqueKey}` : `/trainer/room/${a.uniqueKey}`)}
+                                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#5899B5] hover:bg-[#3D7690] text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-2xs"
+                                                    title="Open Live Proctoring & Waiting Room"
+                                                >
+                                                    <Play size={11} /> Live Room
+                                                </button>
                                                 <button
                                                     onClick={() => setSelectedExamDetail(a)}
                                                     className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-[#5899B5]/10 text-slate-650 hover:text-[#5899B5] rounded-lg text-[10px] font-bold border border-slate-200 hover:border-[#5899B5]/20 transition-all cursor-pointer"

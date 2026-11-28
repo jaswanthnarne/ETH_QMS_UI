@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import useAuthStore from './store/authStore';
 import useStudentAuthStore from './store/studentAuthStore';
 import StudentDashboard from './pages/student/StudentDashboard';
+import SessionEnforcementGuard from './components/common/SessionEnforcementGuard';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -16,6 +17,7 @@ import HowItWorksPage from './pages/public/HowItWorksPage';
 import CampusLifePage from './pages/public/CampusLifePage';
 import TracksPage from './pages/public/TracksPage';
 import FaqPage from './pages/public/FaqPage';
+import TeamPage from './pages/public/TeamPage';
 
 // Dashboard Pages
 import Dashboard from './pages/Dashboard';
@@ -36,6 +38,7 @@ import Allotments from './pages/admin/Allotments';
 import AuditLogs from './pages/admin/AuditLogs';
 import Leaderboard from './pages/admin/Leaderboard';
 import QuestionBank from './pages/admin/QuestionBank';
+import AdminCompanyArena from './pages/admin/AdminCompanyArena';
 import AdminTrainingLogs from './pages/admin/AdminTrainingLogs';
 import UsersPage from './pages/admin/Users';
 import CollegeContextWrapper from './components/CollegeContextWrapper';
@@ -43,6 +46,10 @@ import CollegeDetail from './pages/admin/CollegeDetail';
 import BatchDetail from './pages/admin/BatchDetail';
 import PlacementDashboard from './pages/placement/PlacementDashboard';
 import JobApplicants from './pages/placement/JobApplicants';
+import SearchUser from './pages/common/SearchUser';
+import BlogsHub from './pages/common/BlogsHub';
+import LanguageDescriptionHub from './pages/common/LanguageDescriptionHub';
+import AlgoPlayHub from './pages/common/AlgoPlayHub';
 import NotFound from './pages/NotFound';
 
 // Attendance Pages
@@ -75,6 +82,7 @@ function App() {
 
     return (
         <Router>
+            <SessionEnforcementGuard />
             <Routes>
                 {/* Root Route directs to Student Portal */}
                 <Route path="/" element={<StudentEntry />} />
@@ -87,6 +95,7 @@ function App() {
                 <Route path="/campus-life" element={<CampusLifePage />} />
                 <Route path="/campus" element={<CampusLifePage />} />
                 <Route path="/tracks" element={<TracksPage />} />
+                <Route path="/team" element={<TeamPage />} />
                 <Route path="/faq" element={<FaqPage />} />
                 <Route path="/exam/:key" element={
                     <StudentProtectedRoute>
@@ -196,6 +205,11 @@ function App() {
                         <MainLayout><QuestionBank /></MainLayout>
                     </ProtectedRoute>
                 } />
+                <Route path="/admin/company-arena" element={
+                    <ProtectedRoute allowedRoles={['super_admin', 'ops_admin', 'ast_ops_admin']}>
+                        <MainLayout><AdminCompanyArena /></MainLayout>
+                    </ProtectedRoute>
+                } />
                 <Route path="/admin/logs" element={
                     <ProtectedRoute allowedRoles={ALL_ADMINS}>
                         <MainLayout><AdminTrainingLogs /></MainLayout>
@@ -209,6 +223,31 @@ function App() {
                 <Route path="/admin/users" element={
                     <ProtectedRoute allowedRoles={['super_admin', 'ops_admin']}>
                         <MainLayout><UsersPage /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/search-user" element={
+                    <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                        <MainLayout><SearchUser /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/blogs" element={
+                    <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                        <MainLayout><BlogsHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin/bytebase" element={
+                    <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                        <MainLayout><LanguageDescriptionHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin/language-description" element={
+                    <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                        <MainLayout><LanguageDescriptionHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin/algoplay" element={
+                    <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                        <MainLayout><AlgoPlayHub /></MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/placement/dashboard" element={
@@ -231,6 +270,36 @@ function App() {
                             <MainLayout><Dashboard /></MainLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="search-user" element={
+                        <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                            <MainLayout><SearchUser /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="blogs" element={
+                        <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                            <MainLayout><BlogsHub /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="admin/bytebase" element={
+                        <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                            <MainLayout><LanguageDescriptionHub /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="admin/language-description" element={
+                        <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                            <MainLayout><LanguageDescriptionHub /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="admin/algoplay" element={
+                        <ProtectedRoute allowedRoles={[...ALL_ADMINS, 'trainer']}>
+                            <MainLayout><AlgoPlayHub /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="overview" element={
+                        <ProtectedRoute allowedRoles={ALL_ADMINS}>
+                            <MainLayout><CollegeDetail /></MainLayout>
+                        </ProtectedRoute>
+                    } />
                     <Route path="admin/courses" element={
                         <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><Courses /></MainLayout>
@@ -249,6 +318,11 @@ function App() {
                     <Route path="admin/trainers" element={
                         <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><Trainers /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="admin/study-materials" element={
+                        <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                            <MainLayout><TrainerStudyMaterials /></MainLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="admin/exams" element={
@@ -281,6 +355,16 @@ function App() {
                             <MainLayout><Allotments /></MainLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="trainer/room/:key" element={
+                        <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                            <MainLayout><WaitingRoom /></MainLayout>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="trainer/monitor/:key" element={
+                        <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                            <MainLayout><WaitingRoom /></MainLayout>
+                        </ProtectedRoute>
+                    } />
                     <Route path="admin/audit" element={
                         <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><AuditLogs /></MainLayout>
@@ -296,6 +380,11 @@ function App() {
                             <MainLayout><QuestionBank /></MainLayout>
                         </ProtectedRoute>
                     } />
+                    <Route path="admin/company-arena" element={
+                        <ProtectedRoute allowedRoles={['super_admin', 'ops_admin', 'ast_ops_admin']}>
+                            <MainLayout><AdminCompanyArena /></MainLayout>
+                        </ProtectedRoute>
+                    } />
                     <Route path="admin/logs" element={
                         <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><AdminTrainingLogs /></MainLayout>
@@ -307,12 +396,12 @@ function App() {
                         </ProtectedRoute>
                     } />
                     <Route path="placement/dashboard" element={
-                        <ProtectedRoute allowedRoles={['placement', 'super_admin', 'ops_admin']}>
+                        <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><PlacementDashboard /></MainLayout>
                         </ProtectedRoute>
                     } />
                     <Route path="placement/jobs/:jobId/applicants" element={
-                        <ProtectedRoute allowedRoles={['placement', 'super_admin', 'ops_admin']}>
+                        <ProtectedRoute allowedRoles={ALL_ADMINS}>
                             <MainLayout><JobApplicants /></MainLayout>
                         </ProtectedRoute>
                     } />
@@ -320,6 +409,11 @@ function App() {
                 </Route>
 
                 {/* Trainer Only Routes */}
+                <Route path="/trainer/search-user" element={
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                        <MainLayout><SearchUser /></MainLayout>
+                    </ProtectedRoute>
+                } />
                 <Route path="/trainer/exams" element={
                     <ProtectedRoute allowedRoles={['trainer']}>
                         <MainLayout><TrainerExams /></MainLayout>
@@ -351,6 +445,26 @@ function App() {
                         <MainLayout><TrainerStudyMaterials /></MainLayout>
                     </ProtectedRoute>
                 } />
+                <Route path="/trainer/blogs" element={
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                        <MainLayout><BlogsHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/trainer/bytebase" element={
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                        <MainLayout><LanguageDescriptionHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/trainer/language-description" element={
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                        <MainLayout><LanguageDescriptionHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/trainer/algoplay" element={
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
+                        <MainLayout><AlgoPlayHub /></MainLayout>
+                    </ProtectedRoute>
+                } />
                 <Route path="/trainer/batches/:batchId" element={
                     <ProtectedRoute allowedRoles={['trainer']}>
                         <MainLayout><BatchDetail /></MainLayout>
@@ -375,12 +489,12 @@ function App() {
 
 
                 <Route path="/trainer/monitor/:key" element={
-                    <ProtectedRoute allowedRoles={['trainer']}>
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
                         <MainLayout><WaitingRoom /></MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/trainer/room/:key" element={
-                    <ProtectedRoute allowedRoles={['trainer']}>
+                    <ProtectedRoute allowedRoles={['trainer', ...ALL_ADMINS]}>
                         <MainLayout><WaitingRoom /></MainLayout>
                     </ProtectedRoute>
                 } />

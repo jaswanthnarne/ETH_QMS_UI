@@ -26,7 +26,7 @@ const COMPANY_DOMAINS = {
 };
 
 const getCompanyDomain = (key) => {
-    if (key.includes('tcs') || key.includes('tata')) return COMPANY_DOMAINS.tcs;
+    if (key.includes('tcs') || key.includes('tata')) return null; // Use crisp inline TCS SVG (tcs.com favicon 404s)
     if (key.includes('infosys')) return COMPANY_DOMAINS.infosys;
     if (key.includes('accenture')) return COMPANY_DOMAINS.accenture;
     if (key.includes('wipro')) return COMPANY_DOMAINS.wipro;
@@ -55,11 +55,42 @@ const getCompanyDomain = (key) => {
  * CompanyLogoSvg
  * Renders real official company logos from the internet with automatic fallback to crisp vector SVGs.
  */
-export const CompanyLogoSvg = ({ company, companyId, className = 'w-10 h-10', size = 40 }) => {
+export const CompanyLogoSvg = ({
+    company,
+    companyId,
+    logoUrl,
+    website,
+    accentColor,
+    className = 'w-10 h-10',
+    size = 40
+}) => {
     const rawName = company || companyId || '';
     const key = rawName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const domain = getCompanyDomain(key);
+    const customDomain = website
+        ? String(website)
+              .trim()
+              .replace(/^https?:\/\//i, '')
+              .replace(/^www\./i, '')
+              .replace(/\/.*$/, '')
+        : null;
+    const domain = customDomain || getCompanyDomain(key);
+    const [customLogoFailed, setCustomLogoFailed] = useState(false);
     const [imgTier, setImgTier] = useState(0);
+
+    if (logoUrl && !customLogoFailed) {
+        return (
+            <img
+                src={logoUrl}
+                alt={`${rawName} logo`}
+                width={size}
+                height={size}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={() => setCustomLogoFailed(true)}
+                className={`${className} rounded-lg object-contain`}
+            />
+        );
+    }
 
     if (domain && imgTier < 2) {
         const src =
@@ -284,7 +315,7 @@ export const CompanyLogoSvg = ({ company, companyId, className = 'w-10 h-10', si
     // Default Fallback Logo
     return (
         <svg viewBox="0 0 100 100" className={className} width={size} height={size} aria-label="Company Logo">
-            <rect width="100" height="100" rx="22" fill="#334155" />
+            <rect width="100" height="100" rx="22" fill={accentColor || '#334155'} />
             <text x="50" y="62" textAnchor="middle" fill="#FFFFFF" fontSize="36" fontWeight="bold">
                 {(rawName || 'C').charAt(0).toUpperCase()}
             </text>

@@ -1,11 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
+import { triggerSessionReplacedEvent } from '../components/common/SessionEnforcementGuard';
 
 const api = axios.create({
     baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000/api'),
     timeout: 15000
 });
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error?.response?.status === 401 && error?.response?.data?.code === 'SESSION_REPLACED') {
+            const authHeader = error?.config?.headers?.Authorization || error?.config?.headers?.authorization || '';
+            const failedToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+                ? authHeader.slice(7).trim()
+                : null;
+            triggerSessionReplacedEvent('student', failedToken);
+        }
+        return Promise.reject(error);
+    }
+);
 
 const useStudentAuthStore = create(
     persist(
@@ -25,6 +40,9 @@ const useStudentAuthStore = create(
                         password 
                     });
                     const { token, ...studentData } = response.data;
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('ethnotech:session-fresh-login', { detail: { role: 'student', token } }));
+                    }
                     set({ 
                         student: studentData, 
                         token, 

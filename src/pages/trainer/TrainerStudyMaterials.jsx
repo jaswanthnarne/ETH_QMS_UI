@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
+import { useParams, useLocation } from 'react-router-dom';
 import {
     BookOpen,
     UploadCloud,
@@ -25,7 +26,11 @@ const MATERIAL_TYPES = ['PDF Notes', 'Slides', 'Assignments', 'Reference'];
 
 const TrainerStudyMaterials = () => {
     const { token } = useAuthStore();
-    const { selectedCollegeId } = useCollegeStore();
+    const { selectedCollegeId: storeCollegeId } = useCollegeStore();
+    const { collegeId: paramCollegeId } = useParams();
+    const location = useLocation();
+    const urlCollegeMatch = location.pathname.match(/\/college\/([a-f0-9]+)/);
+    const selectedCollegeId = paramCollegeId || (urlCollegeMatch ? urlCollegeMatch[1] : null) || storeCollegeId;
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     const serverOrigin = apiBase.replace(/\/api\/?$/, '');
 
@@ -56,6 +61,7 @@ const TrainerStudyMaterials = () => {
         module: 'Module 1',
         type: 'PDF Notes',
         description: '',
+        textContent: '',
         fileUrl: ''
     });
     const [selectedFile, setSelectedFile] = useState(null);
@@ -128,6 +134,7 @@ const TrainerStudyMaterials = () => {
             module: 'Module 1',
             type: 'PDF Notes',
             description: '',
+            textContent: '',
             fileUrl: ''
         });
         setModalOpen(true);
@@ -143,6 +150,7 @@ const TrainerStudyMaterials = () => {
             module: item.module || 'General',
             type: item.type || 'PDF Notes',
             description: item.description || '',
+            textContent: item.textContent || '',
             fileUrl: item.fileUrl || ''
         });
         setModalOpen(true);
@@ -158,12 +166,13 @@ const TrainerStudyMaterials = () => {
             setAlertState({ open: true, title: 'Select Batch', message: 'Please select a target batch.', type: 'warning' });
             return;
         }
-        if (uploadMode === 'file' && !selectedFile && !editingItem) {
-            setAlertState({ open: true, title: 'File Required', message: 'Please choose a file to upload or switch to External Link mode.', type: 'warning' });
+        const hasTextNotes = Boolean((formData.textContent || '').trim());
+        if (uploadMode === 'file' && !selectedFile && !editingItem && !hasTextNotes) {
+            setAlertState({ open: true, title: 'File or Notes Required', message: 'Please choose a PDF/file to upload, or enter In-Site Study Notes text below.', type: 'warning' });
             return;
         }
-        if (uploadMode === 'url' && !formData.fileUrl.trim()) {
-            setAlertState({ open: true, title: 'URL Required', message: 'Please provide a valid resource link.', type: 'warning' });
+        if (uploadMode === 'url' && !formData.fileUrl.trim() && !hasTextNotes) {
+            setAlertState({ open: true, title: 'URL or Notes Required', message: 'Please provide a resource link or enter In-Site Study Notes text below.', type: 'warning' });
             return;
         }
 
@@ -175,6 +184,7 @@ const TrainerStudyMaterials = () => {
             payload.append('module', formData.module.trim() || 'General');
             payload.append('type', formData.type);
             payload.append('description', formData.description.trim());
+            payload.append('textContent', (formData.textContent || '').trim());
             if (selectedCollegeId) payload.append('collegeId', selectedCollegeId);
 
             if (uploadMode === 'file' && selectedFile) {
@@ -651,14 +661,28 @@ const TrainerStudyMaterials = () => {
                             {/* Description */}
                             <div>
                                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                                    Description / Study Instructions
+                                    Short Overview / Summary
                                 </label>
                                 <textarea
-                                    rows={3}
+                                    rows={2}
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     placeholder="Add key topics covered or instructions for students..."
                                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 focus:bg-white focus:border-[#5899B5] outline-none resize-none"
+                                />
+                            </div>
+
+                            {/* In-Site Readable Text Notes */}
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                                    In-Site Study Notes &amp; Code Examples (Readable Directly on Site)
+                                </label>
+                                <textarea
+                                    rows={5}
+                                    value={formData.textContent}
+                                    onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
+                                    placeholder="Paste complete module theory notes, code snippets, and practice questions here so students can both read in-site and view the PDF..."
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-mono text-slate-800 focus:bg-white focus:border-[#5899B5] outline-none resize-y"
                                 />
                             </div>
 
@@ -707,11 +731,20 @@ const TrainerStudyMaterials = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-xs">
                     <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden">
                         <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4">
-                            <div className="min-w-0">
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5899B5]">
-                                    {previewItem.batchName} • {previewItem.module || 'General'}
-                                </span>
-                                <h3 className="text-base font-semibold text-slate-900 truncate">{previewItem.title}</h3>
+                            <div className="min-w-0 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 p-1.5 flex items-center justify-center shrink-0">
+                                    <img
+                                        src="/assets/cropped-New-logo-footer-270x270.png"
+                                        alt="Ethnotech Logo"
+                                        className="w-full h-full object-contain"
+                                    />
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5899B5]">
+                                        Ethnotech Academy • {previewItem.batchName} • {previewItem.module || 'General'}
+                                    </span>
+                                    <h3 className="text-base font-semibold text-slate-900 truncate">{previewItem.title}</h3>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                                 <a
@@ -743,9 +776,48 @@ const TrainerStudyMaterials = () => {
                                 />
                             )}
                         </div>
+                        <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                            <div className="flex items-center gap-2">
+                                <img
+                                    src="/assets/cropped-New-logo-footer-270x270.png"
+                                    alt="Ethnotech"
+                                    className="w-5 h-5 object-contain rounded-sm"
+                                />
+                                <span className="font-semibold text-slate-800">
+                                    © {new Date().getFullYear()} Ethnotech Academic Solutions Pvt. Ltd. • All Rights Reserved.
+                                </span>
+                            </div>
+                            <span className="text-[11px] text-slate-400">
+                                Official Ethnotech Study Material &amp; Lab Reference
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
+
+            {/* Page-Level Official Brand & Copyright Footer */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 p-1.5 flex items-center justify-center shrink-0">
+                        <img
+                            src="/assets/cropped-New-logo-footer-270x270.png"
+                            alt="Ethnotech Logo"
+                            className="w-full h-full object-contain"
+                        />
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold text-slate-800">
+                            © {new Date().getFullYear()} Ethnotech Academic Solutions Pvt. Ltd. • All Rights Reserved.
+                        </p>
+                        <p className="text-[11px] text-slate-500">
+                            All uploaded study notes, code labs, and PDF documents are proprietary intellectual property of Ethnotech Academy.
+                        </p>
+                    </div>
+                </div>
+                <span className="text-[10.5px] font-semibold text-[#5899B5] bg-sky-50 border border-sky-200 px-3 py-1 rounded-full shrink-0">
+                    Ethnotech Classroom Hub
+                </span>
+            </div>
         </div>
     );
 };

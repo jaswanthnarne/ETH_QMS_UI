@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import axios from 'axios';
 import {
     Terminal, Play, Send, RotateCcw, CheckCircle2, XCircle, AlertTriangle,
     Clock, Code2, Sparkles, ChevronLeft, ChevronRight, Lightbulb, Eye,
@@ -11,10 +12,10 @@ import CompanyLogoSvg from '../common/CompanyLogoSvg';
 import {
     ALL_COMPANY_QUESTIONS,
     COMPANIES_CATALOG,
-    COMPANY_CATEGORIES,
-    getQuestionsByCompany,
-    getQuestionById
+    COMPANY_CATEGORIES
 } from '../../data/companyQuestions';
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // ============================================================================
 // SUPPORTED LANGUAGES (STRICTLY PYTHON 3 & JAVASCRIPT ES6 AT ₹0 COST)
@@ -313,9 +314,8 @@ const CodeEditor = ({ code, onChange, lang, params = [], minHeight = '400px' }) 
                                     key={sug}
                                     type="button"
                                     onClick={() => applySuggestion(sug)}
-                                    className={`w-full text-left px-2 py-1.5 rounded-lg text-xs font-mono transition flex items-center justify-between cursor-pointer ${
-                                        selectedSugIdx === i ? 'bg-[#5899B5] text-white font-semibold' : 'hover:bg-slate-800 text-slate-300'
-                                    }`}
+                                    className={`w-full text-left px-2 py-1.5 rounded-lg text-xs font-mono transition flex items-center justify-between cursor-pointer ${selectedSugIdx === i ? 'bg-[#5899B5] text-white font-semibold' : 'hover:bg-slate-800 text-slate-300'
+                                        }`}
                                 >
                                     <span>{sug}</span>
                                     <span className="text-[10px] opacity-60 font-sans">
@@ -374,32 +374,70 @@ const StudentLockedInLabTab = ({ student }) => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showRules, setShowRules] = useState(true);
 
+    // Live Catalog State (initialized from static catalog, refreshed from MongoDB)
+    const [companiesList, setCompaniesList] = useState(() => COMPANIES_CATALOG || []);
+    const [allQuestionsList, setAllQuestionsList] = useState(() => ALL_COMPANY_QUESTIONS || []);
+
+    useEffect(() => {
+        let active = true;
+        axios
+            .get(`${API}/coding-arena/catalog`)
+            .then((res) => {
+                if (!active || !res.data?.success) return;
+                const { companies, questions } = res.data.data || {};
+                if (Array.isArray(companies) && companies.length > 0) {
+                    setCompaniesList(companies);
+                }
+                if (Array.isArray(questions) && questions.length > 0) {
+                    setAllQuestionsList(questions);
+                }
+            })
+            .catch(() => { });
+        return () => {
+            active = false;
+        };
+    }, []);
+
     // Warm up Python 3.11 WebAssembly engine in background
     useEffect(() => {
-        preloadPython().catch(() => {});
+        preloadPython().catch(() => { });
     }, []);
+
+    const getCompanyQuestions = useCallback(
+        (companyId) => {
+            if (!companyId || companyId === 'all') return allQuestionsList;
+            const norm = String(companyId).toLowerCase().replace(/[^a-z0-9]/g, '');
+            return allQuestionsList.filter(
+                (q) => String(q.company || '').toLowerCase().replace(/[^a-z0-9]/g, '') === norm
+            );
+        },
+        [allQuestionsList]
+    );
 
     // Active Company & Active Problem helpers
     const currentCompany = useMemo(() => {
-        const catalog = COMPANIES_CATALOG || [];
+        const catalog = companiesList || [];
         const norm = (selectedCompanyId || 'tcs').toLowerCase().replace(/[^a-z0-9]/g, '');
-        return catalog.find(c => c && c.id && c.id.replace(/[^a-z0-9]/g, '') === norm) || catalog[0] || {
-            id: 'tcs',
-            name: 'TCS',
-            category: 'service',
-            categoryLabel: 'Service-Based',
-            packageRange: '3.36 – 9.0 LPA',
-            description: 'TCS technical coding round problems'
-        };
-    }, [selectedCompanyId]);
+        return (
+            catalog.find((c) => c && c.id && c.id.replace(/[^a-z0-9]/g, '') === norm) ||
+            catalog[0] || {
+                id: 'tcs',
+                name: 'TCS',
+                category: 'service',
+                categoryLabel: 'Service-Based',
+                packageRange: '3.36 – 9.0 LPA',
+                description: 'TCS technical coding round problems'
+            }
+        );
+    }, [selectedCompanyId, companiesList]);
 
     const companyQuestions = useMemo(() => {
-        return getQuestionsByCompany(selectedCompanyId);
-    }, [selectedCompanyId]);
+        return getCompanyQuestions(selectedCompanyId);
+    }, [selectedCompanyId, getCompanyQuestions]);
 
     const activeProblem = useMemo(() => {
-        return getQuestionById(activeProblemId) || ALL_COMPANY_QUESTIONS[0];
-    }, [activeProblemId]);
+        return allQuestionsList.find((q) => q.id === activeProblemId) || companyQuestions[0] || allQuestionsList[0];
+    }, [activeProblemId, allQuestionsList, companyQuestions]);
 
     // Synchronize starter skeleton stub whenever active problem or language changes
     useEffect(() => {
@@ -424,22 +462,28 @@ const StudentLockedInLabTab = ({ student }) => {
     }, [isFullscreen]);
 
     // Solved counters per company
-    const getSolvedCountForCompany = useCallback((companyId) => {
-        const qList = getQuestionsByCompany(companyId);
-        return qList.filter(q => solvedIds.includes(q.id)).length;
-    }, [solvedIds]);
+    const getSolvedCountForCompany = useCallback(
+        (companyId) => {
+            const qList = getCompanyQuestions(companyId);
+            return qList.filter((q) => solvedIds.includes(q.id)).length;
+        },
+        [solvedIds, getCompanyQuestions]
+    );
 
-    const totalSolved = solvedIds.length;
+    const totalSolved = useMemo(() => {
+        const validIds = new Set(allQuestionsList.map((q) => q.id));
+        return solvedIds.filter((id) => validIds.has(id)).length;
+    }, [solvedIds, allQuestionsList]);
 
     // Filtered questions within the selected company list view
     const filteredCompanyQuestions = useMemo(() => {
-        return companyQuestions.filter(q => {
+        return companyQuestions.filter((q) => {
             if (selectedDifficulty !== 'All' && q.difficulty !== selectedDifficulty) return false;
             if (searchQuery.trim()) {
                 const term = searchQuery.toLowerCase();
-                const matchTitle = q.title.toLowerCase().includes(term);
-                const matchTopic = q.topic.toLowerCase().includes(term);
-                const matchDesc = q.description.toLowerCase().includes(term);
+                const matchTitle = (q.title || '').toLowerCase().includes(term);
+                const matchTopic = (q.topic || '').toLowerCase().includes(term);
+                const matchDesc = (q.description || '').toLowerCase().includes(term);
                 if (!matchTitle && !matchTopic && !matchDesc) return false;
             }
             return true;
@@ -448,10 +492,10 @@ const StudentLockedInLabTab = ({ student }) => {
 
     // Filtered companies in the Directory view
     const filteredCompanies = useMemo(() => {
-        const catalog = COMPANIES_CATALOG || [];
+        const catalog = companiesList || [];
         if (selectedCategoryFilter === 'all') return catalog;
-        return catalog.filter(c => c && c.category === selectedCategoryFilter);
-    }, [selectedCategoryFilter]);
+        return catalog.filter((c) => c && c.category === selectedCategoryFilter);
+    }, [selectedCategoryFilter, companiesList]);
 
     // Problem submissions for current active problem
     const problemSubmissions = useMemo(() => {
@@ -493,7 +537,7 @@ const StudentLockedInLabTab = ({ student }) => {
             setSolvedIds(nextSolved);
             try {
                 localStorage.setItem(solvedStorageKey, JSON.stringify(nextSolved));
-            } catch {}
+            } catch { }
         }
 
         const submissionRecord = {
@@ -512,7 +556,7 @@ const StudentLockedInLabTab = ({ student }) => {
         setSubmissions(nextSubmissions);
         try {
             localStorage.setItem(subStorageKey, JSON.stringify(nextSubmissions));
-        } catch {}
+        } catch { }
 
         setRunOutput({
             mode: 'submit',
@@ -557,7 +601,8 @@ const StudentLockedInLabTab = ({ student }) => {
     // VIEW 1: COMPANY ARENA DIRECTORY (14 RECRUITERS ACROSS 4 SEGMENTS)
     // =========================================================================
     if (activeView === 'directory') {
-        const completionPct = Math.round((totalSolved / ALL_COMPANY_QUESTIONS.length) * 100);
+        const totalQuestionsCount = allQuestionsList.length || 1;
+        const completionPct = Math.round((totalSolved / totalQuestionsCount) * 100);
 
         return (
             <div className="space-y-6 sm:space-y-8 font-sans pb-12">
@@ -569,17 +614,17 @@ const StudentLockedInLabTab = ({ student }) => {
                                 Campus Placement Arena
                             </span>
                             <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-100">
-                                14 Top Recruiters ⚡
+                                {companiesList.length} Top Recruiters ⚡
                             </span>
                             <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                280 Curated Challenges
+                                {allQuestionsList.length} Curated Challenges
                             </span>
                         </div>
                         <h2 className="text-2xl sm:text-3xl font-semibold text-slate-800">
-                            Company-Wise Technical Coding Arena
+                            Code2Career — Company-Wise Technical Coding
                         </h2>
                         <p className="text-slate-500 text-sm leading-relaxed">
-                            Targeted preparation for campus placements. Practice the 20 most frequent coding problems from Service-Based, Product-Based, Next-Gen Startups, and FinTech companies with instant in-browser test validation.
+                            Targeted preparation for campus placements. Practice the most frequent coding problems from Service-Based, Product-Based, Next-Gen Startups, and FinTech companies with instant in-browser test validation.
                         </p>
                     </div>
 
@@ -587,7 +632,7 @@ const StudentLockedInLabTab = ({ student }) => {
                     <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 shrink-0 w-full lg:w-68 space-y-2.5">
                         <div className="flex items-center justify-between text-xs font-semibold">
                             <span className="text-slate-600">Total Solved</span>
-                            <span className="text-slate-900 font-bold">{totalSolved} / {ALL_COMPANY_QUESTIONS.length}</span>
+                            <span className="text-slate-900 font-bold">{totalSolved} / {allQuestionsList.length}</span>
                         </div>
                         <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                             <div
@@ -596,7 +641,7 @@ const StudentLockedInLabTab = ({ student }) => {
                             />
                         </div>
                         <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                            <span>{ALL_COMPANY_QUESTIONS.length - totalSolved} remaining</span>
+                            <span>{Math.max(0, allQuestionsList.length - totalSolved)} remaining</span>
                             <span className="text-[#5899B5]">{completionPct}% Completed</span>
                         </div>
                     </div>
@@ -611,7 +656,7 @@ const StudentLockedInLabTab = ({ student }) => {
                             </div>
                             <div>
                                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Top Recruiters</span>
-                                <span className="text-2xl font-bold text-slate-800">14 Companies</span>
+                                <span className="text-2xl font-bold text-slate-800">{companiesList.length} Companies</span>
                                 <span className="text-xs font-semibold text-[#5899B5] block mt-0.5">
                                     4 Hiring Tracks
                                 </span>
@@ -626,9 +671,9 @@ const StudentLockedInLabTab = ({ student }) => {
                             </div>
                             <div>
                                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Curated Problems</span>
-                                <span className="text-2xl font-bold text-slate-800">280 Questions</span>
+                                <span className="text-2xl font-bold text-slate-800">{allQuestionsList.length} Questions</span>
                                 <span className="text-xs font-semibold text-emerald-600 block mt-0.5">
-                                    20 Questions / Company
+                                    Real Placement Rounds
                                 </span>
                             </div>
                         </div>
@@ -643,7 +688,7 @@ const StudentLockedInLabTab = ({ student }) => {
                                 <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider block">Challenges Solved</span>
                                 <span className="text-2xl font-bold text-slate-800">{totalSolved}</span>
                                 <span className="text-xs font-semibold text-purple-600 block mt-0.5">
-                                    {ALL_COMPANY_QUESTIONS.length - totalSolved} Remaining
+                                    {Math.max(0, allQuestionsList.length - totalSolved)} Remaining
                                 </span>
                             </div>
                         </div>
@@ -671,30 +716,27 @@ const StudentLockedInLabTab = ({ student }) => {
                         <button
                             type="button"
                             onClick={() => setSelectedCategoryFilter('all')}
-                            className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition shrink-0 ${
-                                selectedCategoryFilter === 'all'
-                                    ? 'bg-[#5899B5] text-white shadow-xs'
-                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80'
-                            }`}
+                            className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition shrink-0 ${selectedCategoryFilter === 'all'
+                                ? 'bg-[#5899B5] text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80'
+                                }`}
                         >
-                            All Companies ({(COMPANIES_CATALOG || []).length})
+                            All Companies ({(companiesList || []).length})
                         </button>
                         {(COMPANY_CATEGORIES || []).filter(c => c && c.id !== 'all').map(cat => (
                             <button
                                 key={cat.id}
                                 type="button"
                                 onClick={() => setSelectedCategoryFilter(cat.id)}
-                                className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition shrink-0 flex items-center gap-2 ${
-                                    selectedCategoryFilter === cat.id
-                                        ? 'bg-[#5899B5] text-white shadow-xs'
-                                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80'
-                                }`}
+                                className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition shrink-0 flex items-center gap-2 ${selectedCategoryFilter === cat.id
+                                    ? 'bg-[#5899B5] text-white shadow-xs'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200/80'
+                                    }`}
                             >
                                 <span>{cat.label}</span>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                                    selectedCategoryFilter === cat.id ? 'bg-white/20 text-white font-bold' : 'bg-slate-100 text-slate-500'
-                                }`}>
-                                    {(COMPANIES_CATALOG || []).filter(c => c && c.category === cat.id).length}
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedCategoryFilter === cat.id ? 'bg-white/20 text-white font-bold' : 'bg-slate-100 text-slate-500'
+                                    }`}>
+                                    {(companiesList || []).filter(c => c && c.category === cat.id).length}
                                 </span>
                             </button>
                         ))}
@@ -704,8 +746,9 @@ const StudentLockedInLabTab = ({ student }) => {
                 {/* Companies Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCompanies.map(company => {
+                        const companyTotal = getCompanyQuestions(company.id).length || company.totalQuestions || 20;
                         const solvedCount = getSolvedCountForCompany(company.id);
-                        const progressPct = Math.round((solvedCount / 20) * 100);
+                        const progressPct = companyTotal > 0 ? Math.round((solvedCount / companyTotal) * 100) : 0;
 
                         return (
                             <div
@@ -716,15 +759,24 @@ const StudentLockedInLabTab = ({ student }) => {
                                     {/* Top Row: Logo & Package */}
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 group-hover:scale-105 transition-transform flex items-center justify-center p-2.5 shrink-0">
-                                            <CompanyLogoSvg companyId={company.id} className="w-9 h-9 object-contain" />
+                                            <CompanyLogoSvg
+                                                companyId={company.id}
+                                                company={company.name}
+                                                logoUrl={company.logoUrl}
+                                                website={company.website}
+                                                accentColor={company.accentColor}
+                                                className="w-9 h-9 object-contain"
+                                            />
                                         </div>
                                         <div className="flex flex-col items-end gap-1.5">
                                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${company.badgeClass || 'bg-slate-100 text-slate-700'}`}>
                                                 {company.categoryLabel || company.category}
                                             </span>
-                                            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                                                {company.packageRange}
-                                            </span>
+                                            {company.packageRange && (
+                                                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                                                    {company.packageRange}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -755,7 +807,7 @@ const StudentLockedInLabTab = ({ student }) => {
                                         <div className="flex justify-between text-xs font-semibold text-slate-600">
                                             <span>Progress</span>
                                             <span className={solvedCount > 0 ? 'text-[#5899B5]' : 'text-slate-400'}>
-                                                {solvedCount} / 20 Solved ({progressPct}%)
+                                                {solvedCount} / {companyTotal} Solved ({progressPct}%)
                                             </span>
                                         </div>
                                         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -774,7 +826,7 @@ const StudentLockedInLabTab = ({ student }) => {
                                         onClick={() => openCompany(company.id)}
                                         className="w-full py-2.5 px-4 bg-[#5899B5] hover:bg-[#3D7690] text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-xs flex items-center justify-center gap-2 group-hover:shadow-sm"
                                     >
-                                        <span>View 20 Questions</span>
+                                        <span>View {companyTotal} Question{companyTotal !== 1 ? 's' : ''}</span>
                                         <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
@@ -791,6 +843,7 @@ const StudentLockedInLabTab = ({ student }) => {
     // =========================================================================
     if (activeView === 'company-list') {
         const companySolved = getSolvedCountForCompany(selectedCompanyId);
+        const companyTotalCount = companyQuestions.length || currentCompany.totalQuestions || 20;
 
         return (
             <div className="space-y-6 font-sans pb-12">
@@ -804,7 +857,7 @@ const StudentLockedInLabTab = ({ student }) => {
                         <ArrowLeft size={14} /> Back to All Companies
                     </button>
                     <span className="text-xs text-slate-500 font-medium">
-                        Showing 20 questions for {currentCompany.name}
+                        Showing {companyQuestions.length} question{companyQuestions.length !== 1 ? 's' : ''} for {currentCompany.name}
                     </span>
                 </div>
 
@@ -812,19 +865,28 @@ const StudentLockedInLabTab = ({ student }) => {
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
                         <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-3 shrink-0">
-                            <CompanyLogoSvg companyId={currentCompany.id} className="w-10 h-10 object-contain" />
+                            <CompanyLogoSvg
+                                companyId={currentCompany.id}
+                                company={currentCompany.name}
+                                logoUrl={currentCompany.logoUrl}
+                                website={currentCompany.website}
+                                accentColor={currentCompany.accentColor}
+                                className="w-10 h-10 object-contain"
+                            />
                         </div>
                         <div className="space-y-1.5">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${currentCompany.badgeClass || 'bg-slate-100 text-slate-700'}`}>
                                     {currentCompany.categoryLabel || currentCompany.category}
                                 </span>
-                                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                                    Package: {currentCompany.packageRange}
-                                </span>
+                                {currentCompany.packageRange && (
+                                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                                        Package: {currentCompany.packageRange}
+                                    </span>
+                                )}
                             </div>
                             <h2 className="text-xl sm:text-2xl font-semibold text-slate-800">
-                                {currentCompany.name} Coding Arena
+                                {currentCompany.name} — Code2Career
                             </h2>
                             <p className="text-xs sm:text-sm text-slate-500 max-w-xl leading-relaxed">
                                 {currentCompany.description}
@@ -836,16 +898,16 @@ const StudentLockedInLabTab = ({ student }) => {
                     <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 w-full md:w-60 shrink-0 space-y-2">
                         <div className="flex justify-between text-xs font-semibold">
                             <span className="text-slate-600">Company Progress</span>
-                            <span className="text-[#5899B5]">{companySolved} / 20</span>
+                            <span className="text-[#5899B5]">{companySolved} / {companyTotalCount}</span>
                         </div>
                         <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-[#5899B5] rounded-full transition-all duration-300"
-                                style={{ width: `${Math.max(companySolved > 0 ? 5 : 0, (companySolved / 20) * 100)}%` }}
+                                style={{ width: `${Math.max(companySolved > 0 ? 5 : 0, companyTotalCount > 0 ? (companySolved / companyTotalCount) * 100 : 0)}%` }}
                             />
                         </div>
                         <p className="text-[11px] text-slate-400 text-center font-medium">
-                            {20 - companySolved} problems remaining
+                            {Math.max(0, companyTotalCount - companySolved)} problems remaining
                         </p>
                     </div>
                 </div>
@@ -858,11 +920,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                 key={diff}
                                 type="button"
                                 onClick={() => setSelectedDifficulty(diff)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition ${
-                                    selectedDifficulty === diff
-                                        ? 'bg-[#5899B5] text-white shadow-xs'
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition ${selectedDifficulty === diff
+                                    ? 'bg-[#5899B5] text-white shadow-xs'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    }`}
                             >
                                 {diff}
                             </button>
@@ -897,9 +958,8 @@ const StudentLockedInLabTab = ({ student }) => {
                                     className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 hover:border-[#5899B5]/40 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-xs shrink-0 ${
-                                            isSolved ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                                        }`}>
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-xs shrink-0 ${isSolved ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                                            }`}>
                                             {isSolved ? <Check size={16} /> : `#${q.number}`}
                                         </div>
 
@@ -908,11 +968,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                                 <h4 className="text-sm font-semibold text-slate-800 hover:text-[#5899B5] transition-colors cursor-pointer" onClick={() => openProblemSolver(q.id)}>
                                                     {q.title}
                                                 </h4>
-                                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
-                                                    q.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${q.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                                                     q.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                                                    'bg-rose-50 text-rose-700 border border-rose-100'
-                                                }`}>
+                                                        'bg-rose-50 text-rose-700 border border-rose-100'
+                                                    }`}>
                                                     {q.difficulty}
                                                 </span>
                                                 <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-100">
@@ -932,11 +991,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                         <button
                                             type="button"
                                             onClick={() => openProblemSolver(q.id)}
-                                            className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition flex items-center gap-1.5 ${
-                                                isSolved
-                                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                                    : 'bg-[#5899B5] hover:bg-[#3D7690] text-white shadow-xs'
-                                            }`}
+                                            className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition flex items-center gap-1.5 ${isSolved
+                                                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                                : 'bg-[#5899B5] hover:bg-[#3D7690] text-white shadow-xs'
+                                                }`}
                                         >
                                             <span>{isSolved ? 'Solve Again' : 'Solve Challenge'}</span>
                                             <ArrowRight size={13} />
@@ -960,24 +1018,29 @@ const StudentLockedInLabTab = ({ student }) => {
     return (
         <div className={`space-y-5 font-sans ${isFullscreen ? 'fixed inset-0 z-50 bg-[#0F172A] p-4 sm:p-6 overflow-y-auto' : 'pb-12'}`}>
             {/* Top Navigation & Breadcrumbs Bar */}
-            <div className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border ${
-                isFullscreen ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-100 shadow-sm'
-            }`}>
+            <div className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl border ${isFullscreen ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-100 shadow-sm'
+                }`}>
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
                         onClick={() => setActiveView('company-list')}
-                        className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border cursor-pointer transition ${
-                            isFullscreen
-                                ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border-slate-600'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border cursor-pointer transition ${isFullscreen
+                            ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border-slate-600'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80'
+                            }`}
                     >
                         <ArrowLeft size={13} /> Back to {currentCompany.name} Questions
                     </button>
 
                     <div className="hidden sm:flex items-center gap-2">
-                        <CompanyLogoSvg companyId={currentCompany.id} className="w-5 h-5 object-contain" />
+                        <CompanyLogoSvg
+                            companyId={currentCompany.id}
+                            company={currentCompany.name}
+                            logoUrl={currentCompany.logoUrl}
+                            website={currentCompany.website}
+                            accentColor={currentCompany.accentColor}
+                            className="w-5 h-5 object-contain"
+                        />
                         <span className="text-xs font-semibold text-slate-400">/</span>
                         <span className="text-xs font-semibold text-slate-700 truncate max-w-xs">
                             Problem #{activeProblem?.number}: {activeProblem?.title}
@@ -996,11 +1059,10 @@ const StudentLockedInLabTab = ({ student }) => {
                     <button
                         type="button"
                         onClick={() => navigateAdjacentProblem(-1)}
-                        className={`p-2 rounded-xl border text-xs cursor-pointer transition ${
-                            isFullscreen
-                                ? 'bg-slate-700 hover:bg-slate-600 text-slate-300 border-slate-600'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
-                        }`}
+                        className={`p-2 rounded-xl border text-xs cursor-pointer transition ${isFullscreen
+                            ? 'bg-slate-700 hover:bg-slate-600 text-slate-300 border-slate-600'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                            }`}
                         title="Previous Question"
                     >
                         <ChevronLeft size={16} />
@@ -1009,11 +1071,10 @@ const StudentLockedInLabTab = ({ student }) => {
                     <button
                         type="button"
                         onClick={() => navigateAdjacentProblem(1)}
-                        className={`p-2 rounded-xl border text-xs cursor-pointer transition ${
-                            isFullscreen
-                                ? 'bg-slate-700 hover:bg-slate-600 text-slate-300 border-slate-600'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
-                        }`}
+                        className={`p-2 rounded-xl border text-xs cursor-pointer transition ${isFullscreen
+                            ? 'bg-slate-700 hover:bg-slate-600 text-slate-300 border-slate-600'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                            }`}
                         title="Next Question"
                     >
                         <ChevronRight size={16} />
@@ -1022,11 +1083,10 @@ const StudentLockedInLabTab = ({ student }) => {
                     <button
                         type="button"
                         onClick={() => setIsFullscreen(!isFullscreen)}
-                        className={`p-2 rounded-xl border text-xs cursor-pointer transition ${
-                            isFullscreen
-                                ? 'bg-[#5899B5] text-white border-[#5899B5]'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
-                        }`}
+                        className={`p-2 rounded-xl border text-xs cursor-pointer transition ${isFullscreen
+                            ? 'bg-[#5899B5] text-white border-[#5899B5]'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                            }`}
                         title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Mode'}
                     >
                         {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -1035,16 +1095,14 @@ const StudentLockedInLabTab = ({ student }) => {
             </div>
 
             {/* Solver Guidelines & Evaluation Rules Card */}
-            <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${
-                isFullscreen
-                    ? 'bg-slate-800/90 border-slate-700 text-slate-200'
-                    : 'bg-white border-slate-100 shadow-sm text-slate-700'
-            }`}>
+            <div className={`p-4 sm:p-5 rounded-2xl border transition-all ${isFullscreen
+                ? 'bg-slate-800/90 border-slate-700 text-slate-200'
+                : 'bg-white border-slate-100 shadow-sm text-slate-700'
+                }`}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div className="flex items-start sm:items-center gap-3">
-                        <div className={`p-2.5 rounded-xl shrink-0 ${
-                            isFullscreen ? 'bg-sky-500/20 text-sky-400' : 'bg-blue-50 text-[#5899B5]'
-                        }`}>
+                        <div className={`p-2.5 rounded-xl shrink-0 ${isFullscreen ? 'bg-sky-500/20 text-sky-400' : 'bg-blue-50 text-[#5899B5]'
+                            }`}>
                             <Code2 size={20} />
                         </div>
                         <div>
@@ -1068,11 +1126,10 @@ const StudentLockedInLabTab = ({ student }) => {
                     <button
                         type="button"
                         onClick={() => setShowRules(!showRules)}
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition cursor-pointer shrink-0 self-start md:self-auto ${
-                            isFullscreen
-                                ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border-slate-600'
-                                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
-                        }`}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition cursor-pointer shrink-0 self-start md:self-auto ${isFullscreen
+                            ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border-slate-600'
+                            : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200/80'
+                            }`}
                     >
                         {showRules ? 'Hide Rules' : 'View Solver Rules'}
                     </button>
@@ -1080,9 +1137,8 @@ const StudentLockedInLabTab = ({ student }) => {
 
                 {showRules && (
                     <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                        <div className={`p-3 rounded-xl border ${
-                            isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
-                        }`}>
+                        <div className={`p-3 rounded-xl border ${isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
+                            }`}>
                             <div className={`font-semibold flex items-center gap-1.5 mb-1 ${isFullscreen ? 'text-white' : 'text-slate-800'}`}>
                                 <span className="w-5 h-5 rounded-full bg-blue-100 text-[#5899B5] text-[11px] font-bold flex items-center justify-center">1</span>
                                 Keep Function Name
@@ -1092,9 +1148,8 @@ const StudentLockedInLabTab = ({ student }) => {
                             </p>
                         </div>
 
-                        <div className={`p-3 rounded-xl border ${
-                            isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
-                        }`}>
+                        <div className={`p-3 rounded-xl border ${isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
+                            }`}>
                             <div className={`font-semibold flex items-center gap-1.5 mb-1 ${isFullscreen ? 'text-white' : 'text-slate-800'}`}>
                                 <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold flex items-center justify-center">2</span>
                                 Always Return Result
@@ -1104,9 +1159,8 @@ const StudentLockedInLabTab = ({ student }) => {
                             </p>
                         </div>
 
-                        <div className={`p-3 rounded-xl border ${
-                            isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
-                        }`}>
+                        <div className={`p-3 rounded-xl border ${isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
+                            }`}>
                             <div className={`font-semibold flex items-center gap-1.5 mb-1 ${isFullscreen ? 'text-white' : 'text-slate-800'}`}>
                                 <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-700 text-[11px] font-bold flex items-center justify-center">3</span>
                                 Write Any Valid Logic
@@ -1116,9 +1170,8 @@ const StudentLockedInLabTab = ({ student }) => {
                             </p>
                         </div>
 
-                        <div className={`p-3 rounded-xl border ${
-                            isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
-                        }`}>
+                        <div className={`p-3 rounded-xl border ${isFullscreen ? 'bg-slate-900/60 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'
+                            }`}>
                             <div className={`font-semibold flex items-center gap-1.5 mb-1 ${isFullscreen ? 'text-white' : 'text-slate-800'}`}>
                                 <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold flex items-center justify-center">4</span>
                                 Watch Loop Limits
@@ -1140,22 +1193,20 @@ const StudentLockedInLabTab = ({ student }) => {
                         <button
                             type="button"
                             onClick={() => setLeftPanelTab('description')}
-                            className={`text-xs font-semibold pb-2 cursor-pointer transition border-b-2 ${
-                                leftPanelTab === 'description'
-                                    ? 'border-[#5899B5] text-[#5899B5]'
-                                    : 'border-transparent text-slate-400 hover:text-slate-600'
-                            }`}
+                            className={`text-xs font-semibold pb-2 cursor-pointer transition border-b-2 ${leftPanelTab === 'description'
+                                ? 'border-[#5899B5] text-[#5899B5]'
+                                : 'border-transparent text-slate-400 hover:text-slate-600'
+                                }`}
                         >
                             Problem Statement
                         </button>
                         <button
                             type="button"
                             onClick={() => setLeftPanelTab('submissions')}
-                            className={`text-xs font-semibold pb-2 cursor-pointer transition border-b-2 flex items-center gap-1.5 ${
-                                leftPanelTab === 'submissions'
-                                    ? 'border-[#5899B5] text-[#5899B5]'
-                                    : 'border-transparent text-slate-400 hover:text-slate-600'
-                            }`}
+                            className={`text-xs font-semibold pb-2 cursor-pointer transition border-b-2 flex items-center gap-1.5 ${leftPanelTab === 'submissions'
+                                ? 'border-[#5899B5] text-[#5899B5]'
+                                : 'border-transparent text-slate-400 hover:text-slate-600'
+                                }`}
                         >
                             <span>Submissions</span>
                             <span className="px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px] text-slate-600 font-semibold">
@@ -1169,11 +1220,10 @@ const StudentLockedInLabTab = ({ student }) => {
                             {/* Title & Metadata */}
                             <div>
                                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
-                                        activeProblem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase ${activeProblem.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                                         activeProblem.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                                        'bg-rose-50 text-rose-700 border border-rose-100'
-                                    }`}>
+                                            'bg-rose-50 text-rose-700 border border-rose-100'
+                                        }`}>
                                         {activeProblem.difficulty}
                                     </span>
                                     <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-100">
@@ -1252,11 +1302,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                 problemSubmissions.map(sub => (
                                     <div key={sub.id} className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 text-xs space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
-                                                sub.verdict === 'Accepted'
-                                                    ? 'bg-emerald-100 text-emerald-800'
-                                                    : 'bg-rose-100 text-rose-800'
-                                            }`}>
+                                            <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${sub.verdict === 'Accepted'
+                                                ? 'bg-emerald-100 text-emerald-800'
+                                                : 'bg-rose-100 text-rose-800'
+                                                }`}>
                                                 {sub.verdict}
                                             </span>
                                             <span className="text-slate-400 text-[10px]">{sub.timestamp}</span>
@@ -1290,11 +1339,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                             key={l.id}
                                             type="button"
                                             onClick={() => setSelectedLang(l.id)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition ${
-                                                selectedLang === l.id
-                                                    ? 'bg-[#5899B5] text-white shadow-xs'
-                                                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                            }`}
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition ${selectedLang === l.id
+                                                ? 'bg-[#5899B5] text-white shadow-xs'
+                                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                                }`}
                                         >
                                             {l.label}
                                         </button>
@@ -1366,9 +1414,8 @@ const StudentLockedInLabTab = ({ student }) => {
                         <div className="bg-slate-900 rounded-3xl border border-slate-800 p-5 sm:p-6 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <span className={`w-2.5 h-2.5 rounded-full ${
-                                        runOutput.allPassed ? 'bg-emerald-400' : 'bg-rose-400'
-                                    }`} />
+                                    <span className={`w-2.5 h-2.5 rounded-full ${runOutput.allPassed ? 'bg-emerald-400' : 'bg-rose-400'
+                                        }`} />
                                     <h4 className="text-sm font-semibold text-white">
                                         {runOutput.mode === 'submit' ? 'Submission Verdict' : 'Sample Test Run'}
                                     </h4>
@@ -1393,11 +1440,10 @@ const StudentLockedInLabTab = ({ student }) => {
 
                             {/* Submission Verdict Banner */}
                             {!runOutput.error && runOutput.mode === 'submit' && (
-                                <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${
-                                    runOutput.allPassed
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                                        : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
-                                }`}>
+                                <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${runOutput.allPassed
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                                    : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                                    }`}>
                                     <div className="font-semibold text-sm mb-1 flex items-center gap-2">
                                         {runOutput.allPassed ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                                         {runOutput.allPassed ? 'Accepted — All Test Cases Passed!' : 'Wrong Answer — Some Test Cases Failed'}
@@ -1410,11 +1456,10 @@ const StudentLockedInLabTab = ({ student }) => {
 
                             {/* Sample Run Verdict Banner */}
                             {!runOutput.error && runOutput.mode === 'run' && (
-                                <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${
-                                    runOutput.allPassed
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                                        : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                                }`}>
+                                <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${runOutput.allPassed
+                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                                    : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                                    }`}>
                                     <div className="font-semibold text-sm mb-1 flex items-center gap-2">
                                         {runOutput.allPassed ? <CheckCircle2 size={16} className="text-emerald-400" /> : <XCircle size={16} className="text-amber-400" />}
                                         {runOutput.allPassed
@@ -1438,11 +1483,10 @@ const StudentLockedInLabTab = ({ student }) => {
                                                 key={i}
                                                 type="button"
                                                 onClick={() => setActiveSampleIdx(i)}
-                                                className={`px-3 py-1 rounded-lg text-xs font-mono cursor-pointer transition flex items-center gap-1.5 ${
-                                                    activeSampleIdx === i
-                                                        ? 'bg-slate-700 text-white font-semibold'
-                                                        : 'text-slate-400 hover:bg-slate-800'
-                                                }`}
+                                                className={`px-3 py-1 rounded-lg text-xs font-mono cursor-pointer transition flex items-center gap-1.5 ${activeSampleIdx === i
+                                                    ? 'bg-slate-700 text-white font-semibold'
+                                                    : 'text-slate-400 hover:bg-slate-800'
+                                                    }`}
                                             >
                                                 <span className={`w-1.5 h-1.5 rounded-full ${res.pass ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                                                 Case {i + 1}

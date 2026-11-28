@@ -711,10 +711,10 @@ const Courses = () => {
             {/* List & Filters */}
             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                 {/* Search & Tabs */}
-                <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-slate-50/50">
-                    <div className="flex flex-wrap items-center gap-3">
+                <div className="p-5 border-b border-slate-100 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-slate-50/50">
+                    <div className="flex flex-wrap items-center gap-3.5">
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="h-10 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all"
                             value={programFilter}
                             onChange={(e) => setProgramFilter(e.target.value)}
                         >
@@ -727,7 +727,7 @@ const Courses = () => {
 
                         {!effectiveCollegeId && (
                             <select
-                                className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
+                                className="h-10 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all max-w-xs"
                                 value={selectedCollegeFilter}
                                 onChange={(e) => setSelectedCollegeFilter(e.target.value)}
                             >
@@ -739,7 +739,7 @@ const Courses = () => {
                         )}
 
                         <select
-                            className="text-xs bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-1 focus:ring-blue-100 transition-all"
+                            className="h-10 text-xs bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-semibold text-slate-700 outline-none cursor-pointer focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                         >
@@ -751,10 +751,10 @@ const Courses = () => {
                             <option value="modules-desc">Sort: Modules (H-L)</option>
                         </select>
                     </div>
-                    <div className="relative w-full md:w-72">
-                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <div className="relative w-full lg:w-80">
+                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                         <input 
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-blue-100 transition-all" 
+                            className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-[#5899B5] focus:ring-2 focus:ring-[#5899B5]/15 transition-all" 
                             placeholder="Search by code or title..." 
                             value={searchTerm} 
                             onChange={(e) => setSearchTerm(e.target.value)} 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { 
     School, BookOpen, Users, Layers, Calendar, Plus, Trash2, ArrowLeft, Loader2,
     Building2, Mail, Phone, PlusCircle, CheckCircle, AlertTriangle, Search, Info, ExternalLink, Upload,
@@ -12,6 +12,8 @@ import useSocketUpdate from '../../hooks/useSocketUpdate';
 const CollegeDetail = () => {
     const { collegeId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const isIsolatedCollegeTab = location.pathname.startsWith('/college/');
     const { token, user } = useAuthStore();
     const isReadOnly = ['regional_manager', 'asst_rm', 'placement'].includes(user?.role);
 
@@ -363,8 +365,8 @@ const CollegeDetail = () => {
         <div className="space-y-6 animate-fade-in duration-300">
             {/* Navigation Header */}
             <div className="flex flex-col gap-4">
-                <button onClick={() => navigate('/admin/colleges')} className="flex items-center gap-2 text-slate-500 hover:text-[#5899B5] text-sm font-bold w-fit transition-all active:translate-x-[-2px]">
-                    <ArrowLeft size={16} /> Back to Institutions
+                <button onClick={() => navigate(isIsolatedCollegeTab ? `/college/${collegeId}/dashboard` : '/admin/colleges')} className="flex items-center gap-2 text-slate-500 hover:text-[#5899B5] text-sm font-bold w-fit transition-all active:translate-x-[-2px]">
+                    <ArrowLeft size={16} /> {isIsolatedCollegeTab ? 'Back to College Dashboard' : 'Back to Institutions'}
                 </button>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
                     <div className="flex items-center gap-4">
@@ -795,7 +797,7 @@ const CollegeDetail = () => {
                                                 <td className="px-5 py-4 text-right">
                                                     <div className="flex justify-end gap-1">
                                                         <Link 
-                                                            to={`/admin/batches/${b._id}`}
+                                                            to={isIsolatedCollegeTab ? `/college/${collegeId}/admin/batches/${b._id}` : `/admin/batches/${b._id}`}
                                                             className="p-1.5 text-slate-400 hover:text-[#5899B5] hover:bg-blue-50 rounded-lg transition-colors inline-block"
                                                             title="Roster & Imports"
                                                         >
@@ -871,7 +873,7 @@ const CollegeDetail = () => {
                                                 </td>
                                                 <td className="px-5 py-4 font-medium">
                                                     {s.batchId ? (
-                                                        <Link to={`/admin/batches/${s.batchId._id || s.batchId}`} className="text-[#5899B5] hover:underline font-semibold flex items-center gap-1">
+                                                        <Link to={isIsolatedCollegeTab ? `/college/${collegeId}/admin/batches/${s.batchId._id || s.batchId}` : `/admin/batches/${s.batchId._id || s.batchId}`} className="text-[#5899B5] hover:underline font-semibold flex items-center gap-1">
                                                             {s.batchId.batchName || 'View Batch'} <ExternalLink size={11} />
                                                         </Link>
                                                     ) : (

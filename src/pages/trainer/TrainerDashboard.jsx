@@ -9,6 +9,7 @@ import useAuthStore from '../../store/authStore';
 import useCollegeStore from '../../store/collegeStore';
 import useSocketUpdate from '../../hooks/useSocketUpdate';
 import { AlertModal } from '../../components/Modals';
+import ActivityHeatmapGraph from '../../components/common/ActivityHeatmapGraph';
 
 const getColorClasses = (color) => {
     if (color.includes('blue')) return { bg: 'bg-blue-50', text: 'text-blue-600' };
@@ -109,6 +110,12 @@ const TrainerDashboard = () => {
                 <StatCard label="Avg Score" value={`${stats?.avgScore ?? 0}%`} icon={TrendingUp} color="bg-emerald-500" sub="Across all exams" />
                 <StatCard label="Pass Rate" value={`${stats?.averagePassRate ?? 0}%`} icon={Award} color="bg-orange-500" sub="Overall" />
             </div>
+
+            {/* GitHub-Style Daily Time & Activity Graph */}
+            <ActivityHeatmapGraph
+                userId={user?._id || user?.id || user?.employeeId || 'trainer'}
+                userName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username}
+            />
 
             {/* Main Content Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

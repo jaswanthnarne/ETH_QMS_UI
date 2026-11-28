@@ -465,8 +465,8 @@ const Batches = () => {
         if (user?.role === 'trainer') {
             return `/trainer/batches/${b._id}`;
         }
-        return urlCollegeId 
-            ? `/college/${urlCollegeId}/admin/batches/${b._id}` 
+        return activeCollegeId 
+            ? `/college/${activeCollegeId}/admin/batches/${b._id}` 
             : `/admin/batches/${b._id}`;
     };
 
@@ -690,7 +690,7 @@ const Batches = () => {
                                         </span>
                                     </div>
                                 ) : (
-                                    user?.role === 'super_admin' && (
+                                    ['super_admin', 'ops_admin', 'ast_ops_admin'].includes(user?.role) && (
                                         <select
                                             value={filterCollegeId}
                                             onChange={(e) => {
